@@ -1,0 +1,24 @@
+{
+  "name": "rivver-backend",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --minify",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.6",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "1.0.0-beta.6-4414a19",
+    "hono": "^4.11.1",
+    "postgres": "^3.4.7",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.4",
+    "drizzle-kit": "1.0.0-beta.6-4414a19",
+    "tsx": "^4.21.0",
+    "wrangler": "^4.54.0"
+  }
+}
