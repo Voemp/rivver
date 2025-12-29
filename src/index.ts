@@ -3,6 +3,7 @@ import { config as ZodConfig, ZodError } from 'zod'
 import { zhCN } from 'zod/locales'
 import { drizzleDB } from './middlewares/drizzle'
 import auth from './routes/auth'
+import subscription from './routes/subscription'
 import { res } from './types/response'
 import { AppError } from './utils/error'
 
@@ -10,9 +11,9 @@ ZodConfig(zhCN())
 
 const app = new Hono()
 
-app.use('*', drizzleDB)
-
+app.use(drizzleDB)
 app.route('/auth', auth)
+app.route('/subscription', subscription)
 
 app.onError((err, c) => {
   if (err instanceof ZodError) {
