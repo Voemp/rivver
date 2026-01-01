@@ -1,7 +1,7 @@
 import { InsertUser, SelectUser, users } from '../db/schema'
-import { DrizzleDB } from '../types/env'
+import { DrizzleDB } from '../index'
 
-export const createUserRepo = (db: DrizzleDB) => ({
+export const usersRepo = (db = DrizzleDB.db) => ({
   findByUsername: async (username: string): Promise<SelectUser | undefined> => {
     return db.query.users.findFirst({
       where: { username: username },

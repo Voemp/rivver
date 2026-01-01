@@ -1,14 +1,24 @@
-import { eq, sql } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { InsertSubscription, links, SelectLink, SelectSubscription, subscriptions } from '../db/schema'
-import { DrizzleDB } from '../types/env'
+import { DrizzleDB } from '../index'
 
-export const createSubscriptionRepo = (db: DrizzleDB) => ({
+export const subsRepo = (db = DrizzleDB.db) => ({
   create: async (sub: InsertSubscription): Promise<SelectSubscription> => {
     const [row] = await db
       .insert(subscriptions)
       .values(sub)
       .returning()
     return row
+  },
+  remove: async (userId: string, linkId: number) => {
+    await db
+      .delete(subscriptions)
+      .where(
+        and(
+          eq(subscriptions.userId, userId),
+          eq(subscriptions.linkId, linkId),
+        ),
+      )
   },
   listByUser: async (userId: string): Promise<SelectLink[]> => {
     return db

@@ -1,7 +1,5 @@
-import dotenv from 'dotenv'
+import 'dotenv/config'
 import { defineConfig } from 'drizzle-kit'
-
-dotenv.config({ path: '.dev.vars' })
 
 export default defineConfig({
   out: './drizzle',
@@ -9,7 +7,7 @@ export default defineConfig({
   dialect: 'postgresql',
   casing: 'snake_case',
   dbCredentials: {
-    url: process.env.DATABASE_URL!
+    url: process.env.DATABASE_URL!,
   },
-  schemaFilter: ['public']
+  schemaFilter: ['public'],
 })

@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { config as ZodConfig, ZodError } from 'zod'
 import { zhCN } from 'zod/locales'
+import DBWrapper from './db'
 import { drizzleDB } from './middlewares/drizzle'
 import auth from './routes/auth'
 import subscription from './routes/subscription'
@@ -11,7 +12,9 @@ ZodConfig(zhCN())
 
 const app = new Hono()
 
+const DrizzleDB = new DBWrapper()
 app.use(drizzleDB)
+
 app.route('/auth', auth)
 app.route('/subscription', subscription)
 
@@ -28,4 +31,5 @@ app.onError((err, c) => {
   return c.json(res.error(err.message, 'INTERNAL_SERVER_ERROR'), 500)
 })
 
+export { DrizzleDB }
 export default app

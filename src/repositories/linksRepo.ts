@@ -1,7 +1,7 @@
 import { InsertLink, links, SelectLink } from '../db/schema'
-import { DrizzleDB } from '../types/env'
+import { DrizzleDB } from '../index'
 
-export const createLinkRepo = (db: DrizzleDB) => ({
+export const linksRepo = (db = DrizzleDB.db) => ({
   findByUrl: async (url: string): Promise<SelectLink | undefined> => {
     return db.query.links.findFirst({
       where: { url: url },
