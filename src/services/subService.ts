@@ -1,8 +1,8 @@
 import { InsertLink, InsertSubscription } from '../db/schema'
-import { linksRepo } from '../repositories/linksRepo'
-import { subsRepo } from '../repositories/subsRepo'
+import linksRepo from '../repositories/linksRepo'
+import subsRepo from '../repositories/subsRepo'
 
-export const subService = {
+export default {
   subscribe: async (userId: string, url: string, title?: string) => {
     let link = await linksRepo().findByUrl(url)
 

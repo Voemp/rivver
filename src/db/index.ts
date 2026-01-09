@@ -1,4 +1,7 @@
-import { DrizzlePostgresDB } from '../types/env'
+import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import { relations } from './relations'
+
+type DrizzlePostgresDB = PostgresJsDatabase<Record<string, never>, typeof relations>
 
 class DBWrapper {
   db: DrizzlePostgresDB

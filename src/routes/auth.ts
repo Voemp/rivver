@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import * as z from 'zod'
-import { authService } from '../services/authService'
+import authService from '../services/authService'
 import { AppEnv } from '../types/env'
 import { res } from '../types/response'
 import { zValidator } from '../utils/validator'

@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import * as z from 'zod'
 import { jwt } from '../middlewares/jwt'
-import { subService } from '../services/subService'
+import subService from '../services/subService'
 import { AppEnv } from '../types/env'
 import { res } from '../types/response'
 import { zValidator } from '../utils/validator'

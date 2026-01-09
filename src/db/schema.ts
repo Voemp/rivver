@@ -1,9 +1,11 @@
-import { integer, pgTable, primaryKey, serial, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
+import {
+  boolean, index, integer, jsonb, pgTable, primaryKey, serial, text, timestamp, uuid,
+} from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: uuid().primaryKey().defaultRandom(),
-  username: varchar({ length: 255 }).notNull().unique(),
-  passwordHash: varchar({ length: 255 }).notNull(),
+  username: text().notNull().unique(),
+  passwordHash: text().notNull(),
   createdAt: timestamp().notNull().defaultNow(),
   updatedAt: timestamp().defaultNow().$onUpdate(() => new Date()),
 })
@@ -36,3 +38,24 @@ export const subscriptions = pgTable('subscriptions', {
 export type SelectSubscription = typeof subscriptions.$inferSelect
 export type InsertSubscription = typeof subscriptions.$inferInsert
 
+export const articles = pgTable('articles', {
+  id: serial().primaryKey(),
+  linkId: integer().references(() => links.id, { onDelete: 'cascade' }).notNull(),
+  title: text(),
+  link: text(),
+  description: text(),
+  author: text(),
+  enclosure: jsonb().$type<{
+    url: string
+    length?: number
+    type?: string
+  }>(),
+  guid: text(),
+  guidIsPermalink: boolean().default(true),
+  pubDate: timestamp({ withTimezone: true }),
+
+  /** 原始 HTML / 内容块（详情页） */
+  contentHtml: text('content_html'),
+}, (table) => [
+  index('articles_pub_date_idx').on(table.pubDate),
+])

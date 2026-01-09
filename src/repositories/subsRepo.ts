@@ -2,7 +2,7 @@ import { and, eq, sql } from 'drizzle-orm'
 import { InsertSubscription, links, SelectLink, SelectSubscription, subscriptions } from '../db/schema'
 import { DrizzleDB } from '../index'
 
-export const subsRepo = (db = DrizzleDB.db) => ({
+export default (db = DrizzleDB.db) => ({
   create: async (sub: InsertSubscription): Promise<SelectSubscription> => {
     const [row] = await db
       .insert(subscriptions)

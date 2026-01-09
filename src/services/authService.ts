@@ -1,11 +1,11 @@
 import bcrypt from 'bcryptjs'
 import { sign } from 'hono/jwt'
 import { InsertUser, SelectUser } from '../db/schema'
-import { usersRepo } from '../repositories/usersRepo'
+import usersRepo from '../repositories/usersRepo'
 import { AppJWTPayload } from '../types/env'
 import { AppError } from '../utils/error'
 
-export const authService = {
+export default {
   register: async (username: string, password: string, privateKey: string) => {
     const existing = await usersRepo().findByUsername(username)
     if (existing) throw new AppError('用户名已被占用', 'USERNAME_TAKEN', 409)
