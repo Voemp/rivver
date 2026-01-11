@@ -1,35 +1,24 @@
-import { Hono } from 'hono'
-import { config as ZodConfig, ZodError } from 'zod'
-import { zhCN } from 'zod/locales'
-import DBWrapper from './db'
-import { drizzleDB } from './middlewares/drizzle'
-import auth from './routes/auth'
-import subscription from './routes/subscription'
-import { res } from './types/response'
+import { Elysia } from 'elysia'
+import { auth } from './modules/auth'
+import subscription from './modules/subscription'
+import { ApiResponseModel, res } from './types/response'
 import { AppError } from './utils/error'
 
-ZodConfig(zhCN())
+const app = new Elysia()
+  .error({ AppError })
+  .onError(({ error, code }) => {
+    switch (code) {
+      case 'AppError':
+        return error
+      case 'VALIDATION':
+        return res.error(error.message, error.code)
+    }
+  })
+  .guard({ response: { 400: ApiResponseModel.error, 409: ApiResponseModel.error } })
+  .use(auth)
+  .use(subscription)
+  .listen(3000)
 
-const app = new Hono()
-
-const DrizzleDB = new DBWrapper()
-app.use(drizzleDB)
-
-app.route('/auth', auth)
-app.route('/subscription', subscription)
-
-app.onError((err, c) => {
-  if (err instanceof ZodError) {
-    return c.json(res.error(err.issues[0].message, 'VALIDATION_ERROR'), 400)
-  }
-
-  if (err instanceof AppError) {
-    return c.json(res.error(err.message, err.code), err.statusCode)
-  }
-
-  console.error('Unexpected Error:', err)
-  return c.json(res.error(err.message, 'INTERNAL_SERVER_ERROR'), 500)
-})
-
-export { DrizzleDB }
-export default app
+console.log(
+  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+)

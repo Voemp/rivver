@@ -1,6 +1,6 @@
 import Parser from 'rss-parser'
-import { SelectLink } from '../db/schema'
-import linksRepo from '../repositories/linksRepo'
+import { SelectFeed } from '../database/schema'
+import { feedRepo } from '../repositories/feedRepo'
 
 const parser = new Parser()
 
@@ -16,8 +16,8 @@ async function parseRss(url: string) {
   }))
 }
 
-async function fetchSingleFeed(link: SelectLink) {
-  const items = await parseRss(link.url)
+async function fetchSingleFeed(feed: SelectFeed) {
+  const items = await parseRss(feed.url)
 
   for (const item of items) {
     // await upsertContent(item, link)
@@ -25,9 +25,9 @@ async function fetchSingleFeed(link: SelectLink) {
 }
 
 async function runRssFetch() {
-  const links = await linksRepo().list()
+  const feeds = await feedRepo.list()
 
-  for (const link of links) {
-    await fetchSingleFeed(link)
+  for (const feed of feeds) {
+    await fetchSingleFeed(feed)
   }
 }
