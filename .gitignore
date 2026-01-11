@@ -10,12 +10,10 @@ dist/
 # deps
 node_modules/
 drizzle/
-.wrangler
 
 # env
 .env
 .env.production
-.dev.vars
 
 # logs
 logs/
@@ -28,3 +26,11 @@ lerna-debug.log*
 
 # misc
 .DS_Store
+
+package-lock.json
+**/*.trace
+**/*.zip
+**/*.tar.gz
+**/*.tgz
+**/*.log
+**/*.bun
