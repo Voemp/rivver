@@ -1,18 +1,26 @@
 import Parser from 'rss-parser'
-import { SelectFeed } from '../database/schema'
+import { InsertArticle, SelectFeed } from '../database/schema'
 import { feedRepo } from '../repositories/feedRepo'
 
 const parser = new Parser()
 
-async function parseRss(url: string) {
-  const feed = await parser.parseURL(url)
+async function parseRss(url: string): Promise<InsertArticle[]> {
+  const feed = await feedRepo.findByUrl(url)
+  if (!feed) throw new Error('Could not parse feed')
 
-  return feed.items.map(item => ({
+  const feedInfo = await parser.parseURL(url)
+
+  return feedInfo.items.map(item => ({
+    feedId: feed.id,
     title: item.title,
     link: item.link,
-    guid: item.guid,
-    pubDate: item.pubDate,
+    summary: item.summary || item.contentSnippet,
     content: item['content:encoded'] || item.content,
+    contentSnippet: item['content:encodedSnippet'] || item.contentSnippet,
+    author: item.creator,
+    enclosure: item.enclosure,
+    guid: item.guid,
+    pubDate: item.pubDate ? new Date(item.pubDate) : null,
   }))
 }
 

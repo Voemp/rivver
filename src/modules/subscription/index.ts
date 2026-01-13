@@ -4,7 +4,7 @@ import { ApiResponseModel, res } from '../../types/response'
 import { SubModel } from './model'
 import { SubService } from './service'
 
-const app = new Elysia({ prefix: '/subscription' })
+export const subscription = new Elysia({ prefix: '/subscription' })
   .use(auth)
   .get('/', async ({ user }) => {
     const subs = await SubService.list(user.id)
@@ -28,5 +28,3 @@ const app = new Elysia({ prefix: '/subscription' })
       200: ApiResponseModel.success(SubModel.unsubResponse),
     },
   })
-
-export default app

@@ -1,8 +1,8 @@
 import { t } from 'elysia'
-import { db } from '../../database/model'
+import { DBModel } from '../../database/model'
 
 export namespace AuthModel {
-  const { user } = db.insert
+  const { user } = DBModel.insert
 
   export const signBody = t.Object({
     username: t.String({

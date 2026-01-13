@@ -3,7 +3,7 @@ import { t } from 'elysia'
 import { table } from './schema'
 import { spreads } from './utils'
 
-export const db = {
+export const DBModel = {
   insert: spreads({
     user: table.user,
     feed: createInsertSchema(table.feed, {

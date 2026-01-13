@@ -1,3 +1,4 @@
+import Parser from 'rss-parser'
 import { InsertFeed, InsertSubscription } from '../../database/schema'
 import { feedRepo } from '../../repositories/feedRepo'
 import { subRepo } from '../../repositories/subRepo'
@@ -8,10 +9,11 @@ export abstract class SubService {
   static async subscribe({ url, title }: SubModel.SubBody, userId: string) {
     let feed = await feedRepo.findByUrl(url)
     if (!feed) {
-      // TODO: 这里未来可以：fetch RSS → 解析真实 title
+      const parser = new Parser()
+      const feedInfo = await parser.parseURL(url)
       const _feed: InsertFeed = {
         url,
-        title: 'DefaultTitle',
+        title: feedInfo.title || 'DefaultTitle',
       }
       feed = await feedRepo.create(_feed)
     }
@@ -22,7 +24,7 @@ export abstract class SubService {
     const sub: InsertSubscription = {
       userId: userId,
       feedId: feed.id,
-      title: title ?? null,
+      title: title || feed.title,
     }
 
     return subRepo.create(sub)

@@ -1,4 +1,4 @@
-import { boolean, index, integer, jsonb, pgTable, primaryKey, serial, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { index, integer, jsonb, pgTable, primaryKey, serial, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
   id: uuid().primaryKey().defaultRandom(),
@@ -41,7 +41,12 @@ export const article = pgTable('article', {
   feedId: integer().references(() => feed.id, { onDelete: 'cascade' }).notNull(),
   title: text(),
   link: text(),
-  description: text(),
+  // RSS <description>：通常是摘要
+  summary: text(),
+  // <content:encoded>: 全文 HTML
+  content: text(),
+  // 纯文本内容（用于搜索 / NLP）
+  contentSnippet: text(),
   author: text(),
   enclosure: jsonb().$type<{
     url: string
@@ -49,14 +54,13 @@ export const article = pgTable('article', {
     type?: string
   }>(),
   guid: text(),
-  guidIsPermalink: boolean().default(true),
   pubDate: timestamp({ withTimezone: true }),
-
-  /** 原始 HTML / 内容块（详情页） */
-  contentHtml: text('content_html'),
 }, (table) => [
   index('articles_pub_date_idx').on(table.pubDate),
 ])
+export type SelectArticle = typeof article.$inferSelect
+export type InsertArticle = typeof article.$inferInsert
+
 
 export const table = {
   user,

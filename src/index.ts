@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia'
 import { auth } from './modules/auth'
-import subscription from './modules/subscription'
+import { dev } from './modules/dev'
+import { subscription } from './modules/subscription'
 import { ApiResponseModel, res } from './types/response'
 import { AppError } from './utils/error'
 
@@ -17,6 +18,7 @@ const app = new Elysia()
   .guard({ response: { 400: ApiResponseModel.error, 409: ApiResponseModel.error } })
   .use(auth)
   .use(subscription)
+  .use(dev)
   .listen(3000)
 
 console.log(

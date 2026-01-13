@@ -1,8 +1,8 @@
 import { t } from 'elysia'
-import { db } from '../../database/model'
+import { DBModel } from '../../database/model'
 
 export namespace SubModel {
-  const { feed, subscription } = db.insert
+  const { feed, subscription } = DBModel.insert
 
   export const subBody = t.Object({
     url: feed.url,
