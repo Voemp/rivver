@@ -8,7 +8,7 @@ export const dev = new Elysia({ prefix: '/dev' })
     return feedInfo.items.map(item => ({
       title: item.title,
       link: item.link,
-      summary: item.summary || item.contentSnippet,
+      summary: item.summary || item.contentSnippet?.slice(0, 200),
       content: item['content:encoded'] || item.content,
       contentSnippet: item['content:encodedSnippet'] || item.contentSnippet,
       author: item.creator,
