@@ -22,12 +22,10 @@ async function runRssFetch() {
   }
 }
 
-// 启动后立即跑一次（很重要）
-runRssFetch().then(() => {
-})
+// 启动后立即跑一次
+void runRssFetch()
 
-// 每 15 分钟跑一次
+// 定时跑（15分钟）
 cron.schedule('*/15 * * * *', () => {
-  runRssFetch().then(() => {
-  })
+  void runRssFetch()
 })

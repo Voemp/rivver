@@ -10,7 +10,7 @@ const app = new Elysia()
   .onError(({ error, code }) => {
     switch (code) {
       case 'AppError':
-        return error
+        return error.toResponse()
       case 'VALIDATION':
         return res.error(error.message, error.code)
     }
