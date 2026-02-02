@@ -10,15 +10,22 @@ export async function fetchAllFeeds() {
 
   for (const feed of feeds) {
     try {
+      console.log(`[RSS] fetching feed: ${feed.url}`)
       await fetchSingleFeed(feed)
     } catch (err) {
-      console.error(`[RSS] feed failed: ${feed.url}`, err)
+      console.error(`[RSS] fetch failed: ${feed.url}`, err)
     }
   }
 }
 
-async function fetchSingleFeed(feed: SelectFeed) {
+export async function fetchSingleFeed(feed: SelectFeed) {
+  await feedRepo.update(feed.id, { status: 'pending' })
+
   const feedInfo = await parser.parseURL(feed.url)
+  if (!feedInfo) {
+    await feedRepo.update(feed.id, { status: 'blocked' })
+    throw Error
+  }
 
   for (const item of feedInfo.items) {
     const article: InsertArticle | null = mapRssItem(feed.id, item)
@@ -26,6 +33,8 @@ async function fetchSingleFeed(feed: SelectFeed) {
 
     await upsertArticle(article)
   }
+
+  await feedRepo.update(feed.id, { status: 'active', lastFetchedAt: new Date() })
 }
 
 function mapRssItem(feedId: number, item: { [key: string]: any } & Parser.Item): InsertArticle | null {

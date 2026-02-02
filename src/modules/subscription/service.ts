@@ -2,6 +2,7 @@ import Parser from 'rss-parser'
 import { InsertFeed, InsertSubscription } from '../../database/schema'
 import { feedRepo } from '../../repositories/feedRepo'
 import { subRepo } from '../../repositories/subRepo'
+import { fetchSingleFeed } from '../../rss-worker/fetcher'
 import { AppError } from '../../utils/error'
 import { SubModel } from './model'
 
@@ -14,8 +15,16 @@ export abstract class SubService {
       const _feed: InsertFeed = {
         url,
         title: feedInfo.title || 'DefaultTitle',
+        description: feedInfo.description,
+        link: feedInfo.link,
+        image: feedInfo.image?.url,
       }
       feed = await feedRepo.create(_feed)
+      // 新增订阅时，立即异步 fetch 数据
+      queueMicrotask(() => {
+        if (!feed) return
+        fetchSingleFeed(feed)
+      })
     }
 
     const existing = await subRepo.findByUserAndLink(userId, feed.id)

@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import { db } from '../database'
 import { feed, InsertFeed, SelectFeed } from '../database/schema'
 
@@ -14,7 +15,13 @@ export const feedRepo = {
   },
   findByUrl: async (url: string): Promise<SelectFeed | undefined> => {
     return db.query.feed.findFirst({
-      where: { url: url },
+      where: { url },
     })
+  },
+  update: async (id: number, newFeed: Partial<InsertFeed>) => {
+    await db
+      .update(feed)
+      .set(newFeed)
+      .where(eq(feed.id, id))
   },
 }

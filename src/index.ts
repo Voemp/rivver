@@ -1,3 +1,4 @@
+import { openapi } from '@elysiajs/openapi'
 import { Elysia } from 'elysia'
 import { auth } from './modules/auth'
 import { dev } from './modules/dev'
@@ -6,6 +7,7 @@ import { ApiResponseModel, res } from './types/response'
 import { AppError } from './utils/error'
 
 const app = new Elysia()
+  .use(openapi())
   .error({ AppError })
   .onError(({ error, code }) => {
     switch (code) {

@@ -1,4 +1,4 @@
-import { index, integer, jsonb, pgTable, primaryKey, serial, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { index, integer, jsonb, pgEnum, pgTable, primaryKey, serial, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
   id: uuid().primaryKey().defaultRandom(),
@@ -16,11 +16,23 @@ export const profile = pgTable('profile', {
   avatarUrl: text(),
 })
 
+export const statusEnum = pgEnum('status', [
+  'active',
+  'pending',
+  'blocked',
+])
+
 export const feed = pgTable('feed', {
   id: serial().primaryKey(),
   url: text().notNull().unique(),
   title: text().notNull(),
+  description: text(),
+  link: text(),
+  image: text(),
+  subscriberCount: integer().default(0),
+  status: statusEnum('status').default('active').notNull(),
   createdAt: timestamp().notNull().defaultNow(),
+  lastFetchedAt: timestamp(),
 })
 export type SelectFeed = typeof feed.$inferSelect
 export type InsertFeed = typeof feed.$inferInsert
