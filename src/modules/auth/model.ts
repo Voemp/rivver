@@ -2,7 +2,7 @@ import { t } from 'elysia'
 import { DBModel } from '../../database/model'
 
 export namespace AuthModel {
-  const { user } = DBModel.insert
+  const { userSelect } = DBModel
 
   export const signBody = t.Object({
     username: t.String({
@@ -19,7 +19,7 @@ export namespace AuthModel {
   export type SignBody = typeof signBody.static
 
   export const signResponse = t.Object({
-    username: user.username,
+    username: userSelect.username,
     token: t.String(),
   })
   export type SignResponse = typeof signResponse.static

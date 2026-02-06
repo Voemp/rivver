@@ -91,3 +91,49 @@ export const spreads = <
 
   return newSchema as any
 }
+
+/**
+ * 定义单个 Model 的结构：既有平铺字段，也有 .schema 对象
+ */
+type ModelWithSchema<T extends TObject> = T['properties'] & { schema: T }
+
+/**
+ * 批量生成所有 Model 的 Insert 和 Select 字段, 以及 schema 对象
+ * @param tables
+ * @param refines
+ */
+export const createModel = <
+  T extends Record<string, Table>,
+  R extends { [K in keyof T]?: Record<string, any> }
+>(
+  tables: T,
+  refines: R = {} as R,
+) => {
+  const models = {} as any
+
+  for (const key of Object.keys(tables)) {
+    const table = tables[key]
+    const refine = refines[key] || {}
+
+    // 生成原始的 TypeBox Schema 对象
+    const insertSchema = createInsertSchema(table, refine)
+    const selectSchema = createSelectSchema(table, refine)
+
+    // 动态生成扁平的 Key，构造包含了 spread 字段和 .schema 属性的对象
+    models[`${key}Insert`] = {
+      ...spread(insertSchema as any, 'insert'),
+      schema: insertSchema,
+    }
+    models[`${key}Select`] = {
+      ...spread(selectSchema as any, 'select'),
+      schema: selectSchema,
+    }
+  }
+
+  // 完善类型推导，利用 TS 模板字面量类型重塑返回类型
+  return models as {
+    [K in keyof T & string as `${K}Insert`]: ModelWithSchema<TObject<Spread<T[K], 'insert'> & (K extends keyof R ? R[K] : {})>>
+  } & {
+    [K in keyof T & string as `${K}Select`]: ModelWithSchema<TObject<Spread<T[K], 'select'> & (K extends keyof R ? R[K] : {})>>
+  }
+}

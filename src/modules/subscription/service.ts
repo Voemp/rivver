@@ -2,12 +2,12 @@ import Parser from 'rss-parser'
 import { InsertFeed, InsertSubscription } from '../../database/schema'
 import { feedRepo } from '../../repositories/feedRepo'
 import { subRepo } from '../../repositories/subRepo'
-import { fetchSingleFeed } from '../../rss-worker/fetcher'
 import { AppError } from '../../utils/error'
+import { fetchSingleFeed } from '../../worker/rss/fetcher'
 import { SubModel } from './model'
 
 export abstract class SubService {
-  static async subscribe({ url, title }: SubModel.SubBody, userId: string) {
+  static async subscribe(userId: string, { url, title }: SubModel.SubBody) {
     let feed = await feedRepo.findByUrl(url)
     if (!feed) {
       const parser = new Parser()
@@ -39,10 +39,11 @@ export abstract class SubService {
     return subRepo.create(sub)
   }
 
-  static async unsubscribe({ feedId }: SubModel.UnsubBody, userId: string) {
-    const sub = await subRepo.remove(userId, feedId)
-    if (!sub) throw new AppError(404, '订阅不存在', 'SUBSCRIPTION_NOT_FOUND')
-    return sub
+  static async unsubscribe(userId: string, { feedId }: SubModel.UnsubBody) {
+    const existing = await subRepo.findByUserAndLink(userId, feedId)
+    if (!existing) throw new AppError(404, '订阅不存在', 'SUBSCRIPTION_NOT_FOUND')
+
+    return subRepo.remove(userId, feedId)
   }
 
   static async list(userId: string) {

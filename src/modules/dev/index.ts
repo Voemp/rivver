@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import Parser from 'rss-parser'
 
-export const dev = new Elysia({ prefix: '/dev' })
+export const dev = new Elysia({ prefix: '/dev', detail: { tags: ['Dev'] } })
   .post('/parse-rss', async ({ body }) => {
     const parser = new Parser()
     const feedInfo = await parser.parseURL(body.url)

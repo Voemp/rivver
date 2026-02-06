@@ -9,7 +9,7 @@ export const jwtConfig = {
   exp: '7d',
 }
 
-export const auth = new Elysia()
+export const authPlugin = new Elysia()
   .use(jwt(jwtConfig))
   .derive({ as: 'global' }, async ({ jwt, headers: { authorization } }) => {
     const token = authorization?.replace('Bearer ', '')

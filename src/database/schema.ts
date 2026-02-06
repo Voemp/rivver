@@ -1,4 +1,6 @@
-import { index, integer, jsonb, pgEnum, pgTable, primaryKey, serial, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import {
+  index, integer, jsonb, pgEnum, pgTable, primaryKey, serial, text, timestamp, uuid, vector,
+} from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
   id: uuid().primaryKey().defaultRandom(),
@@ -30,7 +32,7 @@ export const feed = pgTable('feed', {
   link: text(),
   image: text(),
   subscriberCount: integer().default(0),
-  status: statusEnum('status').default('active').notNull(),
+  status: statusEnum().default('active').notNull(),
   createdAt: timestamp().notNull().defaultNow(),
   lastFetchedAt: timestamp(),
 })
@@ -66,19 +68,57 @@ export const article = pgTable('article', {
     type?: string
   }>(),
   guid: text(),
+  embedding: vector({ dimensions: 384 }),
+  readCount: integer().default(0),
   pubDate: timestamp({ withTimezone: true }),
+  createdAt: timestamp().notNull().defaultNow(),
 }, (table) => [
   index('articles_pub_date_idx').on(table.pubDate),
 ])
 export type SelectArticle = typeof article.$inferSelect
 export type InsertArticle = typeof article.$inferInsert
 
+export const behaviorEnum = pgEnum('behavior', [
+  'click',
+  'read',
+  'collect',
+  'share',
+])
+
+export const userBehavior = pgTable('user_behavior', {
+  id: serial().primaryKey(),
+  userId: uuid().references(() => user.id, { onDelete: 'cascade' }).notNull(),
+  articleId: integer().references(() => article.id, { onDelete: 'cascade' }).notNull(),
+  type: behaviorEnum().notNull(),
+  score: integer().notNull(), // click=1, read=3, collect=5, share=8
+  progress: integer().default(0), // 阅读进度百分比
+  createdAt: timestamp().defaultNow(),
+})
+
+export const userInterest = pgTable('user_interest', {
+  userId: uuid().primaryKey().references(() => user.id, { onDelete: 'cascade' }),
+  interestVector: vector({ dimensions: 384 }).notNull(),
+  articleCount: integer().default(0), // 用于衰减
+  updatedAt: timestamp().defaultNow(),
+})
+
+export const userRecommendation = pgTable('user_recommendation', {
+  userId: uuid().references(() => user.id, { onDelete: 'cascade' }).notNull(),
+  articleId: integer().references(() => article.id, { onDelete: 'cascade' }).notNull(),
+  rank: integer().notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.userId, table.articleId] }),
+  index('user_rank_idx').on(table.userId, table.rank),
+])
 
 export const table = {
   user,
+  profile,
   feed,
   subscription,
   article,
+  userBehavior,
+  userInterest,
 } as const
 
 export type Table = typeof table

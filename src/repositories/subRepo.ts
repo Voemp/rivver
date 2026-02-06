@@ -12,7 +12,7 @@ export const subRepo = {
 
       await tx
         .update(feed)
-        .set({ subscriberCount: sql`(${feed.subscriberCount} + 1)` })
+        .set({ subscriberCount: sql`${feed.subscriberCount} + 1` })
         .where(eq(feed.id, sub.feedId))
 
       return row
@@ -34,7 +34,7 @@ export const subRepo = {
 
       await tx
         .update(feed)
-        .set({ subscriberCount: sql`(${feed.subscriberCount} - 1)` })
+        .set({ subscriberCount: sql`${feed.subscriberCount} - 1` })
         .where(eq(feed.id, feedId))
 
       return row
@@ -45,8 +45,7 @@ export const subRepo = {
       .select({
         id: feed.id,
         url: feed.url,
-        title: sql<string>`COALESCE
-            (${subscription.title}, ${feed.title})`,
+        title: sql<string>`COALESCE(${subscription.title}, ${feed.title})`,
         description: feed.description,
         link: feed.link,
         image: feed.image,

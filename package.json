@@ -4,11 +4,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
-    "worker": "bun run src/rss-worker/index.ts"
+    "worker": "bun run src/worker/rss/index.ts"
   },
   "dependencies": {
     "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/openapi": "^1.4.14",
+    "@xenova/transformers": "^2.17.2",
+    "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "drizzle-orm": "1.0.0-beta.6-4414a19",
     "drizzle-typebox": "^0.3.3",
