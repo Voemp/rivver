@@ -37,7 +37,7 @@ const app = new Elysia()
       case 'AppError':
         return error.toResponse()
       case 'VALIDATION':
-        return res.error(JSON.parse(error.message), error.code)
+        return res.error(JSON.parse(error.message).message, error.code)
     }
   })
   .guard({ response: { 400: ApiResponseModel.error, 409: ApiResponseModel.error } })

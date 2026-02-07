@@ -2,7 +2,7 @@ import {
   index, integer, jsonb, pgEnum, pgTable, primaryKey, serial, text, timestamp, uuid, vector,
 } from 'drizzle-orm/pg-core'
 
-export const user = pgTable('user', {
+export const user = pgTable.withRLS('user', {
   id: uuid().primaryKey().defaultRandom(),
   username: text().notNull().unique(),
   passwordHash: text().notNull(),
@@ -12,7 +12,7 @@ export const user = pgTable('user', {
 export type SelectUser = typeof user.$inferSelect
 export type InsertUser = typeof user.$inferInsert
 
-export const profile = pgTable('profile', {
+export const profile = pgTable.withRLS('profile', {
   userId: uuid().references(() => user.id, { onDelete: 'cascade' }).primaryKey(),
   nickname: text().notNull().unique(),
   avatarUrl: text(),
@@ -24,7 +24,7 @@ export const statusEnum = pgEnum('status', [
   'blocked',
 ])
 
-export const feed = pgTable('feed', {
+export const feed = pgTable.withRLS('feed', {
   id: serial().primaryKey(),
   url: text().notNull().unique(),
   title: text().notNull(),
@@ -39,7 +39,7 @@ export const feed = pgTable('feed', {
 export type SelectFeed = typeof feed.$inferSelect
 export type InsertFeed = typeof feed.$inferInsert
 
-export const subscription = pgTable('subscription', {
+export const subscription = pgTable.withRLS('subscription', {
   userId: uuid().references(() => user.id, { onDelete: 'cascade' }).notNull(),
   feedId: integer().references(() => feed.id, { onDelete: 'cascade' }).notNull(),
   title: text(),
@@ -50,7 +50,7 @@ export const subscription = pgTable('subscription', {
 export type SelectSubscription = typeof subscription.$inferSelect
 export type InsertSubscription = typeof subscription.$inferInsert
 
-export const article = pgTable('article', {
+export const article = pgTable.withRLS('article', {
   id: serial().primaryKey(),
   feedId: integer().references(() => feed.id, { onDelete: 'cascade' }).notNull(),
   title: text(),
@@ -85,7 +85,7 @@ export const behaviorEnum = pgEnum('behavior', [
   'share',
 ])
 
-export const userBehavior = pgTable('user_behavior', {
+export const userBehavior = pgTable.withRLS('user_behavior', {
   id: serial().primaryKey(),
   userId: uuid().references(() => user.id, { onDelete: 'cascade' }).notNull(),
   articleId: integer().references(() => article.id, { onDelete: 'cascade' }).notNull(),
@@ -95,14 +95,14 @@ export const userBehavior = pgTable('user_behavior', {
   createdAt: timestamp().defaultNow(),
 })
 
-export const userInterest = pgTable('user_interest', {
+export const userInterest = pgTable.withRLS('user_interest', {
   userId: uuid().primaryKey().references(() => user.id, { onDelete: 'cascade' }),
   interestVector: vector({ dimensions: 384 }).notNull(),
   articleCount: integer().default(0), // 用于衰减
   updatedAt: timestamp().defaultNow(),
 })
 
-export const userRecommendation = pgTable('user_recommendation', {
+export const userRecommendation = pgTable.withRLS('user_recommendation', {
   userId: uuid().references(() => user.id, { onDelete: 'cascade' }).notNull(),
   articleId: integer().references(() => article.id, { onDelete: 'cascade' }).notNull(),
   rank: integer().notNull(),
