@@ -8,13 +8,6 @@ export namespace SubModel {
     url: feedInsert.url,
     title: subscriptionInsert.title,
   })
-  export type SubBody = typeof subBody.static
-
-  export const unsubBody = t.Object({
-    feedId: subscriptionInsert.feedId,
-  })
-  export type UnsubBody = typeof unsubBody.static
-
   export const subResponse = t.Object({
     userId: subscriptionSelect.userId,
     feedId: subscriptionSelect.feedId,
@@ -22,6 +15,9 @@ export namespace SubModel {
     createdAt: subscriptionSelect.createdAt,
   })
 
+  export const unsubBody = t.Object({
+    feedId: subscriptionInsert.feedId,
+  })
   export const unsubResponse = t.Object({
     feedId: subscriptionSelect.feedId,
   })

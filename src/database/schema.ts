@@ -110,6 +110,7 @@ export const userRecommendation = pgTable('user_recommendation', {
   primaryKey({ columns: [table.userId, table.articleId] }),
   index('user_rank_idx').on(table.userId, table.rank),
 ])
+export type InsertUserRecommendation = typeof userRecommendation.$inferInsert
 
 export const table = {
   user,
@@ -119,6 +120,7 @@ export const table = {
   article,
   userBehavior,
   userInterest,
+  userRecommendation,
 } as const
 
 export type Table = typeof table

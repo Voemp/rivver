@@ -1,24 +1,25 @@
-import usersRepo from '../../repositories/userRepo'
-import { AppError } from '../../utils/error'
-import { AuthModel } from './model'
+import jwt from '@elysiajs/jwt'
+import { Elysia, status, t } from 'elysia'
+import { res } from '../../types/response'
 
-export abstract class AuthService {
-  static async signUp({ username, password }: AuthModel.SignBody) {
-    const existing = await usersRepo.findByUsername(username)
-    if (existing) throw new AppError(409, '用户名已被占用', 'USERNAME_TAKEN')
-
-    const passwordHash = await Bun.password.hash(password)
-
-    return usersRepo.create({ username, passwordHash })
-  }
-
-  static async signIn({ username, password }: AuthModel.SignBody) {
-    const user = await usersRepo.findByUsername(username)
-    if (!user) throw new AppError(401, '用户名或密码错误', 'USERNAME_NOT_FOUND')
-
-    const isMatch = await Bun.password.verify(password, user.passwordHash)
-    if (!isMatch) throw new AppError(401, '用户名或密码错误', 'PASSWORD_NOT_MATCH')
-
-    return user
-  }
+export const jwtConfig = {
+  name: 'jwt',
+  secret: process.env.JWT_SECRET!,
+  sub: undefined,
+  exp: '7d',
 }
+
+export const AuthService = new Elysia({ name: 'Auth.Service' })
+  .use(jwt(jwtConfig))
+  .macro({
+    isAuth: {
+      resolve: async ({ jwt, headers: { authorization } }) => {
+        const token = authorization?.replace('Bearer ', '')
+        const payload = await jwt.verify(token)
+        if (!payload || !payload.sub) return status(401, res.error('未授权', 'UNAUTHORIZED'))
+
+        return { user: { id: payload.sub } }
+      },
+      user: t.Object({ id: t.String({ format: 'uuid' }) }),
+    },
+  })

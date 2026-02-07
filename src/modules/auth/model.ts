@@ -16,11 +16,9 @@ export namespace AuthModel {
       maxLength: 20,
     }),
   })
-  export type SignBody = typeof signBody.static
 
   export const signResponse = t.Object({
     username: userSelect.username,
     token: t.String(),
   })
-  export type SignResponse = typeof signResponse.static
 }

@@ -3,9 +3,9 @@ import { res } from '../types/response'
 
 export class AppError extends Error {
   constructor(
-    public status: keyof InvertedStatusMap = 500,
     public message: string,
     public code: string = 'INTERNAL_ERROR',
+    public status: keyof InvertedStatusMap = 500,
   ) {
     super(message)
     this.name = 'AppError'

@@ -1,4 +1,5 @@
-import { t, TSchema } from 'elysia'
+import { ElysiaCustomStatusResponse, status, t, TSchema } from 'elysia'
+import { InvertedStatusMap } from 'elysia/utils'
 
 export namespace ApiResponseModel {
   export const success = <T extends TSchema>(dataModel: T) =>
@@ -6,7 +7,6 @@ export namespace ApiResponseModel {
       success: t.Boolean(),
       data: t.Union([dataModel, t.Null()]),
       error: t.Null(),
-      meta: t.Optional(t.Any()),
     })
 
   export const error = t.Object({
@@ -28,18 +28,21 @@ export namespace ApiResponseModel {
   export type Error = typeof error.static
 }
 
+function success<T>(data: T): ApiResponseModel.Success
+function success<T, const Code extends keyof InvertedStatusMap>(
+  data: T,
+  code: Code,
+): ElysiaCustomStatusResponse<Code, ApiResponseModel.Success>
+function success(data: any, code?: any) {
+  const body = { success: true, data, error: null }
+  return code ? status(code, body) : body
+}
+
+function error(message: string, code: string = 'INTERNAL_ERROR'): ApiResponseModel.Error {
+  return { success: false, data: null, error: { code, message } }
+}
+
 export const res = {
-  success: <T>(data: T, meta?: any): ApiResponseModel.Success => ({
-    success: true,
-    data,
-    error: null,
-    meta,
-  }),
-  error: (message: string, code: string = 'INTERNAL_ERROR'): ApiResponseModel.Error => {
-    return {
-      success: false,
-      data: null,
-      error: { code, message },
-    }
-  },
+  success,
+  error,
 }

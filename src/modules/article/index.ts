@@ -1,8 +1,10 @@
-import { Elysia, status } from 'elysia'
-import { authPlugin } from '../../plugins/authPlugin'
+import { Elysia } from 'elysia'
+import { articleRepo } from '../../repositories/articleRepo'
+import { interestRepo } from '../../repositories/interestRepo'
+import { recommendRepo } from '../../repositories/recommendRepo'
 import { ApiResponseModel, res } from '../../types/response'
+import { AuthService } from '../auth/service'
 import { ArticleModel } from './model'
-import { ArticleService } from './service'
 
 export const article = new Elysia({
   prefix: '/article',
@@ -11,12 +13,33 @@ export const article = new Elysia({
     security: [{ bearerAuth: [] }],
   },
 })
-  .use(authPlugin)
-  .get('/recommendation', async ({ user, query }) => {
-    const articles = await ArticleService.recommend(user.id, query)
-    console.log('articles', articles)
-    return status(200, res.success(articles))
+  .use(AuthService)
+  .get('/recommendation', async ({ user, query: { offest = 0, limit = 20 } }) => {
+    limit = Math.min(limit, 50)
+
+    // 1. 获取用户兴趣向量（缓存）
+    const interest = await interestRepo.findByUser(user.id)
+
+    // 2. 冷启动处理：无兴趣向量时用热门文章
+    if (!interest?.interestVector) {
+      const articles = await articleRepo.listPopular(offest, limit)
+      return res.success(articles, 200)
+    }
+
+    // 3. 首次刷新：计算推荐池
+    if (offest === 0) {
+      const candidateIds = await articleRepo.listByUserInterest(interest.interestVector)
+      candidateIds.forEach((id, index) => {
+        recommendRepo.create({ userId: user.id, articleId: id, rank: index })
+      })
+    }
+
+    // 4. 分页获取推荐文章
+    const articleIds = await recommendRepo.listByUser(user.id, offest, limit)
+    const articles = await articleRepo.listByIds(articleIds)
+    return res.success(articles, 200)
   }, {
+    isAuth: true,
     query: ArticleModel.recommendQuery,
     response: {
       200: ApiResponseModel.success(ArticleModel.recommendResponse),

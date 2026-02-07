@@ -8,7 +8,6 @@ export namespace ArticleModel {
     offest: t.Optional(t.Number()),
     limit: t.Number(),
   })
-  export type RecommendQuery = typeof recommendQuery.static
 
   export const recommendResponse = t.Array(t.Object({
     id: articleSelect.id,

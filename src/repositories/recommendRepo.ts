@@ -1,13 +1,13 @@
 import { db } from '../database'
-import { userRecommendation } from '../database/schema'
+import { InsertUserRecommendation, userRecommendation } from '../database/schema'
 
 export const recommendRepo = {
-  create: async (userId: string, articleId: number, rank: number) => {
+  create: async (recommendation: InsertUserRecommendation) => {
     db.insert(userRecommendation)
-      .values({ userId, articleId, rank })
+      .values(recommendation)
       .onConflictDoUpdate({
         target: [userRecommendation.userId, userRecommendation.rank],
-        set: { articleId },
+        set: { articleId: recommendation.articleId },
       })
   },
   listByUser: async (userId: string, offset: number, limit: number) => {
