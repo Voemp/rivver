@@ -45,3 +45,12 @@ export const article = new Elysia({
       200: ApiResponseModel.success(ArticleModel.recommendResponse),
     },
   })
+  .get('/:id', async ({ params: { id } }) => {
+    const article = await articleRepo.findById(id)
+    return res.success(article, 200)
+  }, {
+    params: ArticleModel.articleParams,
+    response: {
+      200: ApiResponseModel.success(ArticleModel.articleResponse),
+    },
+  })

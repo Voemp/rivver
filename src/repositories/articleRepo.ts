@@ -21,6 +21,16 @@ export const articleRepo = {
       )
       .returning()
   },
+  findById: async (id: number) => {
+    return db.query.article.findFirst({
+      columns: {
+        summary: false,
+        contentSnippet: false,
+        embedding: false,
+      },
+      where: { id },
+    })
+  },
   findByGuidOrLink: async (key: string): Promise<SelectArticle | undefined> => {
     return db.query.article.findFirst({
       where: {
@@ -38,7 +48,7 @@ export const articleRepo = {
         pubDate: true,
       },
       where: {
-        pubDate: { gte: subDays(new Date(), 7) },
+        pubDate: { gte: subDays(new Date(), 14) },
       },
       with: {
         feed: {
@@ -59,7 +69,7 @@ export const articleRepo = {
   listByUserInterest: async (interestVector: number[]) => {
     return db.query.article.findMany({
       where: {
-        pubDate: { gte: subDays(new Date(), 7) },
+        pubDate: { gte: subDays(new Date(), 14) },
         embedding: { isNotNull: true },
       },
       orderBy: t => sql`${t.embedding} <=> ${interestVector}::vector)`,

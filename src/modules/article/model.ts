@@ -20,4 +20,13 @@ export namespace ArticleModel {
       image: feedSelect.image,
     }),
   }))
+
+  export const articleParams = t.Object({
+    id: articleSelect.id,
+  })
+
+  export const articleResponse = t.Omit(
+    articleSelect.schema,
+    ['summary', 'contentSnippet', 'embedding'],
+  )
 }
