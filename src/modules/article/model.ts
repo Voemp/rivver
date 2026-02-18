@@ -1,5 +1,5 @@
+import { DBModel } from '@/db/model'
 import { t } from 'elysia'
-import { DBModel } from '../../database/model'
 
 export namespace ArticleModel {
   const { feedSelect, articleSelect } = DBModel

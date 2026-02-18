@@ -1,7 +1,7 @@
+import { db } from '@/db'
+import { article } from '@/db/schema'
 import { pipeline } from '@xenova/transformers'
 import { and, desc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
-import { db } from '../../database'
-import { article } from '../../database/schema'
 
 // 轻量中文模型（35MB）
 const generator = await pipeline('feature-extraction', 'TaylorAI/gte-tiny')

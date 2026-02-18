@@ -1,5 +1,5 @@
-import { db } from '../database'
-import { InsertUser, SelectUser, user } from '../database/schema'
+import { db } from '@/db'
+import { InsertUser, SelectUser, user } from '@/db/schema'
 
 export default {
   create: async (newUser: InsertUser): Promise<SelectUser> => {

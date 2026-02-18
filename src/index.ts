@@ -1,3 +1,6 @@
+import { runEmbeddingGenerate } from '@/worker/embedding'
+import { runRssFetch } from '@/worker/rss'
+import cron, { Patterns } from '@elysiajs/cron'
 import { openapi } from '@elysiajs/openapi'
 import { Elysia } from 'elysia'
 import { article } from './modules/article'
@@ -31,6 +34,14 @@ const app = new Elysia()
       },
     },
   }))
+  .use(cron({
+    name: 'article-fetch',
+    pattern: Patterns.everyHours(6),
+    run() {
+      void runRssFetch()
+      void runEmbeddingGenerate()
+    },
+  }))
   .error({ AppError })
   .onError(({ error, code }) => {
     switch (code) {
@@ -51,3 +62,5 @@ console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}\n` +
   `📖 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
 )
+
+export default app

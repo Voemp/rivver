@@ -1,6 +1,6 @@
+import { db } from '@/db'
+import { feed, InsertSubscription, SelectFeed, SelectSubscription, subscription } from '@/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
-import { db } from '../database'
-import { feed, InsertSubscription, SelectFeed, SelectSubscription, subscription } from '../database/schema'
 
 export const subRepo = {
   create: async (sub: InsertSubscription): Promise<SelectSubscription> => {

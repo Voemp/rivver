@@ -74,6 +74,7 @@ export const article = pgTable.withRLS('article', {
   createdAt: timestamp().notNull().defaultNow(),
 }, (table) => [
   index('articles_pub_date_idx').on(table.pubDate),
+  index('embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
 ])
 export type SelectArticle = typeof article.$inferSelect
 export type InsertArticle = typeof article.$inferInsert

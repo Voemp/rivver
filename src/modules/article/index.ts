@@ -1,8 +1,8 @@
+import { articleRepo } from '@/repos/articleRepo'
+import { interestRepo } from '@/repos/interestRepo'
+import { recommendRepo } from '@/repos/recommendRepo'
+import { ApiResponseModel, res } from '@/types/response'
 import { Elysia } from 'elysia'
-import { articleRepo } from '../../repositories/articleRepo'
-import { interestRepo } from '../../repositories/interestRepo'
-import { recommendRepo } from '../../repositories/recommendRepo'
-import { ApiResponseModel, res } from '../../types/response'
 import { AuthService } from '../auth/service'
 import { ArticleModel } from './model'
 

@@ -1,7 +1,7 @@
+import { InsertArticle, SelectFeed } from '@/db/schema'
+import { articleRepo } from '@/repos/articleRepo'
+import { feedRepo } from '@/repos/feedRepo'
 import Parser from 'rss-parser'
-import { InsertArticle, SelectFeed } from '../../database/schema'
-import { articleRepo } from '../../repositories/articleRepo'
-import { feedRepo } from '../../repositories/feedRepo'
 
 const parser = new Parser()
 

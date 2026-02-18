@@ -1,10 +1,11 @@
+import usersRepo from '@/repos/userRepo'
+import { ApiResponseModel, res } from '@/types/response'
+import { AppError } from '@/utils/error'
 import jwt from '@elysiajs/jwt'
 import { Elysia } from 'elysia'
-import usersRepo from '../../repositories/userRepo'
-import { ApiResponseModel, res } from '../../types/response'
-import { AppError } from '../../utils/error'
 import { AuthModel } from './model'
 import { jwtConfig } from './service'
+
 
 export const auth = new Elysia({ prefix: '/auth', detail: { tags: ['Auth'] } })
   .use(jwt(jwtConfig))

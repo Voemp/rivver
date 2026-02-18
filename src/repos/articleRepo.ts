@@ -1,7 +1,7 @@
+import { db } from '@/db'
+import { article, InsertArticle, SelectArticle } from '@/db/schema'
 import { subDays } from 'date-fns'
 import { eq, sql } from 'drizzle-orm'
-import { db } from '../database'
-import { article, InsertArticle, SelectArticle } from '../database/schema'
 
 export const articleRepo = {
   create: async (newArticle: InsertArticle) => {

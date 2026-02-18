@@ -1,9 +1,8 @@
-import cron from 'node-cron'
 import { fetchAllFeeds } from './fetcher'
 
 let running = false
 
-async function runRssFetch() {
+export async function runRssFetch() {
   if (running) {
     console.log('[RSS] previous job still running, skip')
     return
@@ -21,11 +20,3 @@ async function runRssFetch() {
     running = false
   }
 }
-
-// 启动后立即跑一次
-void runRssFetch()
-
-// 定时跑（15分钟）
-cron.schedule('*/15 * * * *', () => {
-  void runRssFetch()
-})

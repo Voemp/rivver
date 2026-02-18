@@ -1,6 +1,6 @@
+import { res } from '@/types/response'
 import jwt from '@elysiajs/jwt'
 import { Elysia, status, t } from 'elysia'
-import { res } from '../../types/response'
 
 export const jwtConfig = {
   name: 'jwt',
