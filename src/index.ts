@@ -56,11 +56,12 @@ const app = new Elysia()
   .use(subscription)
   .use(article)
   .use(dev)
-  .listen(3000)
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}\n` +
-  `📖 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
-)
+app.listen(process.env.PORT ?? 3000, () => {
+  console.log(
+    `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}\n` +
+    `📖 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
+  )
+})
 
 export default app

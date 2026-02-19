@@ -13,6 +13,9 @@ export const AuthService = new Elysia({ name: 'Auth.Service' })
   .use(jwt(jwtConfig))
   .macro({
     isAuth: {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
       resolve: async ({ jwt, headers: { authorization } }) => {
         const token = authorization?.replace('Bearer ', '')
         const payload = await jwt.verify(token)
