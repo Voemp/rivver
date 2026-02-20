@@ -1,4 +1,4 @@
-import { DBModel } from '@/db/model'
+import { DBModel } from '@server/db/model'
 import { t } from 'elysia'
 
 export namespace ArticleModel {

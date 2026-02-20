@@ -1,5 +1,5 @@
-import { db } from '@/db'
-import { InsertUserRecommendation, userRecommendation } from '@/db/schema'
+import { db } from '@server/db'
+import { InsertUserRecommendation, userRecommendation } from '@server/db/schema'
 
 export const recommendRepo = {
   create: async (recommendation: InsertUserRecommendation) => {

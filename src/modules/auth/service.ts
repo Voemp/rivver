@@ -1,5 +1,5 @@
-import { res } from '@/types/response'
 import jwt from '@elysiajs/jwt'
+import { res } from '@server/types/response'
 import { Elysia, status, t } from 'elysia'
 
 export const jwtConfig = {

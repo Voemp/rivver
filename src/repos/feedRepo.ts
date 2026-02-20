@@ -1,5 +1,5 @@
-import { db } from '@/db'
-import { feed, InsertFeed, SelectFeed } from '@/db/schema'
+import { db } from '@server/db'
+import { feed, InsertFeed, SelectFeed } from '@server/db/schema'
 import { eq } from 'drizzle-orm'
 
 export const feedRepo = {

@@ -1,5 +1,5 @@
-import { db } from '@/db'
-import { article, InsertArticle, SelectArticle } from '@/db/schema'
+import { db } from '@server/db'
+import { article, InsertArticle, SelectArticle } from '@server/db/schema'
 import { subDays } from 'date-fns'
 import { eq, sql } from 'drizzle-orm'
 

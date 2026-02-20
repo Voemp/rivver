@@ -1,5 +1,5 @@
-import { db } from '@/db'
-import { article } from '@/db/schema'
+import { db } from '@server/db'
+import { article } from '@server/db/schema'
 import { pipeline } from '@xenova/transformers'
 import { and, desc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 
