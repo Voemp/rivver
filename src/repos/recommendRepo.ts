@@ -19,4 +19,4 @@ export const recommendRepo = {
       limit: limit,
     }).then(rows => rows.map(r => r.articleId))
   },
-}
+} as const

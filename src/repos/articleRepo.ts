@@ -98,4 +98,4 @@ export const articleRepo = {
       },
     })
   },
-}
+} as const

@@ -123,5 +123,3 @@ export const table = {
   userInterest,
   userRecommendation,
 } as const
-
-export type Table = typeof table

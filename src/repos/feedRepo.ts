@@ -24,4 +24,4 @@ export const feedRepo = {
       .set(newFeed)
       .where(eq(feed.id, id))
   },
-}
+} as const

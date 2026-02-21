@@ -6,4 +6,4 @@ export const interestRepo = {
       where: { userId },
     })
   },
-}
+} as const

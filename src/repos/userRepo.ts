@@ -14,4 +14,4 @@ export default {
       where: { username: username },
     })
   },
-}
+} as const

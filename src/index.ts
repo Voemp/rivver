@@ -1,3 +1,4 @@
+import cors from '@elysiajs/cors'
 import cron, { Patterns } from '@elysiajs/cron'
 import { openapi } from '@elysiajs/openapi'
 import { runEmbeddingGenerate } from '@server/worker/embedding'
@@ -36,12 +37,13 @@ const app = new Elysia()
   }))
   .use(cron({
     name: 'article-fetch',
-    pattern: Patterns.everyHours(6),
+    pattern: Patterns.everyHours(24),
     run() {
       void runRssFetch()
       void runEmbeddingGenerate()
     },
   }))
+  .use(cors())
   .error({ AppError })
   .onError(({ error, code }) => {
     switch (code) {
