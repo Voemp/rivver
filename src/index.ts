@@ -4,6 +4,7 @@ import { openapi } from '@elysiajs/openapi'
 import { runEmbeddingGenerate } from '@server/worker/embedding'
 import { runRssFetch } from '@server/worker/rss'
 import { Elysia } from 'elysia'
+import { dts } from 'elysia-remote-dts'
 import { article } from './modules/article'
 import { auth } from './modules/auth'
 import { dev } from './modules/dev'
@@ -58,6 +59,7 @@ const app = new Elysia()
   .use(subscription)
   .use(article)
   .use(dev)
+  .use(dts('./src/index.ts'))
 
 app.listen(process.env.PORT ?? 3000, () => {
   console.log(
@@ -66,4 +68,4 @@ app.listen(process.env.PORT ?? 3000, () => {
   )
 })
 
-export default app
+export type App = typeof app
