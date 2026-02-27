@@ -1,101 +1,25 @@
-/**
- * @lastModified 2025-02-04
- * @see https://elysiajs.com/recipe/drizzle.html#utility
- */
-
-import { Kind, type TObject } from '@sinclair/typebox'
+import { type TObject, TProperties } from '@sinclair/typebox'
 import type { Table } from 'drizzle-orm'
-import { BuildSchema, createInsertSchema, createSelectSchema } from 'drizzle-typebox'
+import { BuildSchema, createInsertSchema, createSelectSchema } from 'drizzle-orm/typebox-legacy'
 
-type Spread<
-  T extends TObject | Table,
-  Mode extends 'select' | 'insert' | undefined,
-> =
-  T extends TObject<infer Fields>
-    ? { [K in keyof Fields]: Fields[K] }
-    : T extends Table
-      ? Mode extends 'select'
-        ? BuildSchema<
-          'select',
-          T['_']['columns'],
-          undefined
-        >['properties']
-        : Mode extends 'insert'
-          ? BuildSchema<
-            'insert',
-            T['_']['columns'],
-            undefined
-          >['properties']
-          : {}
-      : {}
+type TableProperties<
+  T extends Table,
+  Mode extends 'insert' | 'select'
+> = BuildSchema<Mode, T['_']['columns'], undefined>['properties']
+
+// 强行展开交叉类型，解决 Elysia 推导失败
+type Evaluate<T> = { [K in keyof T]: T[K] } & {}
 
 /**
- * Spread a Drizzle schema into a plain object
+ * 合并原始属性和自定义的 refine 属性
+ * 使用 Evaluate 确保结果是一个干净的键值对，而不是 A & B
  */
-export const spread = <
-  T extends TObject | Table,
-  Mode extends 'select' | 'insert' | undefined,
->(
-  schema: T,
-  mode?: Mode,
-): Spread<T, Mode> => {
-  const newSchema: Record<string, unknown> = {}
-  let table
-
-  switch (mode) {
-    case 'insert':
-    case 'select':
-      if (Kind in schema) {
-        table = schema
-        break
-      }
-
-      table =
-        mode === 'insert'
-          ? createInsertSchema(schema)
-          : createSelectSchema(schema)
-
-      break
-
-    default:
-      if (!(Kind in schema)) throw new Error('Expect a schema')
-      table = schema
-  }
-
-  for (const key of Object.keys(table.properties))
-    newSchema[key] = table.properties[key]
-
-  return newSchema as any
-}
+type MergeProperties<P extends TProperties, R> = Evaluate<Omit<P, keyof R> & R>
 
 /**
- * Spread a Drizzle Table into a plain object
- *
- * If `mode` is 'insert', the schema will be refined for insert
- * If `mode` is 'select', the schema will be refined for select
- * If `mode` is undefined, the schema will be spread as is, models will need to be refined manually
+ * 定义单个 Model 的结构：包含平铺字段 + 原始 schema 引用
  */
-export const spreads = <
-  T extends Record<string, TObject | Table>,
-  Mode extends 'select' | 'insert' | undefined,
->(
-  models: T,
-  mode?: Mode,
-): {
-  [K in keyof T]: Spread<T[K], Mode>
-} => {
-  const newSchema: Record<string, unknown> = {}
-  const keys = Object.keys(models)
-
-  for (const key of keys) newSchema[key] = spread(models[key], mode)
-
-  return newSchema as any
-}
-
-/**
- * 定义单个 Model 的结构：既有平铺字段，也有 .schema 对象
- */
-type ModelWithSchema<T extends TObject> = T['properties'] & { schema: T }
+type ModelWithSchema<P extends TProperties> = P & { schema: TObject<P> }
 
 /**
  * 批量生成所有 Model 的 Insert 和 Select 字段, 以及 schema 对象
@@ -109,7 +33,7 @@ export const createModel = <
   tables: T,
   refines: R = {} as R,
 ) => {
-  const models = {} as any
+  const models = {} as Record<string, any>
 
   for (const key of Object.keys(tables)) {
     const table = tables[key]
@@ -121,19 +45,23 @@ export const createModel = <
 
     // 动态生成扁平的 Key，构造包含了 spread 字段和 .schema 属性的对象
     models[`${key}Insert`] = {
-      ...spread(insertSchema as any, 'insert'),
+      ...insertSchema.properties,
       schema: insertSchema,
     }
     models[`${key}Select`] = {
-      ...spread(selectSchema as any, 'select'),
+      ...selectSchema.properties,
       schema: selectSchema,
     }
   }
 
   // 完善类型推导，利用 TS 模板字面量类型重塑返回类型
   return models as {
-    [K in keyof T & string as `${K}Insert`]: ModelWithSchema<TObject<Spread<T[K], 'insert'> & (K extends keyof R ? R[K] : {})>>
+    [K in keyof T & string as `${K}Insert`]: ModelWithSchema<
+      MergeProperties<TableProperties<T[K], 'insert'>, (K extends keyof R ? R[K] : {})>
+    >
   } & {
-    [K in keyof T & string as `${K}Select`]: ModelWithSchema<TObject<Spread<T[K], 'select'> & (K extends keyof R ? R[K] : {})>>
+    [K in keyof T & string as `${K}Select`]: ModelWithSchema<
+      MergeProperties<TableProperties<T[K], 'select'>, (K extends keyof R ? R[K] : {})>
+    >
   }
 }

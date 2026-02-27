@@ -1,10 +1,9 @@
 import { InsertFeed, InsertSubscription } from '@server/db/schema'
 import { feedRepo } from '@server/repos/feedRepo'
 import { subRepo } from '@server/repos/subRepo'
-import { ApiResponseModel, res } from '@server/types/response'
 import { AppError } from '@server/utils/error'
 import { fetchSingleFeed } from '@server/worker/rss/fetcher'
-import { Elysia } from 'elysia'
+import { Elysia, status } from 'elysia'
 import Parser from 'rss-parser'
 import { AuthService } from '../auth/service'
 import { SubModel } from './model'
@@ -19,11 +18,11 @@ export const subscription = new Elysia({
   .use(AuthService)
   .get('/', async ({ user }) => {
     const subs = await subRepo.listByUser(user.id)
-    return res.success(subs, 200)
+    return status(200, subs)
   }, {
     isAuth: true,
     response: {
-      200: ApiResponseModel.success(SubModel.listResponse),
+      200: SubModel.listResponse,
     },
   })
   .post('/', async ({ user, body: { url, title } }) => {
@@ -47,7 +46,7 @@ export const subscription = new Elysia({
     }
 
     const existing = await subRepo.findByUserAndLink(user.id, feed.id)
-    if (existing) throw new AppError('订阅已存在', 'SUBSCRIPTION_EXISTS', 409)
+    if (existing) throw new AppError(409, '订阅已存在', 'SUBSCRIPTION_EXISTS')
 
     const _sub: InsertSubscription = {
       userId: user.id,
@@ -56,24 +55,25 @@ export const subscription = new Elysia({
     }
 
     const sub = await subRepo.create(_sub)
-    return res.success(sub, 201)
+    return status(201, sub)
   }, {
     isAuth: true,
     body: SubModel.subBody,
     response: {
-      201: ApiResponseModel.success(SubModel.subResponse),
+      201: SubModel.subResponse,
     },
   })
   .delete('/', async ({ user, body: { feedId } }) => {
     const existing = await subRepo.findByUserAndLink(user.id, feedId)
-    if (!existing) throw new AppError('订阅不存在', 'SUBSCRIPTION_NOT_FOUND', 404)
+    if (!existing) throw new AppError(404, '订阅不存在', 'SUBSCRIPTION_NOT_FOUND')
 
     const sub = await subRepo.remove(user.id, feedId)
-    return res.success(sub, 200)
+    return status(200, sub)
   }, {
     isAuth: true,
     body: SubModel.unsubBody,
     response: {
-      200: ApiResponseModel.success(SubModel.unsubResponse),
+      200: SubModel.unsubResponse,
     },
   })
+

@@ -1,26 +1,24 @@
 import { DBModel } from '@server/db/model'
 import { t } from 'elysia'
 
-export namespace SubModel {
-  const { feedInsert, feedSelect, subscriptionInsert, subscriptionSelect } = DBModel
+const { feedInsert, feedSelect, subscriptionInsert, subscriptionSelect } = DBModel
 
-  export const subBody = t.Object({
+export const SubModel = {
+  subBody: t.Object({
     url: feedInsert.url,
     title: subscriptionInsert.title,
-  })
-  export const subResponse = t.Object({
+  }),
+  subResponse: t.Object({
     userId: subscriptionSelect.userId,
     feedId: subscriptionSelect.feedId,
     title: subscriptionSelect.title,
     createdAt: subscriptionSelect.createdAt,
-  })
-
-  export const unsubBody = t.Object({
+  }),
+  unsubBody: t.Object({
     feedId: subscriptionInsert.feedId,
-  })
-  export const unsubResponse = t.Object({
+  }),
+  unsubResponse: t.Object({
     feedId: subscriptionSelect.feedId,
-  })
-
-  export const listResponse = t.Array(feedSelect.schema)
-}
+  }),
+  listResponse: t.Array(feedSelect.schema),
+} as const

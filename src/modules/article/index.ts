@@ -1,8 +1,7 @@
 import { articleRepo } from '@server/repos/articleRepo'
 import { interestRepo } from '@server/repos/interestRepo'
 import { recommendRepo } from '@server/repos/recommendRepo'
-import { ApiResponseModel, res } from '@server/types/response'
-import { Elysia } from 'elysia'
+import { Elysia, status } from 'elysia'
 import { AuthService } from '../auth/service'
 import { ArticleModel } from './model'
 
@@ -23,7 +22,7 @@ export const article = new Elysia({
     // 2. 冷启动处理：无兴趣向量时用热门文章
     if (!interest?.interestVector) {
       const articles = await articleRepo.listPopular(offest, limit)
-      return res.success(articles, 200)
+      return status(200, articles)
     }
 
     // 3. 首次刷新：计算推荐池
@@ -37,20 +36,20 @@ export const article = new Elysia({
     // 4. 分页获取推荐文章
     const articleIds = await recommendRepo.listByUser(user.id, offest, limit)
     const articles = await articleRepo.listByIds(articleIds)
-    return res.success(articles, 200)
+    return status(200, articles)
   }, {
     isAuth: true,
     query: ArticleModel.recommendQuery,
     response: {
-      200: ApiResponseModel.success(ArticleModel.recommendResponse),
+      200: ArticleModel.recommendResponse,
     },
   })
   .get('/:id', async ({ params: { id } }) => {
     const article = await articleRepo.findById(id)
-    return res.success(article, 200)
+    return status(200, article)
   }, {
     params: ArticleModel.articleParams,
     response: {
-      200: ApiResponseModel.success(ArticleModel.articleResponse),
+      200: ArticleModel.articleResponse,
     },
   })

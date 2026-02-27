@@ -13,7 +13,7 @@ export const articleRepo = {
     return row
   },
   update: async (id: number, newArticle: Partial<InsertArticle>) => {
-    await db
+    db
       .update(article)
       .set(newArticle)
       .where(

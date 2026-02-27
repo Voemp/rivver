@@ -64,7 +64,8 @@ const app = new Elysia()
 app.listen(process.env.PORT ?? 3000, () => {
   console.log(
     `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}\n` +
-    `📖 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
+    `📖 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/openapi\n` +
+    `🔗 dts: http://${app.server?.hostname}:${app.server?.port}/server.d.ts`,
   )
 })
 

@@ -1,10 +1,10 @@
 import { DBModel } from '@server/db/model'
 import { t } from 'elysia'
 
-export namespace AuthModel {
-  const { userSelect } = DBModel
+const { userSelect } = DBModel
 
-  export const signBody = t.Object({
+export const AuthModel = {
+  signBody: t.Object({
     username: t.String({
       minLength: 3,
       maxLength: 20,
@@ -15,10 +15,9 @@ export namespace AuthModel {
       minLength: 8,
       maxLength: 20,
     }),
-  })
-
-  export const signResponse = t.Object({
+  }),
+  signResponse: t.Object({
     username: userSelect.username,
     token: t.String(),
-  })
-}
+  }),
+} as const

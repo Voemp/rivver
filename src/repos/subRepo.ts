@@ -18,7 +18,7 @@ export const subRepo = {
       return row
     })
   },
-  remove: async (userId: string, feedId: number): Promise<Partial<SelectSubscription>> => {
+  remove: async (userId: string, feedId: number): Promise<Pick<SelectSubscription, 'feedId'>> => {
     return db.transaction(async (tx) => {
       const [row] = await db
         .delete(subscription)
