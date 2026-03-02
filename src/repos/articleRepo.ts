@@ -5,15 +5,14 @@ import { eq, sql } from 'drizzle-orm'
 
 export const articleRepo = {
   create: async (newArticle: InsertArticle) => {
-    const [row] = await db
+    return db
       .insert(article)
       .values(newArticle)
       .onConflictDoNothing()
       .returning()
-    return row
   },
   update: async (id: number, newArticle: Partial<InsertArticle>) => {
-    db
+    return db
       .update(article)
       .set(newArticle)
       .where(
@@ -72,7 +71,7 @@ export const articleRepo = {
         pubDate: { gte: subDays(new Date(), 14) },
         embedding: { isNotNull: true },
       },
-      orderBy: t => sql`${t.embedding} <=> ${interestVector}::vector)`,
+      orderBy: t => sql`${t.embedding} <=> ${interestVector}::vector`,
       limit: 200,
     }).then(rows => rows.map(r => r.id))
   },

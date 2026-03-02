@@ -15,14 +15,14 @@
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/cron": "^1.4.1",
-    "@elysiajs/jwt": "^1.4.0",
+    "@elysiajs/jwt": "^1.4.1",
     "@elysiajs/openapi": "^1.4.14",
     "@xenova/transformers": "^2.17.2",
     "date-fns": "^4.1.0",
     "dotenv": "^17.3.1",
     "drizzle-orm": "1.0.0-beta.15-9485290",
     "drizzle-typebox": "^0.3.3",
-    "elysia": "^1.4.26",
+    "elysia": "^1.4.27",
     "elysia-remote-dts": "^1.0.3",
     "postgres": "^3.4.8",
     "rss-parser": "^3.13.0"

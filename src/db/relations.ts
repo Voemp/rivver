@@ -12,6 +12,11 @@ export const relations = defineRelations(schema, (r) => ({
       to: r.user.id.through(r.userBehavior.userId),
       alias: 'article_id_user_id_via_userBehavior',
     }),
+    usersViaUserFavorite: r.many.user({
+      from: r.article.id.through(r.userFavorite.articleId),
+      to: r.user.id.through(r.userFavorite.userId),
+      alias: 'article_id_user_id_via_userFavorite',
+    }),
     usersViaUserRecommendation: r.many.user({
       from: r.article.id.through(r.userRecommendation.articleId),
       to: r.user.id.through(r.userRecommendation.userId),
@@ -38,8 +43,21 @@ export const relations = defineRelations(schema, (r) => ({
       alias: 'article_id_user_id_via_userBehavior',
     }),
     userInterests: r.many.userInterest(),
+    articlesViaUserFavorite: r.many.article({
+      alias: 'article_id_user_id_via_userFavorite',
+    }),
     articlesViaUserRecommendation: r.many.article({
       alias: 'article_id_user_id_via_userRecommendation',
+    }),
+  },
+  userFavorite: {
+    user: r.one.user({
+      from: r.userFavorite.userId,
+      to: r.user.id,
+    }),
+    article: r.one.article({
+      from: r.userFavorite.articleId,
+      to: r.article.id,
     }),
   },
   userInterest: {

@@ -4,11 +4,18 @@ import { t } from 'elysia'
 const { feedSelect, articleSelect } = DBModel
 
 export const ArticleModel = {
-  recommendQuery: t.Object({
-    offest: t.Optional(t.Number()),
-    limit: t.Number(),
+  articleParams: t.Object({
+    id: t.Number(),
   }),
-  recommendResponse: t.Array(t.Object({
+  articleResponse: t.Omit(
+    articleSelect.schema,
+    ['summary', 'contentSnippet', 'embedding'],
+  ),
+  articleListQuery: t.Object({
+    offset: t.Optional(t.Number({ minimum: 0 })),
+    limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
+  }),
+  articleListResponse: t.Array(t.Object({
     id: articleSelect.id,
     title: articleSelect.title,
     summary: articleSelect.summary,
@@ -19,11 +26,21 @@ export const ArticleModel = {
       image: feedSelect.image,
     })),
   })),
-  articleParams: t.Object({
-    id: t.Number(),
+  favoriteStatusResponse: t.Object({
+    favorited: t.Boolean(),
+    articleId: t.Number(),
   }),
-  articleResponse: t.Omit(
-    articleSelect.schema,
-    ['summary', 'contentSnippet', 'embedding'],
-  ),
+  behaviorResponse: t.Object({
+    recorded: t.Boolean(),
+    type: t.UnionEnum(['click', 'read', 'favorite', 'share']),
+    articleId: t.Number(),
+  }),
+  readProgressBody: t.Object({
+    progress: t.Number({ minimum: 0, maximum: 100 }),
+  }),
+  readProgressResponse: t.Object({
+    recorded: t.Boolean(),
+    articleId: t.Number(),
+    progress: t.Number(),
+  }),
 } as const

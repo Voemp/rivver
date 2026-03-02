@@ -3,11 +3,11 @@ import { InsertUserRecommendation, userRecommendation } from '@server/db/schema'
 
 export const recommendRepo = {
   create: async (recommendation: InsertUserRecommendation) => {
-    db.insert(userRecommendation)
+    await db.insert(userRecommendation)
       .values(recommendation)
       .onConflictDoUpdate({
-        target: [userRecommendation.userId, userRecommendation.rank],
-        set: { articleId: recommendation.articleId },
+        target: [userRecommendation.userId, userRecommendation.articleId],
+        set: { rank: recommendation.rank },
       })
   },
   listByUser: async (userId: string, offset: number, limit: number) => {

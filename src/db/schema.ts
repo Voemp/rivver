@@ -82,7 +82,7 @@ export type InsertArticle = typeof article.$inferInsert
 export const behaviorEnum = pgEnum('behavior', [
   'click',
   'read',
-  'collect',
+  'favorite',
   'share',
 ])
 
@@ -91,10 +91,30 @@ export const userBehavior = pgTable.withRLS('user_behavior', {
   userId: uuid().references(() => user.id, { onDelete: 'cascade' }).notNull(),
   articleId: integer().references(() => article.id, { onDelete: 'cascade' }).notNull(),
   type: behaviorEnum().notNull(),
-  score: integer().notNull(), // click=1, read=3, collect=5, share=8
-  progress: integer().default(0), // 阅读进度百分比
-  createdAt: timestamp().defaultNow(),
-})
+  score: integer().notNull(),
+  readProgress: integer(),
+  createdAt: timestamp({ withTimezone: true }).defaultNow(),
+}, (table) => [
+  index('user_behavior_user_created_idx').on(table.userId, table.createdAt),
+  index('user_behavior_article_created_idx').on(table.articleId, table.createdAt),
+  index('user_behavior_user_type_created_idx').on(table.userId, table.type, table.createdAt),
+  index('user_behavior_user_article_type_idx').on(table.userId, table.articleId, table.type),
+])
+
+export type SelectUserBehavior = typeof userBehavior.$inferSelect
+export type InsertUserBehavior = typeof userBehavior.$inferInsert
+
+export const userFavorite = pgTable.withRLS('user_favorite', {
+  userId: uuid().references(() => user.id, { onDelete: 'cascade' }).notNull(),
+  articleId: integer().references(() => article.id, { onDelete: 'cascade' }).notNull(),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  primaryKey({ columns: [table.userId, table.articleId] }),
+  index('user_favorite_user_created_idx').on(table.userId, table.createdAt),
+])
+
+export type SelectUserFavorite = typeof userFavorite.$inferSelect
+export type InsertUserFavorite = typeof userFavorite.$inferInsert
 
 export const userInterest = pgTable.withRLS('user_interest', {
   userId: uuid().primaryKey().references(() => user.id, { onDelete: 'cascade' }),
@@ -120,6 +140,7 @@ export const table = {
   subscription,
   article,
   userBehavior,
+  userFavorite,
   userInterest,
   userRecommendation,
 } as const
