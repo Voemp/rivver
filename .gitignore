@@ -5,6 +5,9 @@ dist/
 .vscode/*
 !.vscode/launch.json
 !.vscode/*.code-snippets
+.agents/
+.kilocode/
+skills-lock.json
 
 # build
 build/

@@ -1,38 +1,65 @@
-import jwt from '@elysiajs/jwt'
-import usersRepo from '@server/repos/userRepo'
-import { AppError } from '@server/utils/error'
-import { Elysia, status } from 'elysia'
-import { AuthModel } from './model'
-import { jwtConfig } from './service'
+import { db } from '@server/db'
+import { account, session, user, verification } from '@server/db/schema'
+import { betterAuth } from 'better-auth'
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { openAPI } from 'better-auth/plugins'
 
-
-export const auth = new Elysia({ prefix: '/auth', detail: { tags: ['Auth'] } })
-  .use(jwt(jwtConfig))
-  .guard({
-    body: AuthModel.signBody,
-    response: {
-      201: AuthModel.signResponse,
+export const auth = betterAuth({
+  appName: 'Rivver',
+  basePath: '/auth',
+  database: drizzleAdapter(db, {
+    provider: 'pg',
+    schema: {
+      user,
+      session,
+      account,
+      verification,
     },
-  })
-  .post('/sign-up', async ({ jwt, body: { username, password } }) => {
-    const existing = await usersRepo.findByUsername(username)
-    if (existing) throw new AppError(409, '用户名已被占用', 'USERNAME_TAKEN')
+  }),
+  emailAndPassword: {
+    enabled: true,
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
+  },
+  advanced: {
+    useSecureCookies: process.env.NODE_ENV === 'production',
+    database: {
+      generateId: 'uuid',
+    },
+  },
+  plugins: [
+    openAPI(),
+  ],
+})
 
-    const passwordHash = await Bun.password.hash(password)
-    const user = await usersRepo.create({ username, passwordHash })
-    const token = await jwt.sign({ sub: user.id })
+let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>
+const getSchema = async () => (_schema ??= auth.api.generateOpenAPISchema())
 
-    return status(201, { username: user.username, token })
-  })
-  .post('sign-in', async ({ jwt, body: { username, password } }) => {
-    const user = await usersRepo.findByUsername(username)
-    if (!user) throw new AppError(401, '用户名或密码错误', 'USERNAME_NOT_FOUND')
+export const OpenAPI = {
+  getPaths: (prefix = '/auth') =>
+    getSchema().then(({ paths }) => {
+      const reference: typeof paths = Object.create(null)
 
-    const isMatch = await Bun.password.verify(password, user.passwordHash)
-    if (!isMatch) throw new AppError(401, '用户名或密码错误', 'PASSWORD_NOT_MATCH')
+      for (const path of Object.keys(paths)) {
+        const key = prefix + path
+        reference[key] = paths[path]
 
-    const token = await jwt.sign({ sub: user.id })
+        for (const method of Object.keys(paths[path])) {
+          const operation = (reference[key] as any)[method]
 
-    return status(201, { username: user.username, token })
-  })
+          operation.tags = ['Better Auth']
+        }
+      }
 
+      return reference
+    }) as Promise<any>,
+  components: getSchema().then(({ components }) => components) as Promise<any>,
+} as const

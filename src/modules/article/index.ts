@@ -5,7 +5,7 @@ import { interestRepo } from '@server/repos/interestRepo'
 import { recommendRepo } from '@server/repos/recommendRepo'
 import { AppError } from '@server/utils/error'
 import { Elysia, status } from 'elysia'
-import { AuthService } from '../auth/service'
+import { betterAuth } from '../auth/service'
 import { ArticleModel } from './model'
 import { assertProgress, BEHAVIOR_SCORE, calcReadScore } from './service'
 
@@ -13,10 +13,10 @@ export const article = new Elysia({
   prefix: '/article',
   detail: {
     tags: ['Article'],
-    security: [{ bearerAuth: [] }],
+    security: [{ cookieAuth: [] }],
   },
 })
-  .use(AuthService)
+  .use(betterAuth)
   .get('/:id', async ({ params: { id } }) => {
     const detail = await articleRepo.findById(id)
     return status(200, detail)
@@ -24,6 +24,9 @@ export const article = new Elysia({
     params: ArticleModel.articleParams,
     response: {
       200: ArticleModel.articleResponse,
+    },
+    detail: {
+      security: [],
     },
   })
   .get('/recommendation', async ({ user, query: { offset = 0, limit = 20 } }) => {
@@ -49,7 +52,7 @@ export const article = new Elysia({
     const articles = await articleRepo.listByIds(articleIds)
     return status(200, articles)
   }, {
-    isAuth: true,
+    auth: true,
     query: ArticleModel.articleListQuery,
     response: {
       200: ArticleModel.articleListResponse,
@@ -59,7 +62,7 @@ export const article = new Elysia({
     const list = await favoriteRepo.listByUser(user.id, offset, Math.min(limit, 50))
     return status(200, list)
   }, {
-    isAuth: true,
+    auth: true,
     query: ArticleModel.articleListQuery,
     response: {
       200: ArticleModel.articleListResponse,
@@ -87,7 +90,7 @@ export const article = new Elysia({
 
     return status(200, { favorited: true, articleId: id })
   }, {
-    isAuth: true,
+    auth: true,
     params: ArticleModel.articleParams,
     response: {
       200: ArticleModel.favoriteStatusResponse,
@@ -97,7 +100,7 @@ export const article = new Elysia({
     await favoriteRepo.remove(user.id, id)
     return status(200, { favorited: false, articleId: id })
   }, {
-    isAuth: true,
+    auth: true,
     params: ArticleModel.articleParams,
     response: {
       200: ArticleModel.favoriteStatusResponse,
@@ -107,7 +110,7 @@ export const article = new Elysia({
     const favorited = await favoriteRepo.exists(user.id, id)
     return status(200, { favorited, articleId: id })
   }, {
-    isAuth: true,
+    auth: true,
     params: ArticleModel.articleParams,
     response: {
       200: ArticleModel.favoriteStatusResponse,
@@ -129,7 +132,7 @@ export const article = new Elysia({
 
     return status(200, { recorded: true, type: 'click', articleId: id })
   }, {
-    isAuth: true,
+    auth: true,
     params: ArticleModel.articleParams,
     response: {
       200: ArticleModel.behaviorResponse,
@@ -156,7 +159,7 @@ export const article = new Elysia({
 
     return status(200, { recorded: true, articleId: id, progress: body.progress })
   }, {
-    isAuth: true,
+    auth: true,
     params: ArticleModel.articleParams,
     body: ArticleModel.readProgressBody,
     response: {
@@ -179,7 +182,7 @@ export const article = new Elysia({
 
     return status(200, { recorded: true, type: 'share', articleId: id })
   }, {
-    isAuth: true,
+    auth: true,
     params: ArticleModel.articleParams,
     response: {
       200: ArticleModel.behaviorResponse,

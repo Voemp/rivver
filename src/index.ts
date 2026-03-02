@@ -6,11 +6,16 @@ import { runRssFetch } from '@server/worker/rss'
 import { Elysia } from 'elysia'
 import { dts } from 'elysia-remote-dts'
 import { article } from './modules/article'
-import { auth } from './modules/auth'
+import { auth, OpenAPI } from './modules/auth'
 import { dev } from './modules/dev'
 import { subscription } from './modules/subscription'
 import { ApiResponseModel, res } from './types/response'
 import { AppError } from './utils/error'
+
+const trustedOrigins = (process.env.TRUSTED_ORIGINS ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
 
 const app = new Elysia()
   .use(openapi({
@@ -20,20 +25,21 @@ const app = new Elysia()
         version: '1.0.0',
       },
       tags: [
-        { name: 'Auth', description: 'Authentication endpoints' },
         { name: 'Subscription', description: 'Subscription endpoints' },
         { name: 'Article', description: 'Article endpoints' },
         { name: 'Dev', description: 'Dev endpoints' },
       ],
       components: {
+        ...await OpenAPI.components,
         securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
+          cookieAuth: {
+            type: 'apiKey',
+            in: 'cookie',
+            name: 'better-auth.session_token',
           },
         },
       },
+      paths: await OpenAPI.getPaths(),
     },
   }))
   .use(cron({
@@ -44,7 +50,12 @@ const app = new Elysia()
       void runEmbeddingGenerate()
     },
   }))
-  .use(cors())
+  .use(cors({
+    origin: trustedOrigins.length > 0 ? trustedOrigins : true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }))
   .error({ AppError })
   .onError(({ error, code }) => {
     switch (code) {
@@ -55,7 +66,7 @@ const app = new Elysia()
     }
   })
   .guard({ response: { 400: ApiResponseModel.error, 409: ApiResponseModel.error } })
-  .use(auth)
+  .mount(auth.handler)
   .use(subscription)
   .use(article)
   .use(dev)

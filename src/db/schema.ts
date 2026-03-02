@@ -1,16 +1,61 @@
 import {
-  index, integer, jsonb, pgEnum, pgTable, primaryKey, serial, text, timestamp, uuid, vector,
+  boolean, index, integer, jsonb, pgEnum, pgTable, primaryKey, serial, text, timestamp, uuid, vector,
 } from 'drizzle-orm/pg-core'
 
 export const user = pgTable.withRLS('user', {
   id: uuid().primaryKey().defaultRandom(),
-  username: text().notNull().unique(),
-  passwordHash: text().notNull(),
+  name: text().notNull(),
+  email: text().notNull().unique(),
+  emailVerified: boolean().notNull().default(false),
+  image: text(),
+  username: text().unique(),
+  passwordHash: text(),
   createdAt: timestamp().notNull().defaultNow(),
-  updatedAt: timestamp().defaultNow().$onUpdate(() => new Date()),
+  updatedAt: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
 })
 export type SelectUser = typeof user.$inferSelect
 export type InsertUser = typeof user.$inferInsert
+
+export const session = pgTable.withRLS('session', {
+  id: uuid().primaryKey().defaultRandom(),
+  expiresAt: timestamp().notNull(),
+  token: text().notNull().unique(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
+  ipAddress: text(),
+  userAgent: text(),
+  userId: uuid().notNull().references(() => user.id, { onDelete: 'cascade' }),
+})
+
+export const account = pgTable.withRLS('account', {
+  id: uuid().primaryKey().defaultRandom(),
+  accountId: text().notNull(),
+  providerId: text().notNull(),
+  userId: uuid().notNull().references(() => user.id, { onDelete: 'cascade' }),
+  accessToken: text(),
+  refreshToken: text(),
+  idToken: text(),
+  accessTokenExpiresAt: timestamp(),
+  refreshTokenExpiresAt: timestamp(),
+  scope: text(),
+  password: text(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index('account_provider_account_idx').on(table.providerId, table.accountId),
+  index('account_user_idx').on(table.userId),
+])
+
+export const verification = pgTable.withRLS('verification', {
+  id: uuid().primaryKey().defaultRandom(),
+  identifier: text().notNull(),
+  value: text().notNull(),
+  expiresAt: timestamp().notNull(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index('verification_identifier_idx').on(table.identifier),
+])
 
 export const profile = pgTable.withRLS('profile', {
   userId: uuid().references(() => user.id, { onDelete: 'cascade' }).primaryKey(),
@@ -135,6 +180,9 @@ export type InsertUserRecommendation = typeof userRecommendation.$inferInsert
 
 export const table = {
   user,
+  session,
+  account,
+  verification,
   profile,
   feed,
   subscription,

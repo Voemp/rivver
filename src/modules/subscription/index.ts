@@ -5,22 +5,22 @@ import { AppError } from '@server/utils/error'
 import { fetchSingleFeed } from '@server/worker/rss/fetcher'
 import { Elysia, status } from 'elysia'
 import Parser from 'rss-parser'
-import { AuthService } from '../auth/service'
+import { betterAuth } from '../auth/service'
 import { SubModel } from './model'
 
 export const subscription = new Elysia({
   prefix: '/subscription',
   detail: {
     tags: ['Subscription'],
-    security: [{ bearerAuth: [] }],
+    security: [{ cookieAuth: [] }],
   },
 })
-  .use(AuthService)
+  .use(betterAuth)
   .get('/', async ({ user }) => {
     const subs = await subRepo.listByUser(user.id)
     return status(200, subs)
   }, {
-    isAuth: true,
+    auth: true,
     response: {
       200: SubModel.listResponse,
     },
@@ -57,7 +57,7 @@ export const subscription = new Elysia({
     const sub = await subRepo.create(_sub)
     return status(201, sub)
   }, {
-    isAuth: true,
+    auth: true,
     body: SubModel.subBody,
     response: {
       201: SubModel.subResponse,
@@ -70,7 +70,7 @@ export const subscription = new Elysia({
     const sub = await subRepo.remove(user.id, feedId)
     return status(200, sub)
   }, {
-    isAuth: true,
+    auth: true,
     body: SubModel.unsubBody,
     response: {
       200: SubModel.unsubResponse,

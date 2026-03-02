@@ -9,12 +9,8 @@ export namespace ApiResponseModel {
     })
 
   export const error = t.Object({
-    success: t.Boolean(),
-    data: t.Null(),
-    error: t.Object({
-      code: t.String(),
-      message: t.String(),
-    }),
+    code: t.String(),
+    message: t.String(),
   })
 
   export type Success = {
@@ -32,6 +28,6 @@ export const res = {
     return { success: true, data, error: null }
   },
   error: (message: string, code: string = 'INTERNAL_ERROR'): ApiResponseModel.Error => {
-    return { success: false, data: null, error: { code, message } }
+    return { code, message }
   },
-}
+} as const
