@@ -3,6 +3,10 @@ import { table } from './schema'
 import { createModel } from './utils'
 
 export const DBModel = createModel(table, {
+  profile: {
+    createdAt: t.Date(),
+    updatedAt: t.Date(),
+  },
   feed: {
     url: t.String({ format: 'uri' }),
     link: t.Nullable(t.String({ format: 'uri' })),

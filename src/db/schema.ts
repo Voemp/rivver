@@ -1,5 +1,5 @@
 import {
-  boolean, index, integer, jsonb, pgEnum, pgTable, primaryKey, serial, text, timestamp, uuid, vector,
+  boolean, bytea, index, integer, jsonb, pgEnum, pgTable, primaryKey, serial, text, timestamp, uuid, vector,
 } from 'drizzle-orm/pg-core'
 
 export const user = pgTable.withRLS('user', {
@@ -59,9 +59,17 @@ export const verification = pgTable.withRLS('verification', {
 
 export const profile = pgTable.withRLS('profile', {
   userId: uuid().references(() => user.id, { onDelete: 'cascade' }).primaryKey(),
-  nickname: text().notNull().unique(),
-  avatarUrl: text(),
+  nickname: text().notNull(),
+  avatarBytes: bytea(),
+  avatarMime: text().notNull().default('image/webp'),
+  avatarHash: text(),
+  avatarVersion: integer().notNull().default(1),
+  avatarUpdatedAt: timestamp(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
 })
+export type SelectProfile = typeof profile.$inferSelect
+export type InsertProfile = typeof profile.$inferInsert
 
 export const statusEnum = pgEnum('status', [
   'active',

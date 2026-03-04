@@ -5,9 +5,11 @@ import { runEmbeddingGenerate } from '@server/worker/embedding'
 import { runRssFetch } from '@server/worker/rss'
 import { Elysia } from 'elysia'
 import { dts } from 'elysia-remote-dts'
+import { version } from '../package.json'
 import { article } from './modules/article'
 import { auth, OpenAPI } from './modules/auth'
 import { dev } from './modules/dev'
+import { profile } from './modules/profile'
 import { subscription } from './modules/subscription'
 import { ApiResponseModel, res } from './types/response'
 import { AppError } from './utils/error'
@@ -22,11 +24,12 @@ const app = new Elysia()
     documentation: {
       info: {
         title: 'Rivver Documentation',
-        version: '1.0.0',
+        version: `${version}`,
       },
       tags: [
         { name: 'Subscription', description: 'Subscription endpoints' },
         { name: 'Article', description: 'Article endpoints' },
+        { name: 'Profile', description: 'Profile endpoints' },
         { name: 'Dev', description: 'Dev endpoints' },
       ],
       components: {
@@ -62,13 +65,14 @@ const app = new Elysia()
       case 'AppError':
         return error.toResponse()
       case 'VALIDATION':
-        return res.error(JSON.parse(error.message).message, error.code)
+        return res.error(error.message, error.code)
     }
   })
-  .guard({ response: { 400: ApiResponseModel.error, 409: ApiResponseModel.error } })
+  .guard({ response: { 422: ApiResponseModel.error(undefined, 'VALIDATION') } })
   .mount(auth.handler)
   .use(subscription)
   .use(article)
+  .use(profile)
   .use(dev)
   .use(dts('./src/index.ts'))
 

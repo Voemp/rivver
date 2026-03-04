@@ -16,7 +16,7 @@ export const subscription = new Elysia({
   },
 })
   .use(betterAuth)
-  .get('/', async ({ user }) => {
+  .get('', async ({ user }) => {
     const subs = await subRepo.listByUser(user.id)
     return status(200, subs)
   }, {
@@ -25,7 +25,7 @@ export const subscription = new Elysia({
       200: SubModel.listResponse,
     },
   })
-  .post('/', async ({ user, body: { url, title } }) => {
+  .post('', async ({ user, body: { url, title } }) => {
     let feed = await feedRepo.findByUrl(url)
     if (!feed) {
       const parser = new Parser()
@@ -63,7 +63,7 @@ export const subscription = new Elysia({
       201: SubModel.subResponse,
     },
   })
-  .delete('/', async ({ user, body: { feedId } }) => {
+  .delete('', async ({ user, body: { feedId } }) => {
     const existing = await subRepo.findByUserAndLink(user.id, feedId)
     if (!existing) throw new AppError(404, '订阅不存在', 'SUBSCRIPTION_NOT_FOUND')
 

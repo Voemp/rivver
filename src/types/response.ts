@@ -8,9 +8,9 @@ export namespace ApiResponseModel {
       error: t.Null(),
     })
 
-  export const error = t.Object({
-    code: t.String(),
-    message: t.String(),
+  export const error = (message?: string, code?: string) => t.Object({
+    code: code ? t.Literal(code) : t.String(),
+    message: message ? t.Literal(message) : t.String(),
   })
 
   export type Success = {
@@ -20,7 +20,10 @@ export namespace ApiResponseModel {
     meta?: any
   }
 
-  export type Error = typeof error.static
+  export type Error = {
+    code: string
+    message: string
+  }
 }
 
 export const res = {

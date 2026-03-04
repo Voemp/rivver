@@ -59,8 +59,8 @@ export const article = new Elysia({
     },
   })
   .get('/favorites', async ({ user, query: { offset = 0, limit = 20 } }) => {
-    const list = await favoriteRepo.listByUser(user.id, offset, Math.min(limit, 50))
-    return status(200, list)
+    const articles = await favoriteRepo.listByUser(user.id, offset, Math.min(limit, 50))
+    return status(200, articles)
   }, {
     auth: true,
     query: ArticleModel.articleListQuery,
