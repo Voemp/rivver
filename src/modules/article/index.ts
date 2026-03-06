@@ -29,6 +29,15 @@ export const article = new Elysia({
       security: [],
     },
   })
+  .get('/popular', async ({ query: { offset = 0, limit = 20 } }) => {
+    const articles = await articleRepo.listPopular(offset, Math.min(limit, 50))
+    return status(200, articles)
+  }, {
+    query: ArticleModel.articleListQuery,
+    response: {
+      200: ArticleModel.articleListResponse,
+    },
+  })
   .get('/recommendation', async ({ user, query: { offset = 0, limit = 20 } }) => {
     limit = Math.min(limit, 50)
 

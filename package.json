@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
     "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile build/rivver-server src/index.ts",
-    "worker:rss": "bun run src/worker/rss/index.ts",
-    "worker:embedding": "bun run src/worker/embedding/index.ts",
+    "worker:rss": "bun src/worker/rss/index.ts",
+    "worker:embedding": "bun src/worker/embedding/index.ts",
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull"
   },

@@ -12,12 +12,8 @@ import { dev } from './modules/dev'
 import { profile } from './modules/profile'
 import { subscription } from './modules/subscription'
 import { ApiResponseModel, res } from './types/response'
+import { trustedOrigins } from './utils/cors'
 import { AppError } from './utils/error'
-
-const trustedOrigins = (process.env.TRUSTED_ORIGINS ?? '')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean)
 
 const app = new Elysia()
   .use(openapi({
