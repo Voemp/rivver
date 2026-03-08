@@ -20,3 +20,5 @@ export async function runRssFetch() {
     running = false
   }
 }
+
+void runRssFetch()

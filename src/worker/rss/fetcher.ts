@@ -1,21 +1,25 @@
 import { InsertArticle, SelectFeed } from '@server/db/schema'
 import { articleRepo } from '@server/repos/articleRepo'
 import { feedRepo } from '@server/repos/feedRepo'
+import pLimit from 'p-limit'
 import Parser from 'rss-parser'
 
 const parser = new Parser()
 
 export async function fetchAllFeeds() {
+  const limit = pLimit(10)
   const feeds = await feedRepo.list()
 
-  for (const feed of feeds) {
+  const tasks = feeds.map(feed => limit(async () => {
     try {
       console.log(`[RSS] fetching feed: ${feed.url}`)
       await fetchSingleFeed(feed)
     } catch (err) {
       console.error(`[RSS] fetch failed: ${feed.url}`, err)
     }
-  }
+  }))
+
+  await Promise.all(tasks)
 }
 
 export async function fetchSingleFeed(feed: SelectFeed) {

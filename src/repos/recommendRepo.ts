@@ -1,5 +1,6 @@
 import { db } from '@server/db'
 import { InsertUserRecommendation, userRecommendation } from '@server/db/schema'
+import { eq } from 'drizzle-orm'
 
 export const recommendRepo = {
   create: async (recommendation: InsertUserRecommendation) => {
@@ -9,6 +10,10 @@ export const recommendRepo = {
         target: [userRecommendation.userId, userRecommendation.articleId],
         set: { rank: recommendation.rank },
       })
+  },
+  clearByUser: async (userId: string) => {
+    await db.delete(userRecommendation)
+      .where(eq(userRecommendation.userId, userId))
   },
   listByUser: async (userId: string, offset: number, limit: number) => {
     return db.query.userRecommendation.findMany({

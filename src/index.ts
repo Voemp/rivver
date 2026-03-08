@@ -61,7 +61,7 @@ const app = new Elysia()
       case 'AppError':
         return error.toResponse()
       case 'VALIDATION':
-        return res.error(error.message, error.code)
+        return res.error(error.all[0].message, error.code)
     }
   })
   .guard({ response: { 422: ApiResponseModel.error(undefined, 'VALIDATION') } })

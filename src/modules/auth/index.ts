@@ -1,8 +1,8 @@
 import { db } from '@server/db'
 import { account, session, user, verification } from '@server/db/schema'
 import { trustedOrigins } from '@server/utils/cors'
-import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { betterAuth } from 'better-auth/minimal'
 import { openAPI } from 'better-auth/plugins'
 
 export const auth = betterAuth({
@@ -30,6 +30,10 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
   },
   advanced: {
     useSecureCookies: process.env.NODE_ENV === 'production',

@@ -1,13 +1,12 @@
 import { articleRepo } from '@server/repos/articleRepo'
 import { behaviorRepo } from '@server/repos/behaviorRepo'
 import { favoriteRepo } from '@server/repos/favoriteRepo'
-import { interestRepo } from '@server/repos/interestRepo'
 import { recommendRepo } from '@server/repos/recommendRepo'
 import { AppError } from '@server/utils/error'
 import { Elysia, status } from 'elysia'
 import { betterAuth } from '../auth/service'
 import { ArticleModel } from './model'
-import { assertProgress, BEHAVIOR_SCORE, calcReadScore } from './service'
+import { assertProgress, BEHAVIOR_SCORE, calcReadScore, refreshUserInterest, seedUserRecommendations } from './service'
 
 export const article = new Elysia({
   prefix: '/article',
@@ -41,25 +40,29 @@ export const article = new Elysia({
   .get('/recommendation', async ({ user, query: { offset = 0, limit = 20 } }) => {
     limit = Math.min(limit, 50)
 
-    const interest = await interestRepo.findByUser(user.id)
+    if (offset === 0) {
+      const seededIds = await seedUserRecommendations(user.id)
+      if (seededIds.length === 0) {
+        const articles = await articleRepo.listPopular(offset, limit)
+        return status(200, articles)
+      }
+    }
 
-    if (!interest?.interestVector) {
+    const articleIds = await recommendRepo.listByUser(user.id, offset, limit)
+
+    if (articleIds.length === 0) {
       const articles = await articleRepo.listPopular(offset, limit)
       return status(200, articles)
     }
 
-    if (offset === 0) {
-      const candidateIds = await articleRepo.listByUserInterest(interest.interestVector)
-      await Promise.all(candidateIds.map((id, index) => recommendRepo.create({
-        userId: user.id,
-        articleId: id,
-        rank: index,
-      })))
-    }
-
-    const articleIds = await recommendRepo.listByUser(user.id, offset, limit)
     const articles = await articleRepo.listByIds(articleIds)
-    return status(200, articles)
+    const ordered = articleIds.reduce<typeof articles>((result, id) => {
+      const found = articles.find(article => article.id === id)
+      if (found) result.push(found)
+      return result
+    }, [])
+
+    return status(200, ordered)
   }, {
     auth: true,
     query: ArticleModel.articleListQuery,
@@ -97,6 +100,8 @@ export const article = new Elysia({
       },
     )
 
+    void refreshUserInterest(user.id)
+
     return status(200, { favorited: true, articleId: id })
   }, {
     auth: true,
@@ -106,7 +111,8 @@ export const article = new Elysia({
     },
   })
   .delete('/:id/favorite', async ({ user, params: { id } }) => {
-    await favoriteRepo.remove(user.id, id)
+    await favoriteRepo.removeWithBehavior(user.id, id)
+    void refreshUserInterest(user.id)
     return status(200, { favorited: false, articleId: id })
   }, {
     auth: true,
@@ -139,6 +145,8 @@ export const article = new Elysia({
       score: BEHAVIOR_SCORE.click,
     })
 
+    void refreshUserInterest(user.id)
+
     return status(200, { recorded: true, type: 'click', articleId: id })
   }, {
     auth: true,
@@ -153,20 +161,34 @@ export const article = new Elysia({
 
     assertProgress(body.progress)
 
+    const existed = await behaviorRepo.existsByUserArticleType(user.id, id, 'read')
+    if (!existed) {
+      await behaviorRepo.create({
+        userId: user.id,
+        articleId: id,
+        type: 'read',
+        score: calcReadScore(body.progress),
+        readProgress: body.progress,
+      })
+      void refreshUserInterest(user.id)
+      return status(200, { recorded: true, articleId: id, progress: body.progress })
+    }
+
     const maxProgress = await behaviorRepo.findMaxReadProgress(user.id, id)
     if (body.progress <= maxProgress) {
       return status(200, { recorded: false, articleId: id, progress: maxProgress })
+    } else {
+      await behaviorRepo.updateReadProgress(
+        user.id,
+        id,
+        {
+          readProgress: body.progress,
+          score: calcReadScore(body.progress),
+        },
+      )
+      void refreshUserInterest(user.id)
+      return status(200, { recorded: true, articleId: id, progress: body.progress })
     }
-
-    await behaviorRepo.create({
-      userId: user.id,
-      articleId: id,
-      type: 'read',
-      score: calcReadScore(body.progress),
-      readProgress: body.progress,
-    })
-
-    return status(200, { recorded: true, articleId: id, progress: body.progress })
   }, {
     auth: true,
     params: ArticleModel.articleParams,
@@ -188,6 +210,8 @@ export const article = new Elysia({
       type: 'share',
       score: BEHAVIOR_SCORE.share,
     })
+
+    void refreshUserInterest(user.id)
 
     return status(200, { recorded: true, type: 'share', articleId: id })
   }, {

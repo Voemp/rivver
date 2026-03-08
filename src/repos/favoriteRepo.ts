@@ -23,15 +23,27 @@ export const favoriteRepo = {
 
     return existing!
   },
-  remove: async (userId: string, articleId: number): Promise<boolean> => {
-    const [row] = await db
-      .delete(userFavorite)
-      .where(and(eq(userFavorite.userId, userId), eq(userFavorite.articleId, articleId)))
-      .returning({
-        userId: userFavorite.userId,
-      })
+  removeWithBehavior: async (userId: string, articleId: number): Promise<boolean> => {
+    return db.transaction(async (tx) => {
+      const [row] = await tx
+        .delete(userFavorite)
+        .where(and(eq(userFavorite.userId, userId), eq(userFavorite.articleId, articleId)))
+        .returning({
+          userId: userFavorite.userId,
+        })
 
-    return !!row
+      if (!row) return false
+
+      await tx
+        .delete(userBehavior)
+        .where(and(
+          eq(userBehavior.userId, userId),
+          eq(userBehavior.articleId, articleId),
+          eq(userBehavior.type, 'favorite'),
+        ))
+
+      return true
+    })
   },
   exists: async (userId: string, articleId: number): Promise<boolean> => {
     const row = await db.query.userFavorite.findFirst({
