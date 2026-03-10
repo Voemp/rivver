@@ -1,6 +1,7 @@
 import cors from '@elysiajs/cors'
 import cron, { Patterns } from '@elysiajs/cron'
 import { openapi } from '@elysiajs/openapi'
+import { feed } from '@server/modules/feed'
 import { runEmbeddingGenerate } from '@server/worker/embedding'
 import { runRssFetch } from '@server/worker/rss'
 import { Elysia } from 'elysia'
@@ -8,7 +9,6 @@ import { dts } from 'elysia-remote-dts'
 import { version } from '../package.json'
 import { article } from './modules/article'
 import { auth, OpenAPI } from './modules/auth'
-import { dev } from './modules/dev'
 import { profile } from './modules/profile'
 import { subscription } from './modules/subscription'
 import { ApiResponseModel, res } from './types/response'
@@ -23,10 +23,10 @@ const app = new Elysia()
         version: `${version}`,
       },
       tags: [
+        { name: 'Profile', description: 'Profile endpoints' },
         { name: 'Subscription', description: 'Subscription endpoints' },
         { name: 'Article', description: 'Article endpoints' },
-        { name: 'Profile', description: 'Profile endpoints' },
-        { name: 'Dev', description: 'Dev endpoints' },
+        { name: 'Feed', description: 'Feed endpoints' },
       ],
       components: {
         ...await OpenAPI.components,
@@ -66,10 +66,10 @@ const app = new Elysia()
   })
   .guard({ response: { 422: ApiResponseModel.error(undefined, 'VALIDATION') } })
   .mount(auth.handler)
+  .use(profile)
   .use(subscription)
   .use(article)
-  .use(profile)
-  .use(dev)
+  .use(feed)
   .use(dts('./src/index.ts'))
 
 app.listen(process.env.PORT ?? 3000, () => {

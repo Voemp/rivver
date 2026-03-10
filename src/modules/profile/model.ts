@@ -7,7 +7,6 @@ const { profileSelect } = DBModel
 export const ProfileModel = {
   profileResponse: t.Object({
     userId: profileSelect.userId,
-    nickname: profileSelect.nickname,
     avatarUrl: t.Nullable(t.String()),
     createdAt: profileSelect.createdAt,
     updatedAt: profileSelect.updatedAt,

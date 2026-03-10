@@ -13,6 +13,11 @@ export const feedRepo = {
   list: async () => {
     return db.query.feed.findMany()
   },
+  findById: async (id: number): Promise<SelectFeed | undefined> => {
+    return db.query.feed.findFirst({
+      where: { id },
+    })
+  },
   findByUrl: async (url: string): Promise<SelectFeed | undefined> => {
     return db.query.feed.findFirst({
       where: { url },

@@ -59,7 +59,6 @@ export const verification = pgTable.withRLS('verification', {
 
 export const profile = pgTable.withRLS('profile', {
   userId: uuid().references(() => user.id, { onDelete: 'cascade' }).primaryKey(),
-  nickname: text().notNull(),
   avatarBytes: bytea(),
   avatarMime: text().notNull().default('image/webp'),
   avatarHash: text(),

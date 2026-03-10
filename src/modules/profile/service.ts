@@ -12,11 +12,7 @@ export const ensureProfile = async (userId: string) => {
   let profile = await profileRepo.findByUserId(userId)
 
   if (!profile) {
-    const fallback = `user_${userId.slice(0, 8)}`
-    profile = await profileRepo.create({
-      userId,
-      nickname: fallback,
-    })
+    profile = await profileRepo.create({ userId })
   }
 
   return profile
@@ -25,7 +21,6 @@ export const ensureProfile = async (userId: string) => {
 export const toProfileResponse = (profile: SelectProfile) => {
   return {
     userId: profile.userId,
-    nickname: profile.nickname,
     avatarUrl: profile.avatarBytes ? `/profile/avatar?v=${profile.avatarVersion}` : null,
     createdAt: profile.createdAt,
     updatedAt: profile.updatedAt,

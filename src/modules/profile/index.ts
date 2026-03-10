@@ -26,24 +26,6 @@ export const profile = new Elysia({
       200: ProfileModel.profileResponse,
     },
   })
-  .patch('/nickname', async ({ user, body: { nickname } }) => {
-    const trimmed = nickname.trim()
-    const existing = await profileRepo.existsNickname(trimmed, user.id)
-    if (existing) throw new AppError(409, '昵称已被占用', 'NICKNAME_CONFLICT')
-
-    await ensureProfile(user.id)
-
-    const profile = await profileRepo.updateNickname(user.id, trimmed)
-
-    return status(200, toProfileResponse(profile))
-  }, {
-    auth: true,
-    body: ProfileModel.nicknameBody,
-    response: {
-      200: ProfileModel.profileResponse,
-      409: ApiResponseModel.error('昵称已被占用', 'NICKNAME_CONFLICT'),
-    },
-  })
   .put('/avatar', async ({ user, body }) => {
     const inputBuffer = Buffer.from(await body.file.arrayBuffer())
 
