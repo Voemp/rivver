@@ -1,5 +1,5 @@
 import { db } from '@server/db'
-import { profile, SelectProfile } from '@server/db/schema'
+import { profile, type SelectProfile } from '@server/db/schema'
 import { eq, sql } from 'drizzle-orm'
 
 export const profileRepo = {

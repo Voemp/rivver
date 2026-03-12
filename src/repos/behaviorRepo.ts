@@ -1,5 +1,5 @@
 import { db } from '@server/db'
-import { article, InsertUserBehavior, SelectUserBehavior, userBehavior } from '@server/db/schema'
+import { article, type InsertUserBehavior, type SelectUserBehavior, userBehavior } from '@server/db/schema'
 import { and, desc, eq, gt } from 'drizzle-orm'
 
 export const behaviorRepo = {

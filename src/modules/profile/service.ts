@@ -1,4 +1,4 @@
-import { SelectProfile } from '@server/db/schema'
+import type { SelectProfile } from '@server/db/schema'
 import { profileRepo } from '@server/repos/profileRepo'
 import { createHash } from 'crypto'
 

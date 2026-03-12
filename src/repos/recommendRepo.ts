@@ -1,5 +1,5 @@
 import { db } from '@server/db'
-import { InsertUserRecommendation, userRecommendation } from '@server/db/schema'
+import { type InsertUserRecommendation, userRecommendation } from '@server/db/schema'
 import { eq } from 'drizzle-orm'
 
 export const recommendRepo = {

@@ -1,6 +1,6 @@
-import { type TObject, TProperties } from '@sinclair/typebox'
+import type { TObject, TProperties } from '@sinclair/typebox'
 import type { Table } from 'drizzle-orm'
-import { BuildSchema, createInsertSchema, createSelectSchema } from 'drizzle-orm/typebox-legacy'
+import { type BuildSchema, createInsertSchema, createSelectSchema } from 'drizzle-orm/typebox-legacy'
 
 type TableProperties<
   T extends Table,

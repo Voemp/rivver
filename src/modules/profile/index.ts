@@ -28,7 +28,6 @@ export const profile = new Elysia({
   })
   .put('/avatar', async ({ user, body }) => {
     const inputBuffer = Buffer.from(await body.file.arrayBuffer())
-
     let output = await sharp(inputBuffer)
       .rotate()
       .resize(TARGET_SIZE, TARGET_SIZE, { fit: 'cover' })

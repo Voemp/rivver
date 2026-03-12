@@ -1,4 +1,4 @@
-import { InsertArticle, SelectFeed } from '@server/db/schema'
+import type { InsertArticle, SelectFeed } from '@server/db/schema'
 import { articleRepo } from '@server/repos/articleRepo'
 import { feedRepo } from '@server/repos/feedRepo'
 import pLimit from 'p-limit'

@@ -1,4 +1,4 @@
-import { InsertFeed, InsertSubscription } from '@server/db/schema'
+import { type InsertFeed, type InsertSubscription } from '@server/db/schema'
 import { feedRepo } from '@server/repos/feedRepo'
 import { subRepo } from '@server/repos/subRepo'
 import { AppError } from '@server/utils/error'

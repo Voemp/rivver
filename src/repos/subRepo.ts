@@ -1,5 +1,7 @@
 import { db } from '@server/db'
-import { feed, InsertSubscription, SelectFeed, SelectSubscription, subscription } from '@server/db/schema'
+import {
+  feed, type InsertSubscription, type SelectFeed, type SelectSubscription, subscription,
+} from '@server/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
 
 export const subRepo = {

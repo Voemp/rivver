@@ -1,6 +1,6 @@
 import { db } from '@server/db'
 import {
-  InsertUserBehavior, InsertUserFavorite, SelectUserFavorite, userBehavior, userFavorite,
+  type InsertUserBehavior, type InsertUserFavorite, type SelectUserFavorite, userBehavior, userFavorite,
 } from '@server/db/schema'
 import { and, eq } from 'drizzle-orm'
 

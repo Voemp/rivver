@@ -1,4 +1,4 @@
-import { t, TSchema } from 'elysia'
+import { t, type TSchema } from 'elysia'
 
 export const ApiResponseModel = {
   success: <T extends TSchema>(dataModel: T) =>
