@@ -8,4 +8,8 @@ export const FeedModel = {
     id: t.Number(),
   }),
   feedResponse: feedSelect.schema,
+  subscriptionStatusResponse: t.Object({
+    subscribed: t.Boolean(),
+    feedId: t.Number(),
+  }),
 } as const

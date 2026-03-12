@@ -1,7 +1,7 @@
 import { db } from '@server/db'
-import { article, InsertArticle, SelectArticle } from '@server/db/schema'
+import { article, InsertArticle, SelectArticle, userBehavior } from '@server/db/schema'
 import { subDays } from 'date-fns'
-import { and, desc, eq, gte, isNotNull, notInArray, sql } from 'drizzle-orm'
+import { and, eq, gte, isNotNull, notInArray, sql } from 'drizzle-orm'
 
 export const articleRepo = {
   create: async (newArticle: InsertArticle) => {
@@ -37,30 +37,31 @@ export const articleRepo = {
       },
     })
   },
-  listPopular: async (pageNumber: number, pageSize: number) => {
-    return db.query.article.findMany({
-      columns: {
-        id: true,
-        title: true,
-        summary: true,
-        enclosure: true,
-        pubDate: true,
-      },
-      with: {
-        feed: {
-          columns: {
-            title: true,
-            image: true,
-          },
-        },
-      },
-      orderBy: {
-        readCount: 'desc',
-        pubDate: 'desc',
-      },
-      offset: pageNumber,
-      limit: pageSize,
-    })
+  listPopularityCandidates: async (excludedIds: number[] = []) => {
+    const behaviorScore = db
+      .select({
+        articleId: userBehavior.articleId,
+        totalScore: sql<number>`sum(${userBehavior.score})`.as('totalScore'),
+      })
+      .from(userBehavior)
+      .groupBy(userBehavior.articleId)
+      .as('behaviorScore')
+
+    const query = db
+      .select({
+        id: article.id,
+        pubDate: article.pubDate,
+        createdAt: article.createdAt,
+        totalScore: behaviorScore.totalScore,
+      })
+      .from(article)
+      .leftJoin(behaviorScore, eq(article.id, behaviorScore.articleId))
+
+    if (excludedIds.length > 0) {
+      return query.where(notInArray(article.id, excludedIds))
+    }
+
+    return query
   },
   listByUserInterest: async (interestVector: number[], excludedIds: number[] = [], limit = 200) => {
     const vectorLiteral = `[${interestVector.join(',')}]`
@@ -79,18 +80,32 @@ export const articleRepo = {
       .limit(limit)
       .then(rows => rows.map(row => row.id))
   },
-  listFallbackForRecommendation: async (excludedIds: number[], limit: number) => {
-    return db
-      .select({
-        id: article.id,
-      })
-      .from(article)
-      .where(and(
-        ...(excludedIds.length > 0 ? [notInArray(article.id, excludedIds)] : []),
-      ))
-      .orderBy(desc(article.readCount), desc(article.pubDate))
-      .limit(limit)
-      .then(rows => rows.map(row => row.id))
+  listByFeedId: async (feedId: number, offset: number, limit: number) => {
+    return db.query.article.findMany({
+      columns: {
+        id: true,
+        title: true,
+        summary: true,
+        enclosure: true,
+        pubDate: true,
+      },
+      where: {
+        feedId,
+      },
+      with: {
+        feed: {
+          columns: {
+            title: true,
+            image: true,
+          },
+        },
+      },
+      orderBy: {
+        pubDate: 'desc',
+      },
+      offset,
+      limit,
+    })
   },
   listByIds: async (ids: number[]) => {
     return db.query.article.findMany({

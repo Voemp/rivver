@@ -6,7 +6,9 @@ import { AppError } from '@server/utils/error'
 import { Elysia, status } from 'elysia'
 import { betterAuth } from '../auth/service'
 import { ArticleModel } from './model'
-import { assertProgress, BEHAVIOR_SCORE, calcReadScore, refreshUserInterest, seedUserRecommendations } from './service'
+import {
+  assertProgress, BEHAVIOR_SCORE, calcReadScore, listPopularArticles, refreshUserInterest, seedUserRecommendations,
+} from './service'
 
 export const article = new Elysia({
   prefix: '/article',
@@ -29,7 +31,7 @@ export const article = new Elysia({
     },
   })
   .get('/popular', async ({ query: { offset = 0, limit = 20 } }) => {
-    const articles = await articleRepo.listPopular(offset, Math.min(limit, 50))
+    const articles = await listPopularArticles(offset, Math.min(limit, 50))
     return status(200, articles)
   }, {
     query: ArticleModel.articleListQuery,
@@ -43,7 +45,7 @@ export const article = new Elysia({
     if (offset === 0) {
       const seededIds = await seedUserRecommendations(user.id)
       if (seededIds.length === 0) {
-        const articles = await articleRepo.listPopular(offset, limit)
+        const articles = await listPopularArticles(offset, limit)
         return status(200, articles)
       }
     }
@@ -51,7 +53,7 @@ export const article = new Elysia({
     const articleIds = await recommendRepo.listByUser(user.id, offset, limit)
 
     if (articleIds.length === 0) {
-      const articles = await articleRepo.listPopular(offset, limit)
+      const articles = await listPopularArticles(offset, limit)
       return status(200, articles)
     }
 

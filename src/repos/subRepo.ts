@@ -40,6 +40,16 @@ export const subRepo = {
       return row
     })
   },
+  exists: async (userId: string, feedId: number): Promise<boolean> => {
+    const row = await db.query.subscription.findFirst({
+      where: {
+        userId,
+        feedId,
+      },
+    })
+
+    return !!row
+  },
   listByUser: async (userId: string): Promise<SelectFeed[]> => {
     return db
       .select({

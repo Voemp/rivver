@@ -7,6 +7,16 @@ import { AppError } from '@server/utils/error'
 const INTEREST_DIMENSIONS = 384
 const MAX_BEHAVIORS = 100
 const MAX_RECOMMENDATIONS = 200
+const POPULAR_SCORE_WEIGHT = 0.7
+const POPULAR_RECENCY_WEIGHT = 0.3
+const POPULAR_RECENCY_HALF_LIFE_DAYS = 7
+
+type PopularityCandidate = {
+  id: number
+  pubDate: Date | null
+  createdAt: Date
+  totalScore: number | null
+}
 
 export const BEHAVIOR_SCORE = {
   click: 1,
@@ -33,6 +43,60 @@ function normalizeVector(vector: number[]) {
   if (magnitude === 0) return null
 
   return vector.map(value => value / magnitude)
+}
+
+function calcPopularityScore(candidate: PopularityCandidate, nowMs: number, baseDateMs: number) {
+  const ageInDays = Math.max(0, (nowMs - baseDateMs) / (1000 * 60 * 60 * 24))
+  const rawScore = Number(candidate.totalScore ?? 0)
+  const scoreComponent = Math.log(1 + Math.max(0, rawScore))
+  const recencyComponent = 1 / (1 + ageInDays / POPULAR_RECENCY_HALF_LIFE_DAYS)
+
+  return (POPULAR_SCORE_WEIGHT * scoreComponent) + (POPULAR_RECENCY_WEIGHT * recencyComponent)
+}
+
+function rankPopularityCandidates<T extends PopularityCandidate>(candidates: T[]): T[] {
+  const nowMs = Date.now()
+  const ranked = candidates.map((candidate) => {
+    const baseDate = candidate.pubDate ?? candidate.createdAt
+    const baseDateMs = baseDate.getTime()
+    return {
+      candidate,
+      score: calcPopularityScore(candidate, nowMs, baseDateMs),
+      baseDateMs,
+    }
+  })
+
+  ranked.sort((a, b) => {
+    if (a.score !== b.score) return b.score - a.score
+    if (a.baseDateMs !== b.baseDateMs) return b.baseDateMs - a.baseDateMs
+    return b.candidate.id - a.candidate.id
+  })
+
+  return ranked.map(entry => entry.candidate)
+}
+
+function orderArticlesByIds<T extends { id: number }>(articles: T[], ids: number[]): T[] {
+  const map = new Map(articles.map(article => [article.id, article]))
+  return ids.map(id => map.get(id)).filter(Boolean) as T[]
+}
+
+export async function listPopularArticles(offset: number, limit: number) {
+  const candidates = await articleRepo.listPopularityCandidates()
+  const orderedIds = rankPopularityCandidates(candidates)
+    .slice(offset, offset + limit)
+    .map(candidate => candidate.id)
+
+  if (orderedIds.length === 0) return []
+
+  const articles = await articleRepo.listByIds(orderedIds)
+  return orderArticlesByIds(articles, orderedIds)
+}
+
+export async function listFallbackForRecommendation(excludedIds: number[], limit: number) {
+  const candidates = await articleRepo.listPopularityCandidates(excludedIds)
+  return rankPopularityCandidates(candidates)
+    .slice(0, limit)
+    .map(candidate => candidate.id)
 }
 
 export function calcReadScore(progress: number): number {
@@ -99,7 +163,7 @@ export async function seedUserRecommendations(userId: string) {
   )
 
   const fallbackIds = candidateIds.length < MAX_RECOMMENDATIONS
-    ? await articleRepo.listFallbackForRecommendation(
+    ? await listFallbackForRecommendation(
       [...seenArticleIds, ...candidateIds],
       MAX_RECOMMENDATIONS - candidateIds.length,
     )

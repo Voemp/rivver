@@ -83,7 +83,7 @@ export const feed = pgTable.withRLS('feed', {
   description: text(),
   link: text(),
   image: text(),
-  subscriberCount: integer().default(0),
+  subscriberCount: integer().default(0).notNull(),
   status: statusEnum().default('active').notNull(),
   createdAt: timestamp().notNull().defaultNow(),
   lastFetchedAt: timestamp(),
@@ -121,7 +121,6 @@ export const article = pgTable.withRLS('article', {
   }>(),
   guid: text(),
   embedding: vector({ dimensions: 384 }),
-  readCount: integer().default(0),
   pubDate: timestamp({ withTimezone: true }),
   createdAt: timestamp().notNull().defaultNow(),
 }, (table) => [
