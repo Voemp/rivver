@@ -5,7 +5,6 @@ import { feed } from '@server/modules/feed'
 import { runEmbeddingGenerate } from '@server/worker/embedding'
 import { runRssFetch } from '@server/worker/rss'
 import { Elysia } from 'elysia'
-import { dts } from 'elysia-remote-dts'
 import { version } from '../package.json'
 import { article } from './modules/article'
 import { auth, OpenAPI } from './modules/auth'
@@ -70,13 +69,11 @@ const app = new Elysia()
   .use(subscription)
   .use(article)
   .use(feed)
-  .use(dts('./src/index.ts'))
 
 app.listen(process.env.PORT ?? 3000, () => {
   console.log(
     `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}\n` +
-    `📖 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/openapi\n` +
-    `🔗 dts: http://${app.server?.hostname}:${app.server?.port}/server.d.ts`,
+    `📖 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
   )
 })
 

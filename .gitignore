@@ -5,6 +5,7 @@ dist/
 .vscode/*
 !.vscode/launch.json
 !.vscode/*.code-snippets
+.turbo/
 .agents/
 .kilocode/
 skills-lock.json
@@ -17,7 +18,7 @@ node_modules/
 drizzle/
 
 # env
-.env
+apps/server/.env
 .env.production
 
 # logs

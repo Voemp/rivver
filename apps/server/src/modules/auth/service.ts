@@ -1,4 +1,4 @@
-import { auth } from '@server/modules/auth'
+import { auth } from '@server/modules/auth/index'
 import { res } from '@server/types/response'
 import { Elysia, t } from 'elysia'
 

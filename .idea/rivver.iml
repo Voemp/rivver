@@ -5,6 +5,10 @@
       <excludeFolder url="file://$MODULE_DIR$/.agents" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
       <excludeFolder url="file://$MODULE_DIR$/.kilocode" />
+      <excludeFolder url="file://$MODULE_DIR$/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/server/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/server/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/web/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/drizzle" />
     </content>
     <orderEntry type="inheritedJdk" />
