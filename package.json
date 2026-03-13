@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "start": "turbo start",
     "check-types": "turbo check-types"
   },
   "workspaces": [
@@ -12,5 +13,5 @@
   "devDependencies": {
     "turbo": "^2.8.16"
   },
-  "packageManager": "bun@1.2.0"
+  "packageManager": "bun@1.3.10"
 }

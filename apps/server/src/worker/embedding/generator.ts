@@ -1,6 +1,6 @@
+import { pipeline } from '@huggingface/transformers'
 import { db } from '@server/db'
 import { article } from '@server/db/schema'
-import { pipeline } from '@xenova/transformers'
 import { and, desc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 
 // 轻量中文模型（35MB）

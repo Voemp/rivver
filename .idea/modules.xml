@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/rivver-server.iml" filepath="$PROJECT_DIR$/.idea/rivver-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/rivver.iml" filepath="$PROJECT_DIR$/.idea/rivver.iml" />
     </modules>
   </component>
 </project>
