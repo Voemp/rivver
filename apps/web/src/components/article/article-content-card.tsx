@@ -1,7 +1,29 @@
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
-import rehypeSanitize from 'rehype-sanitize'
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
+
+const customSchema = {
+  ...defaultSchema,
+  tagNames: [
+    ...(defaultSchema.tagNames || []),
+    'iframe', // 允许使用 iframe 标签
+  ],
+  attributes: {
+    ...defaultSchema.attributes,
+    // 允许 iframe 拥有以下属性
+    iframe: [
+      'src',
+      'width',
+      'height',
+      'title',
+      'frameborder',
+      'allow',
+      'allowfullscreen',
+      'className',
+    ],
+  },
+}
 
 type ArticleContentCardProps = {
   content: string
@@ -13,7 +35,7 @@ export const ArticleContentCard = ({ content }: ArticleContentCardProps) => {
       <div
         className="text-[1.04rem] leading-8 text-foreground [&_.contains-task-list]:list-none [&_.contains-task-list]:pl-0 [&_.task-list-item]:list-none [&_.task-list-item]:pl-0 [&_.task-list-item>input]:mr-3 [&_.task-list-item>input]:accent-primary [&>div>*:first-child]:mt-0 [&>div>*:last-child]:mb-0">
         <ReactMarkdown
-          rehypePlugins={[rehypeRaw, rehypeSanitize]}
+          rehypePlugins={[rehypeRaw, [rehypeSanitize, customSchema]]}
           components={{
             h1: ({ node: _node, ...props }) => (
               <h1
@@ -87,6 +109,11 @@ export const ArticleContentCard = ({ content }: ArticleContentCardProps) => {
             ),
             strong: ({ node: _node, ...props }) => <strong className="font-semibold text-foreground" {...props} />,
             em: ({ node: _node, ...props }) => <em className="text-foreground/80" {...props} />,
+            iframe: ({ node, ...props }) => (
+              <div className="aspect-video w-full my-6 overflow-hidden rounded-xl border bg-muted shadow-sm">
+                <iframe {...props} className="h-full w-full" />
+              </div>
+            ),
           }}
         >
           {content}
