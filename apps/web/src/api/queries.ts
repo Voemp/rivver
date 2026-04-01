@@ -39,6 +39,9 @@ export const articleDetailQueryOptions = (id: number) =>
     staleTime: 1000 * 60 * 10,
   })
 
+export const postArticleAiSummary = async (id: number) =>
+  unwrapResponse(appClient.article({ id })['ai-summary'].post(), 'Failed to generate AI summary')
+
 export const feedDetailQueryOptions = (id: number) =>
   queryOptions({
     queryKey: ['feed', id, 'detail'] as const,

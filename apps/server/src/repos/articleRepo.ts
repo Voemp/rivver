@@ -20,12 +20,44 @@ export const articleRepo = {
       )
       .returning()
   },
+  updateAiSummary: async (id: number, aiSummary: string) => {
+    return db
+      .update(article)
+      .set({ aiSummary })
+      .where(eq(article.id, id))
+      .returning({
+        id: article.id,
+        aiSummary: article.aiSummary,
+      })
+  },
   findById: async (id: number) => {
     return db.query.article.findFirst({
       columns: {
         summary: false,
         contentSnippet: false,
         embedding: false,
+      },
+      where: { id },
+    })
+  },
+  findAiSummaryById: async (id: number) => {
+    return db.query.article.findFirst({
+      columns: {
+        id: true,
+        aiSummary: true,
+      },
+      where: { id },
+    })
+  },
+  findSummarySourceById: async (id: number) => {
+    return db.query.article.findFirst({
+      columns: {
+        id: true,
+        title: true,
+        summary: true,
+        aiSummary: true,
+        content: true,
+        contentSnippet: true,
       },
       where: { id },
     })

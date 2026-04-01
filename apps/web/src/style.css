@@ -133,3 +133,36 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes ai-summary-border-spin {
+  from {
+    transform: rotate(0deg) scale(1.05);
+  }
+
+  to {
+    transform: rotate(360deg) scale(1.05);
+  }
+}
+
+.ai-summary-beam {
+  inset: -130%;
+  background: conic-gradient(
+          from 90deg at 50% 50%,
+          transparent 0deg,
+          transparent 240deg,
+          var(--chart-2) 285deg,
+          var(--chart-4) 320deg,
+          var(--chart-1) 350deg,
+          transparent 360deg
+  );
+  animation: ai-summary-border-spin 8s linear infinite;
+  opacity: 0.9;
+}
+
+.ai-summary-glow {
+  background: radial-gradient(circle at top left, color-mix(in oklch, var(--chart-2) 20%, transparent), transparent 42%),
+  radial-gradient(circle at bottom right, color-mix(in oklch, var(--chart-1) 22%, transparent), transparent 44%),
+  radial-gradient(circle at center, color-mix(in oklch, var(--chart-4) 14%, transparent), transparent 54%);
+  filter: blur(22px);
+  opacity: 0.75;
+}

@@ -5,6 +5,7 @@ import { recommendRepo } from '@server/repos/recommendRepo'
 import { AppError } from '@server/utils/error'
 import { Elysia, status } from 'elysia'
 import { betterAuth } from '../auth/service'
+import { ensureArticleAiSummary } from './ai-summary'
 import { ArticleModel } from './model'
 import {
   assertProgress, BEHAVIOR_SCORE, calcReadScore, listPopularArticles, refreshUserInterest, seedUserRecommendations,
@@ -25,6 +26,18 @@ export const article = new Elysia({
     params: ArticleModel.articleParams,
     response: {
       200: ArticleModel.articleResponse,
+    },
+    detail: {
+      security: [],
+    },
+  })
+  .post('/:id/ai-summary', async ({ params: { id } }) => {
+    const aiSummary = await ensureArticleAiSummary(id)
+    return status(200, { articleId: id, aiSummary })
+  }, {
+    params: ArticleModel.articleParams,
+    response: {
+      200: ArticleModel.aiSummaryResponse,
     },
     detail: {
       security: [],

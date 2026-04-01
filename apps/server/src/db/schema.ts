@@ -109,6 +109,8 @@ export const article = pgTable.withRLS('article', {
   link: text(),
   // RSS <description>：通常是摘要
   summary: text(),
+  // AI 生成摘要，避免与 RSS 摘要混用
+  aiSummary: text(),
   // <content:encoded>: 全文 HTML
   content: text(),
   // 纯文本内容（用于搜索 / NLP）

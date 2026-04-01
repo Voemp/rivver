@@ -1,10 +1,12 @@
 import {
   articleDetailQueryOptions, articleFavoriteQueryOptions, deleteFavorite, deleteSubscription, feedDetailQueryOptions,
-  feedSubscriptionQueryOptions, postArticleClick, postArticleShare, postFavorite, postSubscription,
+  feedSubscriptionQueryOptions, postArticleAiSummary, postArticleClick, postArticleShare, postFavorite,
+  postSubscription,
 } from '@/api/queries'
 import {
   ArticleActionButtons, ArticleActionsSkeleton, type SharePlatform, type SharePlatformItem,
 } from '@/components/article/article-action-buttons'
+import { ArticleAiSummaryCard } from '@/components/article/article-ai-summary-card'
 import { ArticleAudioCard, ArticleAudioSkeleton } from '@/components/article/article-audio-card'
 import { ArticleContentCard, ArticleContentSkeleton } from '@/components/article/article-content-card'
 import { ArticleTitleCard, ArticleTitleSkeleton } from '@/components/article/article-title-card.tsx'
@@ -19,7 +21,7 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tansta
 import { createFileRoute } from '@tanstack/react-router'
 import { produce } from 'immer'
 import { Link } from 'lucide-react'
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -158,20 +160,79 @@ function Article() {
     onError: (error: Error) => toast.error(error.message || 'Share failed'),
   })
 
+  const aiSummaryMutation = useMutation({
+    mutationFn: async () => postArticleAiSummary(id),
+    onSuccess: (result) => {
+      queryClient.setQueryData(
+        ['article', id, 'detail'],
+        (old: typeof article | undefined) => old
+          ? {
+            ...old,
+            aiSummary: result.aiSummary,
+          }
+          : old,
+      )
+    },
+  })
+  const {
+    data: aiSummaryResult,
+    error: aiSummaryMutationError,
+    isError: isAiSummaryError,
+    isPending: isAiSummaryPending,
+    isSuccess: isAiSummarySuccess,
+    mutate: generateAiSummary,
+    reset: resetAiSummary,
+  } = aiSummaryMutation
+
+  useEffect(() => {
+    resetAiSummary()
+  }, [id])
+
+  useEffect(() => {
+    if (article.aiSummary?.trim()) return
+    if (isAiSummaryPending || isAiSummarySuccess || isAiSummaryError) return
+
+    generateAiSummary()
+  }, [article.aiSummary, generateAiSummary, id, isAiSummaryError, isAiSummaryPending, isAiSummarySuccess])
+
   const { progress, headings } = useReadingProgress({ articleId: id })
 
   const content = article.content ?? ''
   const audioEnclosure = article.enclosure?.type === 'audio/mpeg' ? article.enclosure : null
+  const aiSummary = article.aiSummary?.trim() || aiSummaryResult?.aiSummary || null
+  const aiSummaryError = aiSummaryMutationError?.message || undefined
 
   return (
     <section className="relative isolate py-4 pb-16 sm:py-6 lg:py-8">
       <div
-        className="mx-auto grid max-w-368 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,52rem)_18rem] lg:gap-x-10 xl:gap-x-14">
+        className="mx-auto grid max-w-368 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,52rem)_18rem] lg:gap-x-8 xl:grid-cols-[20rem_minmax(0,52rem)_18rem] xl:gap-x-10">
+        <aside className="hidden xl:block xl:col-start-1">
+          <div className="sticky top-30 space-y-6 pr-2">
+            <ArticleAiSummaryCard
+              summary={aiSummary}
+              pending={isAiSummaryPending}
+              errorMessage={aiSummaryError}
+              onRetry={() => generateAiSummary()}
+              layout="aside"
+            />
+          </div>
+        </aside>
+
         <article className="mx-auto min-w-0 w-full max-w-4xl lg:col-start-2 lg:mx-0">
           <Suspense fallback={<ArticleDetailSkeleton />}>
             <ArticleTitleCard title={article.title} author={article.author} pubDate={article.pubDate} feed={feed} />
 
             <Separator />
+
+            <div className="mt-8 xl:hidden">
+              <ArticleAiSummaryCard
+                summary={aiSummary}
+                pending={isAiSummaryPending}
+                errorMessage={aiSummaryError}
+                onRetry={() => generateAiSummary()}
+                layout="inline"
+              />
+            </div>
 
             {audioEnclosure ? <ArticleAudioCard url={audioEnclosure.url} /> : null}
 
@@ -235,7 +296,13 @@ function ArticleSkeleton() {
   return (
     <section className="relative isolate py-4 pb-16 sm:py-6 lg:py-8">
       <div
-        className="mx-auto grid max-w-368 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,52rem)_18rem] lg:gap-x-10 xl:gap-x-14">
+        className="mx-auto grid max-w-368 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,52rem)_18rem] lg:gap-x-8 xl:grid-cols-[20rem_minmax(0,52rem)_18rem] xl:gap-x-10">
+        <aside className="hidden xl:block xl:col-start-1">
+          <div className="sticky top-30 pr-2">
+            <ArticleAiSummaryCard summary={null} pending errorMessage={undefined} layout="aside" />
+          </div>
+        </aside>
+
         <article className="mx-auto min-w-0 w-full max-w-4xl lg:col-start-2 lg:mx-0">
           <ArticleDetailSkeleton />
         </article>

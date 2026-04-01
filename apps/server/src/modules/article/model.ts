@@ -26,6 +26,10 @@ export const ArticleModel = {
       image: feedSelect.image,
     })),
   })),
+  aiSummaryResponse: t.Object({
+    articleId: t.Number(),
+    aiSummary: t.String(),
+  }),
   favoriteStatusResponse: t.Object({
     favorited: t.Boolean(),
     articleId: t.Number(),
