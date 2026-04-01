@@ -29,6 +29,17 @@ type ArticleContentCardProps = {
   content: string
 }
 
+const MarkdownIframe = ({ node: _node, className, ...props }: any) => {
+  return (
+    <div className="my-6 aspect-video w-full overflow-hidden rounded-xl border bg-muted shadow-sm">
+      <iframe
+        {...props}
+        className={`h-full w-full ${className ?? ''}`}
+      />
+    </div>
+  )
+}
+
 export const ArticleContentCard = ({ content }: ArticleContentCardProps) => {
   return (
     <section className="mx-auto mt-10 max-w-3xl">
@@ -109,11 +120,7 @@ export const ArticleContentCard = ({ content }: ArticleContentCardProps) => {
             ),
             strong: ({ node: _node, ...props }) => <strong className="font-semibold text-foreground" {...props} />,
             em: ({ node: _node, ...props }) => <em className="text-foreground/80" {...props} />,
-            iframe: ({ node, ...props }) => (
-              <div className="aspect-video w-full my-6 overflow-hidden rounded-xl border bg-muted shadow-sm">
-                <iframe {...props} className="h-full w-full" />
-              </div>
-            ),
+            iframe: MarkdownIframe,
           }}
         >
           {content}
