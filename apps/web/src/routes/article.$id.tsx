@@ -12,13 +12,14 @@ import { ArticleTocCard, ArticleTocSkeleton } from '@/components/article/article
 import { FeedInfoCard, FeedInfoSkeleton } from '@/components/feed/feed-info-card'
 import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/hooks/use-auth'
+import { useMountEffect } from '@/hooks/use-mount-effect'
 import { useReadingProgress } from '@/hooks/use-reading-progress'
 import { SiSinaweibo, SiTelegram, SiX } from '@icons-pack/react-simple-icons'
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { produce } from 'immer'
 import { Link } from 'lucide-react'
-import { Suspense, useEffect } from 'react'
+import { Suspense } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -79,9 +80,7 @@ function Article() {
   const { data: subscription } = useQuery(feedSubscriptionQueryOptions(article.feedId))
   const { data: favorite } = useQuery(articleFavoriteQueryOptions(id))
 
-  useEffect(() => {
-    void postArticleClick(id)
-  }, [id])
+  useMountEffect(() => void postArticleClick(id))
 
   const favoriteMutation = useMutation({
     mutationFn: async () => (favorite?.favorited ? deleteFavorite(id) : postFavorite(id)),

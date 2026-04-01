@@ -1,6 +1,6 @@
 import { env } from '@/config/env'
 import { treaty } from '@elysiajs/eden'
-import type { App } from '../../../server'
+import type { App } from '@server/index'
 
 export const appClient = treaty<App>(env.apiBaseUrl, {
   fetch: { credentials: 'include' },

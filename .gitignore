@@ -1,13 +1,20 @@
 # prod
 dist/
 
+# idea
+.idea/AICommit.xml
+.idea/dataSources.xml
+.idea/deployment.xml
+
 # dev
 .vscode/*
 !.vscode/launch.json
 !.vscode/*.code-snippets
 .turbo/
 .agents/
+.claude/
 .kilocode/
+CLAUDE.md
 skills-lock.json
 
 # build
