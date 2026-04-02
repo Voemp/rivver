@@ -20,7 +20,6 @@ type ArticleActionButtonsProps = {
   originalLink?: string | null
   sharePending: boolean
   sharePlatforms: SharePlatformItem[]
-  ensureAuthed: () => boolean
   onFavorite: () => void
   onShare: (platform: SharePlatform) => void
   direction?: 'row' | 'column'

@@ -1,4 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton.tsx'
+import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
@@ -27,6 +28,8 @@ const customSchema = {
 
 type ArticleContentCardProps = {
   content: string
+  className?: string
+  contentClassName?: string
 }
 
 const MarkdownIframe = ({ node: _node, className, ...props }: any) => {
@@ -40,11 +43,14 @@ const MarkdownIframe = ({ node: _node, className, ...props }: any) => {
   )
 }
 
-export const ArticleContentCard = ({ content }: ArticleContentCardProps) => {
+export const ArticleContentCard = ({ content, className, contentClassName }: ArticleContentCardProps) => {
   return (
-    <section className="mx-auto mt-10 max-w-3xl">
+    <section className={cn('mx-auto mt-10 max-w-3xl', className)}>
       <div
-        className="text-[1.04rem] leading-8 text-foreground [&_.contains-task-list]:list-none [&_.contains-task-list]:pl-0 [&_.task-list-item]:list-none [&_.task-list-item]:pl-0 [&_.task-list-item>input]:mr-3 [&_.task-list-item>input]:accent-primary [&>div>*:first-child]:mt-0 [&>div>*:last-child]:mb-0">
+        className={cn(
+          'text-[1.04rem] leading-8 text-foreground [&_.contains-task-list]:list-none [&_.contains-task-list]:pl-0 [&_.task-list-item]:list-none [&_.task-list-item]:pl-0 [&_.task-list-item>input]:mr-3 [&_.task-list-item>input]:accent-primary [&>div>*:first-child]:mt-0 [&>div>*:last-child]:mb-0',
+          contentClassName,
+        )}>
         <ReactMarkdown
           rehypePlugins={[rehypeRaw, [rehypeSanitize, customSchema]]}
           components={{

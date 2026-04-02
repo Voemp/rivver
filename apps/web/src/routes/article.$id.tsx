@@ -9,6 +9,7 @@ import {
 import { ArticleAiSummaryCard } from '@/components/article/article-ai-summary-card'
 import { ArticleAudioCard, ArticleAudioSkeleton } from '@/components/article/article-audio-card'
 import { ArticleContentCard, ArticleContentSkeleton } from '@/components/article/article-content-card'
+import { ArticleMediaDetail } from '@/components/article/article-media-detail'
 import { ArticleTitleCard, ArticleTitleSkeleton } from '@/components/article/article-title-card.tsx'
 import { ArticleTocCard, ArticleTocSkeleton } from '@/components/article/article-toc-card'
 import { FeedInfoCard, FeedInfoSkeleton } from '@/components/feed/feed-info-card'
@@ -48,6 +49,33 @@ const sharePlatforms: SharePlatformItem[] = [
   { key: 'telegram', label: 'Share to Telegram', icon: SiTelegram },
 ]
 
+type ArticleDetailData = {
+  id: number
+  feedId: number
+  title: string | null
+  link: string | null
+  contentType: 'article' | 'image' | 'video'
+  author: string | null
+  pubDate: Date | null
+  content: string | null
+  aiSummary: string | null
+  enclosure: {
+    url: string
+    type?: string
+    length?: number
+  } | null
+}
+
+type FeedDetailData = {
+  id: number
+  title: string
+  description: string | null
+  image: string | null
+  url: string
+  subscriberCount: number | null
+  contentType: 'article' | 'image' | 'video'
+}
+
 const shareToPlatform = async (platform: SharePlatform, url: string): Promise<void> => {
   const encodedUrl = encodeURIComponent(url)
   const windowFeatures = 'noopener,noreferrer'
@@ -81,6 +109,7 @@ function Article() {
   const { data: feed } = useSuspenseQuery(feedDetailQueryOptions(article.feedId))
   const { data: subscription } = useQuery(feedSubscriptionQueryOptions(article.feedId))
   const { data: favorite } = useQuery(articleFavoriteQueryOptions(id))
+  const isMediaArticle = article.contentType === 'image' || article.contentType === 'video'
 
   useMountEffect(() => void postArticleClick(id))
 
@@ -160,6 +189,81 @@ function Article() {
     onError: (error: Error) => toast.error(error.message || 'Share failed'),
   })
 
+  const handleSubscribe = () => {
+    if (!ensureAuthed()) return
+    void subscriptionMutation.mutateAsync('subscribe')
+  }
+
+  const handleUnsubscribe = () => {
+    void subscriptionMutation.mutateAsync('unsubscribe')
+  }
+
+  const handleFavorite = () => {
+    if (!ensureAuthed()) return
+    void favoriteMutation.mutateAsync()
+  }
+
+  const handleShare = (platform: SharePlatform) => {
+    if (!ensureAuthed()) return
+    void shareMutation.mutateAsync(platform)
+  }
+
+  if (isMediaArticle) {
+    return (
+      <MediaArticleLayout
+        article={article}
+        feed={feed}
+        subscribed={subscription?.subscribed}
+        favorited={favorite?.favorited}
+        sharePending={shareMutation.isPending}
+        onSubscribe={handleSubscribe}
+        onUnsubscribe={handleUnsubscribe}
+        onFavorite={handleFavorite}
+        onShare={handleShare}
+      />
+    )
+  }
+
+  return (
+    <StandardArticleLayout
+      article={article}
+      feed={feed}
+      subscribed={subscription?.subscribed}
+      favorited={favorite?.favorited}
+      sharePending={shareMutation.isPending}
+      onSubscribe={handleSubscribe}
+      onUnsubscribe={handleUnsubscribe}
+      onFavorite={handleFavorite}
+      onShare={handleShare}
+    />
+  )
+}
+
+type ArticlePageProps = {
+  article: ArticleDetailData
+  feed: FeedDetailData
+  subscribed: boolean | undefined
+  favorited: boolean | undefined
+  sharePending: boolean
+  onSubscribe: () => void
+  onUnsubscribe: () => void
+  onFavorite: () => void
+  onShare: (platform: SharePlatform) => void
+}
+
+function StandardArticleLayout({
+                                 article,
+                                 feed,
+                                 subscribed,
+                                 favorited,
+                                 sharePending,
+                                 onSubscribe,
+                                 onUnsubscribe,
+                                 onFavorite,
+                                 onShare,
+                               }: ArticlePageProps) {
+  const id = article.id
+  const queryClient = useQueryClient()
   const aiSummaryMutation = useMutation({
     mutationFn: async () => postArticleAiSummary(id),
     onSuccess: (result) => {
@@ -186,17 +290,16 @@ function Article() {
 
   useEffect(() => {
     resetAiSummary()
-  }, [id])
+  }, [id, resetAiSummary])
 
   useEffect(() => {
     if (article.aiSummary?.trim()) return
     if (isAiSummaryPending || isAiSummarySuccess || isAiSummaryError) return
 
     generateAiSummary()
-  }, [article.aiSummary, generateAiSummary, id, isAiSummaryError, isAiSummaryPending, isAiSummarySuccess])
+  }, [article.aiSummary, generateAiSummary, isAiSummaryError, isAiSummaryPending, isAiSummarySuccess])
 
   const { progress, headings } = useReadingProgress({ articleId: id })
-
   const content = article.content ?? ''
   const audioEnclosure = article.enclosure?.type === 'audio/mpeg' ? article.enclosure : null
   const aiSummary = article.aiSummary?.trim() || aiSummaryResult?.aiSummary || null
@@ -245,37 +348,77 @@ function Article() {
             <Suspense fallback={<FeedInfoSkeleton />}>
               <FeedInfoCard
                 feed={feed}
-                subscribed={subscription?.subscribed}
+                subscribed={subscribed}
                 linkToFeed
-                onSubscribe={() => {
-                  if (!ensureAuthed()) return
-                  void subscriptionMutation.mutateAsync('subscribe')
-                }}
-                onUnsubscribe={() => {
-                  void subscriptionMutation.mutateAsync('unsubscribe')
-                }}
+                onSubscribe={onSubscribe}
+                onUnsubscribe={onUnsubscribe}
               />
             </Suspense>
             <ArticleTocCard progress={progress} headings={headings} />
             <Separator />
             <ArticleActionButtons
-              favorited={favorite?.favorited}
+              favorited={favorited}
               originalLink={article.link}
-              sharePending={shareMutation.isPending}
+              sharePending={sharePending}
               sharePlatforms={sharePlatforms}
-              ensureAuthed={ensureAuthed}
-              onFavorite={() => {
-                if (!ensureAuthed()) return
-                void favoriteMutation.mutateAsync()
-              }}
-              onShare={(platform) => {
-                if (!ensureAuthed()) return
-                void shareMutation.mutateAsync(platform)
-              }}
+              onFavorite={onFavorite}
+              onShare={onShare}
               direction="column"
               dropdownSide="left"
               dropdownAlign="center"
               className="pt-6"
+            />
+          </div>
+        </aside>
+      </div>
+    </section>
+  )
+}
+
+function MediaArticleLayout({
+                              article,
+                              feed,
+                              subscribed,
+                              favorited,
+                              sharePending,
+                              onSubscribe,
+                              onUnsubscribe,
+                              onFavorite,
+                              onShare,
+                            }: ArticlePageProps) {
+  return (
+    <section className="relative isolate py-4 pb-16 sm:py-6 lg:py-8">
+      <div
+        className="mx-auto grid max-w-376 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,64rem)_18rem] lg:gap-x-8 xl:grid-cols-[minmax(0,68rem)_18rem] xl:gap-x-10">
+        <article className="mx-auto min-w-0 w-full max-w-5xl lg:mx-0">
+          <Suspense fallback={<ArticleDetailSkeleton />}>
+            <ArticleMediaDetail article={article} feed={feed} />
+          </Suspense>
+        </article>
+
+        <aside className="hidden sm:block">
+          <div className="sticky top-30 max-h-[calc(100dvh-7rem)] space-y-8 overflow-y-auto pl-2 pr-1">
+            <Suspense fallback={<FeedInfoSkeleton />}>
+              <FeedInfoCard
+                feed={feed}
+                subscribed={subscribed}
+                linkToFeed
+                onSubscribe={onSubscribe}
+                onUnsubscribe={onUnsubscribe}
+              />
+            </Suspense>
+            <Separator />
+            <ArticleActionButtons
+              favorited={favorited}
+              originalLink={article.link}
+              sharePending={sharePending}
+              sharePlatforms={sharePlatforms}
+              onFavorite={onFavorite}
+              onShare={onShare}
+              direction="column"
+              dropdownSide="left"
+              dropdownAlign="center"
+              className="pt-2"
             />
           </div>
         </aside>
