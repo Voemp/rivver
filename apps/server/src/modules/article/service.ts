@@ -365,20 +365,20 @@ function diversifyRecommendationCandidates(
   return selected.map(entry => entry.candidate)
 }
 
-export async function listPopularArticles(offset: number, limit: number) {
-  const candidates = await articleRepo.listPopularityCandidates()
+export async function listPopularArticles(offset: number, limit: number, contentType?: ContentKind) {
+  const candidates = await articleRepo.listPopularityCandidates([], contentType)
   const orderedIds = rankPopularityCandidates(candidates)
     .slice(offset, offset + limit)
     .map(candidate => candidate.id)
 
   if (orderedIds.length === 0) return []
 
-  const articles = await articleRepo.listByIds(orderedIds)
+  const articles = await articleRepo.listByIds(orderedIds, contentType)
   return orderArticlesByIds(articles, orderedIds)
 }
 
-export async function listFallbackForRecommendation(excludedIds: number[], limit: number) {
-  const candidates = await articleRepo.listPopularityCandidates(excludedIds)
+export async function listFallbackForRecommendation(excludedIds: number[], limit: number, contentType?: ContentKind) {
+  const candidates = await articleRepo.listPopularityCandidates(excludedIds, contentType)
   return rankPopularityCandidates(candidates)
     .slice(0, limit)
     .map(candidate => candidate.id)
@@ -433,7 +433,7 @@ export async function refreshUserInterest(userId: string) {
   return interestRepo.upsert(userId, normalized, articleCount)
 }
 
-export async function seedUserRecommendations(userId: string) {
+export async function seedUserRecommendations(userId: string, contentType?: ContentKind) {
   const interest = await interestRepo.findByUser(userId)
   const seenArticleIds = await behaviorRepo.listSeenArticleIds(userId)
   const signals = await behaviorRepo.listWeightedSignals(userId, MAX_BEHAVIORS)
@@ -447,6 +447,7 @@ export async function seedUserRecommendations(userId: string) {
   const candidates = await articleRepo.listRecommendationCandidates(
     seenArticleIds,
     MAX_RECOMMENDATION_CANDIDATES,
+    contentType,
   )
   const candidateIds = diversifyRecommendationCandidates(
     rankRecommendationCandidates(candidates, profile),
@@ -458,6 +459,7 @@ export async function seedUserRecommendations(userId: string) {
     ? await listFallbackForRecommendation(
       [...seenArticleIds, ...candidateIds],
       MAX_RECOMMENDATIONS - candidateIds.length,
+      contentType,
     )
     : []
 

@@ -8,7 +8,8 @@ import { betterAuth } from '../auth/service'
 import { ensureArticleAiSummary } from './ai-summary'
 import { ArticleModel } from './model'
 import {
-  assertProgress, BEHAVIOR_SCORE, calcReadScore, listPopularArticles, refreshUserInterest, seedUserRecommendations,
+  assertProgress, BEHAVIOR_SCORE, calcReadScore, listFallbackForRecommendation, listPopularArticles,
+  refreshUserInterest, seedUserRecommendations,
 } from './service'
 
 function refreshRecommendations(userId: string) {
@@ -49,8 +50,8 @@ export const article = new Elysia({
       security: [],
     },
   })
-  .get('/popular', async ({ query: { offset = 0, limit = 20 } }) => {
-    const articles = await listPopularArticles(offset, Math.min(limit, 50))
+  .get('/popular', async ({ query: { offset = 0, limit = 20, contentType } }) => {
+    const articles = await listPopularArticles(offset, Math.min(limit, 50), contentType)
     return status(200, articles)
   }, {
     query: ArticleModel.articleListQuery,
@@ -58,13 +59,13 @@ export const article = new Elysia({
       200: ArticleModel.articleListResponse,
     },
   })
-  .get('/recommendation', async ({ user, query: { offset = 0, limit = 20 } }) => {
+  .get('/recommendation', async ({ user, query: { offset = 0, limit = 20, contentType } }) => {
     limit = Math.min(limit, 50)
 
     if (offset === 0) {
-      const seededIds = await seedUserRecommendations(user.id)
+      const seededIds = await seedUserRecommendations(user.id, contentType)
       if (seededIds.length === 0) {
-        const articles = await listPopularArticles(offset, limit)
+        const articles = await listPopularArticles(offset, limit, contentType)
         return status(200, articles)
       }
     }
@@ -72,16 +73,32 @@ export const article = new Elysia({
     const articleIds = await recommendRepo.listByUser(user.id, offset, limit)
 
     if (articleIds.length === 0) {
-      const articles = await listPopularArticles(offset, limit)
+      const articles = await listPopularArticles(offset, limit, contentType)
       return status(200, articles)
     }
 
-    const articles = await articleRepo.listByIds(articleIds)
+    const articles = await articleRepo.listByIds(articleIds, contentType)
     const ordered = articleIds.reduce<typeof articles>((result, id) => {
       const found = articles.find(article => article.id === id)
       if (found) result.push(found)
       return result
     }, [])
+
+    if (ordered.length < limit) {
+      const fallbackIds = await listFallbackForRecommendation(
+        [...articleIds, ...ordered.map(article => article.id)],
+        limit - ordered.length,
+        contentType,
+      )
+
+      if (fallbackIds.length > 0) {
+        const fallbackArticles = await articleRepo.listByIds(fallbackIds, contentType)
+        const fallbackOrdered = fallbackIds
+          .map(id => fallbackArticles.find(article => article.id === id))
+          .filter((article): article is NonNullable<typeof article> => Boolean(article))
+        return status(200, [...ordered, ...fallbackOrdered])
+      }
+    }
 
     return status(200, ordered)
   }, {

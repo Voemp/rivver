@@ -1,21 +1,28 @@
 import { appClient, unwrapResponse } from '@/api/client'
 import { env } from '@/config/env'
+import type { ContentType } from '@/types/content'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
 const DEFAULT_LIMIT = env.articleListPageSize
 
-export const fetchPopularList = async (offset: number, limit = DEFAULT_LIMIT) =>
-  unwrapResponse(appClient.article.popular.get({ query: { offset, limit } }), 'Failed to load popular articles')
+export const fetchPopularList = async (offset: number, limit = DEFAULT_LIMIT, contentType?: ContentType) =>
+  unwrapResponse(
+    appClient.article.popular.get({ query: { offset, limit, contentType } }),
+    'Failed to load popular articles',
+  )
 
-export const fetchRecommendationList = async (offset: number, limit = DEFAULT_LIMIT) =>
-  unwrapResponse(appClient.article.recommendation.get({ query: { offset, limit } }), 'Failed to load recommendations')
+export const fetchRecommendationList = async (offset: number, limit = DEFAULT_LIMIT, contentType?: ContentType) =>
+  unwrapResponse(
+    appClient.article.recommendation.get({ query: { offset, limit, contentType } }),
+    'Failed to load recommendations',
+  )
 
-export const articlesInfiniteOptions = (isAuthed: boolean, pageSize: number) =>
+export const articlesInfiniteOptions = (isAuthed: boolean, pageSize: number, contentType?: ContentType) =>
   infiniteQueryOptions({
-    queryKey: ['article', isAuthed ? 'recommendation' : 'popular', 'infinite', pageSize] as const,
+    queryKey: ['article', isAuthed ? 'recommendation' : 'popular', 'infinite', pageSize, contentType ?? 'all'] as const,
     queryFn: ({ pageParam }) => isAuthed
-      ? fetchRecommendationList(pageParam, pageSize)
-      : fetchPopularList(pageParam, pageSize),
+      ? fetchRecommendationList(pageParam, pageSize, contentType)
+      : fetchPopularList(pageParam, pageSize, contentType),
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       return lastPage.length < pageSize ? undefined : pages.length * pageSize
@@ -63,11 +70,11 @@ export const feedSubscriptionQueryOptions = (id: number) =>
     staleTime: 1000 * 60 * 10,
   })
 
-export const feedArticlesQueryOptions = (id: number, offset = 0, limit = DEFAULT_LIMIT) =>
+export const feedArticlesQueryOptions = (id: number, offset = 0, limit = DEFAULT_LIMIT, contentType?: ContentType) =>
   queryOptions({
-    queryKey: ['feed', id, 'articles', offset, limit] as const,
+    queryKey: ['feed', id, 'articles', offset, limit, contentType ?? 'all'] as const,
     queryFn: () => unwrapResponse(
-      appClient.feed({ id }).articles.get({ query: { offset, limit } }),
+      appClient.feed({ id }).articles.get({ query: { offset, limit, contentType } }),
       'Failed to load feed articles',
     ),
   })

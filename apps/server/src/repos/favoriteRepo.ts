@@ -65,6 +65,7 @@ export const favoriteRepo = {
           columns: {
             id: true,
             title: true,
+            contentType: true,
             summary: true,
             enclosure: true,
             pubDate: true,

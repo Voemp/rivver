@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { cn } from '@/lib/utils'
+import { type ContentType, contentTypeLabels } from '@/types/content'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
@@ -13,6 +14,7 @@ export type FeedInfo = {
   image: string | null
   url: string
   subscriberCount: number | null
+  contentType: ContentType
 }
 
 type FeedInfoCardProps = {
@@ -86,18 +88,30 @@ export const FeedInfoCard = ({
                 'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2',
               )}
             >
-              <p className="truncate text-sm font-semibold text-foreground group-hover:underline">
-                {feed.title || '未命名订阅源'}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="truncate text-sm font-semibold text-foreground group-hover:underline">
+                  {feed.title || '未命名订阅源'}
+                </p>
+                <span
+                  className="inline-flex shrink-0 items-center rounded-full border border-border/70 bg-muted/55 px-2 py-0.5 text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+                  {contentTypeLabels[feed.contentType]}
+                </span>
+              </div>
               <p className="truncate text-xs leading-5 text-muted-foreground">
                 {description}
               </p>
             </Link>
           ) : (
             <>
-              <p className="truncate text-sm font-semibold text-foreground">
-                {feed.title || '未命名订阅源'}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {feed.title || '未命名订阅源'}
+                </p>
+                <span
+                  className="inline-flex shrink-0 items-center rounded-full border border-border/70 bg-muted/55 px-2 py-0.5 text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+                  {contentTypeLabels[feed.contentType]}
+                </span>
+              </div>
               <p className="truncate text-xs leading-5 text-muted-foreground">
                 {description}
               </p>

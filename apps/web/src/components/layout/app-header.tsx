@@ -10,6 +10,7 @@ import {
 import { Separator } from '@/components/ui/separator.tsx'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
+import { type ContentType, contentTypeLabels, contentTypeOptions } from '@/types/content'
 import { Link, useLocation } from '@tanstack/react-router'
 import { LogOut, Rss, Star, UserRound } from 'lucide-react'
 import { useState } from 'react'
@@ -18,6 +19,11 @@ export const AppHeader = () => {
   const location = useLocation()
   const { session, signOut, openAuthDialog } = useAuth()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const searchParams = new URLSearchParams(location.searchStr)
+  const activeContentType = location.pathname === '/'
+    ? (searchParams.get('type') as ContentType | null)
+    : null
+  const showHomeFilters = location.pathname === '/'
 
   const favoritesActive = location.pathname.startsWith('/favorites')
   const subscriptionsActive = location.pathname.startsWith('/subscriptions')
@@ -27,6 +33,12 @@ export const AppHeader = () => {
     active
       ? 'text-foreground after:w-6 after:bg-primary'
       : 'text-muted-foreground hover:text-foreground hover:after:w-4 hover:after:bg-border',
+  )
+  const filterItemClassName = (active: boolean) => cn(
+    'inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+    active
+      ? 'bg-foreground text-background'
+      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
   )
 
   return (
@@ -40,6 +52,20 @@ export const AppHeader = () => {
           >
             <img src={rivverLogo} alt="rivver_logo" className="h-8" />
             <img src={rivverText} alt="rivver_text" className="block h-8 sm:hidden" />
+            {showHomeFilters ? (
+              <div className="ml-4 hidden items-center gap-1.5 lg:flex">
+                {contentTypeOptions.map((type) => (
+                  <Link
+                    to="/"
+                    key={type}
+                    href={`/?type=${type}`}
+                    className={filterItemClassName(activeContentType === type)}
+                  >
+                    {contentTypeLabels[type]}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
           </Link>
 
           <div className="hidden shrink-0 sm:block">

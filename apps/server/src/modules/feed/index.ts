@@ -23,8 +23,9 @@ export const feed = new Elysia({
       200: FeedModel.feedResponse,
     },
   })
-  .get('/:id/articles', async ({ params: { id }, query: { offset = 0, limit = 20 } }) => {
-    const articles = await articleRepo.listByFeedId(id, offset, Math.min(limit, 50))
+  .get('/:id/articles', async ({ params: { id }, query: { offset = 0, limit = 20, contentType } }) => {
+    console.log(contentType)
+    const articles = await articleRepo.listByFeedId(id, offset, Math.min(limit, 50), contentType)
     return status(200, articles)
   }, {
     params: FeedModel.feedParams,

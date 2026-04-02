@@ -38,6 +38,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@rolldown/plugin-babel": "^0.2.2",
     "@tanstack/react-devtools": "^0.10.1",
     "@tanstack/react-query-devtools": "^5.96.1",
     "@tanstack/react-router-devtools": "^1.166.11",

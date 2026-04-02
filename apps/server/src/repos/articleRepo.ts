@@ -69,7 +69,7 @@ export const articleRepo = {
       },
     })
   },
-  listPopularityCandidates: async (excludedIds: number[] = []) => {
+  listPopularityCandidates: async (excludedIds: number[] = [], contentType?: ContentKind) => {
     const behaviorScore = db
       .select({
         articleId: userBehavior.articleId,
@@ -89,8 +89,19 @@ export const articleRepo = {
       .from(article)
       .leftJoin(behaviorScore, eq(article.id, behaviorScore.articleId))
 
+    if (excludedIds.length > 0 && contentType) {
+      return query.where(and(
+        notInArray(article.id, excludedIds),
+        eq(article.contentType, contentType),
+      ))
+    }
+
     if (excludedIds.length > 0) {
       return query.where(notInArray(article.id, excludedIds))
+    }
+
+    if (contentType) {
+      return query.where(eq(article.contentType, contentType))
     }
 
     return query
@@ -128,7 +139,7 @@ export const articleRepo = {
       video: row?.video ?? 0,
     }
   },
-  listRecommendationCandidates: async (excludedIds: number[] = [], limit = 400) => {
+  listRecommendationCandidates: async (excludedIds: number[] = [], limit = 400, contentType?: ContentKind) => {
     const behaviorScore = db
       .select({
         articleId: userBehavior.articleId,
@@ -153,13 +164,24 @@ export const articleRepo = {
       .orderBy(desc(article.pubDate), desc(article.createdAt), desc(article.id))
       .limit(limit)
 
+    if (excludedIds.length > 0 && contentType) {
+      return query.where(and(
+        notInArray(article.id, excludedIds),
+        eq(article.contentType, contentType),
+      ))
+    }
+
     if (excludedIds.length > 0) {
       return query.where(notInArray(article.id, excludedIds))
     }
 
+    if (contentType) {
+      return query.where(eq(article.contentType, contentType))
+    }
+
     return query
   },
-  listByFeedId: async (feedId: number, offset: number, limit: number) => {
+  listByFeedId: async (feedId: number, offset: number, limit: number, contentType?: ContentKind) => {
     return db.query.article.findMany({
       columns: {
         id: true,
@@ -168,9 +190,14 @@ export const articleRepo = {
         enclosure: true,
         pubDate: true,
       },
-      where: {
-        feedId,
-      },
+      where: contentType
+        ? {
+          AND: [
+            { feedId },
+            { contentType },
+          ],
+        }
+        : { feedId },
       with: {
         feed: {
           columns: {
@@ -186,7 +213,7 @@ export const articleRepo = {
       limit,
     })
   },
-  listByIds: async (ids: number[]) => {
+  listByIds: async (ids: number[], contentType?: ContentKind) => {
     return db.query.article.findMany({
       columns: {
         id: true,
@@ -195,9 +222,14 @@ export const articleRepo = {
         enclosure: true,
         pubDate: true,
       },
-      where: {
-        id: { in: ids },
-      },
+      where: contentType
+        ? {
+          AND: [
+            { id: { in: ids } },
+            { contentType },
+          ],
+        }
+        : { id: { in: ids } },
       with: {
         feed: {
           columns: {

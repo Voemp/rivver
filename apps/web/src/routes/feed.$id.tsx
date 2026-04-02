@@ -6,24 +6,30 @@ import { EmptyState } from '@/components/feedback/empty-state'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
+import { type ContentType, contentTypeLabels, contentTypeOptions } from '@/types/content'
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { produce } from 'immer'
 import { ExternalLink } from 'lucide-react'
-import { useMemo } from 'react'
+import { startTransition, useMemo } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
+
+const contentTypeSearchSchema = z.object({
+  type: z.enum(contentTypeOptions).optional(),
+})
 
 export const Route = createFileRoute('/feed/$id')({
   parseParams: (params) => ({
     id: z.coerce.number().parse(params.id),
   }),
+  validateSearch: search => contentTypeSearchSchema.parse(search),
   loader: ({ context: { queryClient, isAuthed }, params: { id } }) => {
     queryClient.ensureQueryData(feedDetailQueryOptions(id))
     isAuthed && queryClient.ensureQueryData(feedSubscriptionQueryOptions(id))
-    queryClient.ensureQueryData(feedArticlesQueryOptions(id, 0, 50))
   },
   pendingComponent: FeedDetailSkeleton,
   component: FeedDetail,
@@ -32,11 +38,16 @@ export const Route = createFileRoute('/feed/$id')({
 function FeedDetail() {
   const { ensureAuthed } = useAuth()
   const queryClient = useQueryClient()
+  const navigate = useNavigate({ from: '/feed/$id' })
   const id = Route.useParams().id
+  const { type } = Route.useSearch() as { type?: ContentType }
 
   const { data: feed } = useSuspenseQuery(feedDetailQueryOptions(id))
   const { data: subscription } = useQuery(feedSubscriptionQueryOptions(id))
-  const { data: articles = [] } = useSuspenseQuery(feedArticlesQueryOptions(id, 0, 50))
+  const articlesQuery = useQuery(feedArticlesQueryOptions(id, 0, 50, type))
+  const articles = articlesQuery.data ?? []
+  const isArticleListPending = articlesQuery.isPending && articles.length === 0
+  const isArticleListRefreshing = articlesQuery.isFetching && articles.length > 0
 
   const description = useMemo(() => {
     const trimmed = feed.description?.trim()
@@ -103,6 +114,7 @@ function FeedDetail() {
   const actionLabel = subscribed ? '取消订阅' : '订阅'
   const subscriberCount = (feed.subscriberCount ?? 0).toLocaleString('zh-CN')
   const articleCount = articles.length.toLocaleString('zh-CN')
+  const tabValue = type ?? 'all'
 
   return (
     <section className="mx-auto w-full max-w-6xl space-y-6">
@@ -120,6 +132,10 @@ function FeedDetail() {
               <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">
                 {feed.title || '未命名订阅源'}
               </h1>
+              <span
+                className="ml-2 inline-flex shrink-0 items-center rounded-full border border-border/70 bg-muted/55 px-2.5 py-1 text-[11px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+                {contentTypeLabels[feed.contentType]}
+              </span>
               {feed.link &&
                 <Button size="icon-sm" variant="link" className="rounded-full cursor-pointer"
                         onClick={() => window.open(feed.link!)} aria-label="打开订阅源链接" title="打开订阅源链接">
@@ -139,7 +155,7 @@ function FeedDetail() {
             </span>
             <span className="h-3 w-px bg-border/60" />
             <span>
-              文章 <span className="font-semibold text-foreground">{articleCount}</span>
+              内容 <span className="font-semibold text-foreground">{articleCount}</span>
             </span>
           </div>
           <Button
@@ -152,9 +168,37 @@ function FeedDetail() {
         </div>
       </div>
 
-      {articles.length === 0 ? (
+      <Tabs
+        value={tabValue}
+        onValueChange={(value) => {
+          startTransition(() => {
+            void navigate({
+              search: () => (value === 'all' ? {} : { type: value as ContentType }),
+              replace: true,
+            })
+          })
+        }}
+        className="gap-4"
+      >
+        <TabsList>
+          <TabsTrigger value="all" className="flex-none px-4">全部</TabsTrigger>
+          {contentTypeOptions.map((contentType) => (
+            <TabsTrigger key={contentType} value={contentType} className="flex-none px-4">
+              {contentTypeLabels[contentType]}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
+      {isArticleListPending || isArticleListRefreshing ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <FeedArticleSkeleton key={index} />
+          ))}
+        </div>
+      ) : articles.length === 0 ? (
         <div className="mx-auto w-full max-w-3xl">
-          <EmptyState title="暂无文章" description="该订阅源暂时还没有可展示的文章。" />
+          <EmptyState title="暂无内容" description="该订阅源暂时还没有可展示的内容。" />
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
@@ -218,6 +262,7 @@ function FeedDetailSkeleton() {
   return (
     <section className="mx-auto w-full max-w-6xl space-y-6">
       <FeedHeaderSkeleton />
+      <Skeleton className="h-9 w-62" />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, index) => (
           <FeedArticleSkeleton key={index} />

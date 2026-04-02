@@ -14,6 +14,7 @@ export const ArticleModel = {
   articleListQuery: t.Object({
     offset: t.Optional(t.Number({ minimum: 0 })),
     limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
+    contentType: t.Optional(t.UnionEnum(['article', 'image', 'video'], { default: undefined })),
   }),
   articleListResponse: t.Array(t.Object({
     id: articleSelect.id,
