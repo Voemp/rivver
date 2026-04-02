@@ -55,12 +55,12 @@ export const formatRelativeTime = (value: Date | string | number | null) => {
 
 export const formatRecentTime = (value: Date | string | number | null) => {
   if (!value) {
-    return '未知时间'
+    return ''
   }
 
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) {
-    return '未知时间'
+    return ''
   }
 
   const diffMs = Date.now() - date.getTime()

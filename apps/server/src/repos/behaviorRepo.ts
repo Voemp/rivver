@@ -51,12 +51,14 @@ export const behaviorRepo = {
         eq(userBehavior.type, 'read'),
       ))
   },
-  listWeightedForInterest: async (userId: string, limit: number) => {
+  listWeightedSignals: async (userId: string, limit: number) => {
     return db
       .select({
         articleId: userBehavior.articleId,
         score: userBehavior.score,
         createdAt: userBehavior.createdAt,
+        feedId: article.feedId,
+        contentType: article.contentType,
         embedding: article.embedding,
       })
       .from(userBehavior)
@@ -67,6 +69,10 @@ export const behaviorRepo = {
       ))
       .orderBy(desc(userBehavior.createdAt))
       .limit(limit)
+  },
+  listWeightedForInterest: async (userId: string, limit: number) => {
+    return behaviorRepo
+      .listWeightedSignals(userId, limit)
       .then(rows => rows.filter(row => row.embedding && row.embedding.length > 0))
   },
   listSeenArticleIds: async (userId: string, limit = 500) => {

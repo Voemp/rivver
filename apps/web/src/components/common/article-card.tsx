@@ -78,7 +78,8 @@ export const VerticalCard = ({ article, dense = false, className }: VerticalCard
       )}
     >
       <div className="min-h-0 overflow-hidden bg-muted/60">
-        <img src={image} alt={article.title ?? '未命名文章'} className="h-full w-full object-cover" />
+        <img src={image} alt={article.title ?? '未命名文章'} referrerPolicy="no-referrer" loading="lazy"
+             className="size-full object-cover" />
       </div>
 
       <div className="flex min-h-0 flex-col justify-between gap-2 p-2">
@@ -130,7 +131,8 @@ export const AsideCard = ({ article, className }: AsideCardProps) => {
       </div>
 
       <div className="h-full min-h-0 overflow-hidden bg-muted/60">
-        <img src={image} alt={article.title ?? '未命名文章'} className="h-full w-full object-cover" />
+        <img src={image} alt={article.title ?? '未命名文章'} referrerPolicy="no-referrer" loading="lazy"
+             className="h-full w-full object-cover" />
       </div>
     </div>
   )
@@ -154,7 +156,8 @@ export const FlowCard = ({ article, reverse = false, className }: FlowCardProps)
           reverse ? 'order-2' : 'order-1',
         )}
       >
-        <img src={image} alt={article.title ?? '未命名文章'} className="h-full w-full object-cover" />
+        <img src={image} alt={article.title ?? '未命名文章'} referrerPolicy="no-referrer" loading="lazy"
+             className="h-full w-full object-cover" />
       </div>
 
       <div className={cn('flex min-w-0 flex-col justify-between gap-1.5 p-2', reverse ? 'order-1' : 'order-2')}>

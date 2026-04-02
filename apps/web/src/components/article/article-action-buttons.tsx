@@ -5,7 +5,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { cn } from '@/lib/utils'
 import type { IconType } from '@/types/icon.ts'
-import { Heart, Share2 } from 'lucide-react'
+import { ExternalLink, Heart, Share2 } from 'lucide-react'
 
 export type SharePlatform = 'copy' | 'x' | 'weibo' | 'telegram'
 
@@ -17,6 +17,7 @@ export type SharePlatformItem = {
 
 type ArticleActionButtonsProps = {
   favorited: boolean | undefined
+  originalLink?: string | null
   sharePending: boolean
   sharePlatforms: SharePlatformItem[]
   ensureAuthed: () => boolean
@@ -30,6 +31,7 @@ type ArticleActionButtonsProps = {
 
 export const ArticleActionButtons = ({
                                        favorited = false,
+                                       originalLink,
                                        sharePending,
                                        sharePlatforms,
                                        onFavorite,
@@ -59,6 +61,21 @@ export const ArticleActionButtons = ({
         title={favorited ? '已收藏' : '收藏'}
       >
         <Heart className="size-4" fill={favorited ? 'currentColor' : 'none'} />
+      </Button>
+
+      <Button
+        size="icon-lg"
+        variant="outline"
+        className={buttonClassName}
+        disabled={!originalLink}
+        onClick={() => {
+          if (!originalLink) return
+          window.open(originalLink, '_blank', 'noopener,noreferrer')
+        }}
+        aria-label="阅读原文"
+        title={originalLink ? '阅读原文' : '暂无原文链接'}
+      >
+        <ExternalLink className="size-4" />
       </Button>
 
       <DropdownMenu>
@@ -97,6 +114,7 @@ export const ArticleActionButtons = ({
 
 export const ArticleActionsSkeleton = () => (
   <div className="flex flex-col items-start gap-4 pt-6">
+    <Skeleton className="size-10 rounded-full" />
     <Skeleton className="size-10 rounded-full" />
     <Skeleton className="size-10 rounded-full" />
   </div>

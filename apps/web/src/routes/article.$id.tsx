@@ -260,6 +260,7 @@ function Article() {
             <Separator />
             <ArticleActionButtons
               favorited={favorite?.favorited}
+              originalLink={article.link}
               sharePending={shareMutation.isPending}
               sharePlatforms={sharePlatforms}
               ensureAuthed={ensureAuthed}

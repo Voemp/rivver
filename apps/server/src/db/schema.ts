@@ -2,6 +2,10 @@ import {
   boolean, bytea, index, integer, jsonb, pgEnum, pgTable, primaryKey, serial, text, timestamp, uuid, vector,
 } from 'drizzle-orm/pg-core'
 
+export const contentKindValues = ['article', 'image', 'video'] as const
+export type ContentKind = typeof contentKindValues[number]
+export const contentKindEnum = pgEnum('content_kind', contentKindValues)
+
 export const user = pgTable.withRLS('user', {
   id: uuid().primaryKey().defaultRandom(),
   name: text().notNull(),
@@ -83,6 +87,10 @@ export const feed = pgTable.withRLS('feed', {
   description: text(),
   link: text(),
   image: text(),
+  contentType: contentKindEnum().notNull().default('article'),
+  articleContentCount: integer().notNull().default(0),
+  imageContentCount: integer().notNull().default(0),
+  videoContentCount: integer().notNull().default(0),
   subscriberCount: integer().default(0).notNull(),
   status: statusEnum().default('active').notNull(),
   createdAt: timestamp().notNull().defaultNow(),
@@ -107,6 +115,7 @@ export const article = pgTable.withRLS('article', {
   feedId: integer().references(() => feed.id, { onDelete: 'cascade' }).notNull(),
   title: text(),
   link: text(),
+  contentType: contentKindEnum().notNull().default('article'),
   // RSS <description>：通常是摘要
   summary: text(),
   // AI 生成摘要，避免与 RSS 摘要混用

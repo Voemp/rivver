@@ -104,7 +104,8 @@ export const ArticleContentCard = ({ content }: ArticleContentCardProps) => {
             ),
             hr: ({ node: _node, ...props }) => <hr className="my-10 border-border/60" {...props} />,
             img: ({ node: _node, ...props }) => (
-              <img className="my-8 border border-border/60 bg-muted/20" {...props} alt={props.alt} />
+              <img className="my-8 border border-border/60 bg-muted/20" {...props} alt={props.alt}
+                   referrerPolicy="no-referrer" loading="lazy" />
             ),
             table: ({ node: _node, ...props }) => (
               <div className="my-8 overflow-x-auto border border-border/70 bg-background/70">

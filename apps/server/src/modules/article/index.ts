@@ -11,6 +11,12 @@ import {
   assertProgress, BEHAVIOR_SCORE, calcReadScore, listPopularArticles, refreshUserInterest, seedUserRecommendations,
 } from './service'
 
+function refreshRecommendations(userId: string) {
+  return refreshUserInterest(userId)
+    .then(() => seedUserRecommendations(userId))
+    .catch(() => undefined)
+}
+
 export const article = new Elysia({
   prefix: '/article',
   detail: {
@@ -115,7 +121,7 @@ export const article = new Elysia({
       },
     )
 
-    void refreshUserInterest(user.id)
+    void refreshRecommendations(user.id)
 
     return status(200, { favorited: true, articleId: id })
   }, {
@@ -127,7 +133,7 @@ export const article = new Elysia({
   })
   .delete('/:id/favorite', async ({ user, params: { id } }) => {
     await favoriteRepo.removeWithBehavior(user.id, id)
-    void refreshUserInterest(user.id)
+    void refreshRecommendations(user.id)
     return status(200, { favorited: false, articleId: id })
   }, {
     auth: true,
@@ -160,7 +166,7 @@ export const article = new Elysia({
       score: BEHAVIOR_SCORE.click,
     })
 
-    void refreshUserInterest(user.id)
+    void refreshRecommendations(user.id)
 
     return status(200, { recorded: true, type: 'click', articleId: id })
   }, {
@@ -185,7 +191,7 @@ export const article = new Elysia({
         score: calcReadScore(body.progress),
         readProgress: body.progress,
       })
-      void refreshUserInterest(user.id)
+      void refreshRecommendations(user.id)
       return status(200, { recorded: true, articleId: id, progress: body.progress })
     }
 
@@ -201,7 +207,7 @@ export const article = new Elysia({
           score: calcReadScore(body.progress),
         },
       )
-      void refreshUserInterest(user.id)
+      void refreshRecommendations(user.id)
       return status(200, { recorded: true, articleId: id, progress: body.progress })
     }
   }, {
@@ -226,7 +232,7 @@ export const article = new Elysia({
       score: BEHAVIOR_SCORE.share,
     })
 
-    void refreshUserInterest(user.id)
+    void refreshRecommendations(user.id)
 
     return status(200, { recorded: true, type: 'share', articleId: id })
   }, {

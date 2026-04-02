@@ -1,7 +1,7 @@
 import { db } from '@server/db'
-import { article, type InsertArticle, type SelectArticle, userBehavior } from '@server/db/schema'
+import { article, type ContentKind, type InsertArticle, type SelectArticle, userBehavior } from '@server/db/schema'
 import { subDays } from 'date-fns'
-import { and, eq, gte, isNotNull, notInArray, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, isNotNull, notInArray, sql } from 'drizzle-orm'
 
 export const articleRepo = {
   create: async (newArticle: InsertArticle) => {
@@ -111,6 +111,53 @@ export const articleRepo = {
       .orderBy(sql`${article.embedding} <=> ${sql.raw(`'${vectorLiteral}'::vector`)}`)
       .limit(limit)
       .then(rows => rows.map(row => row.id))
+  },
+  getContentTypeCountsByFeedId: async (feedId: number): Promise<Record<ContentKind, number>> => {
+    const [row] = await db
+      .select({
+        article: sql<number>`cast(count(*) filter (where ${article.contentType} = 'article') as int)`,
+        image: sql<number>`cast(count(*) filter (where ${article.contentType} = 'image') as int)`,
+        video: sql<number>`cast(count(*) filter (where ${article.contentType} = 'video') as int)`,
+      })
+      .from(article)
+      .where(eq(article.feedId, feedId))
+
+    return {
+      article: row?.article ?? 0,
+      image: row?.image ?? 0,
+      video: row?.video ?? 0,
+    }
+  },
+  listRecommendationCandidates: async (excludedIds: number[] = [], limit = 400) => {
+    const behaviorScore = db
+      .select({
+        articleId: userBehavior.articleId,
+        totalScore: sql<number>`sum(${userBehavior.score})`.as('totalScore'),
+      })
+      .from(userBehavior)
+      .groupBy(userBehavior.articleId)
+      .as('behaviorScore')
+
+    const query = db
+      .select({
+        id: article.id,
+        feedId: article.feedId,
+        contentType: article.contentType,
+        embedding: article.embedding,
+        pubDate: article.pubDate,
+        createdAt: article.createdAt,
+        totalScore: behaviorScore.totalScore,
+      })
+      .from(article)
+      .leftJoin(behaviorScore, eq(article.id, behaviorScore.articleId))
+      .orderBy(desc(article.pubDate), desc(article.createdAt), desc(article.id))
+      .limit(limit)
+
+    if (excludedIds.length > 0) {
+      return query.where(notInArray(article.id, excludedIds))
+    }
+
+    return query
   },
   listByFeedId: async (feedId: number, offset: number, limit: number) => {
     return db.query.article.findMany({
