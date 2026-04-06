@@ -72,7 +72,7 @@ export const VerticalCard = ({ article, dense = false, className }: VerticalCard
     <div
       className={cn(
         'grid h-full min-h-0 overflow-hidden rounded-sm bg-transparent transition-shadow duration-300',
-        'group-hover:shadow-xl',
+        'group-hover:shadow-card',
         dense ? 'grid-rows-[56%_44%]' : 'grid-rows-[60%_40%]',
         className,
       )}
@@ -114,7 +114,7 @@ export const AsideCard = ({ article, className }: AsideCardProps) => {
     <div
       className={cn(
         'grid h-full min-h-0 grid-cols-[minmax(0,1fr)_34%] gap-3 overflow-hidden rounded-sm',
-        'bg-transparent transition-shadow duration-300 group-hover:shadow-xl',
+        'bg-transparent transition-shadow duration-300 group-hover:shadow-card',
         className,
       )}
     >
@@ -145,7 +145,7 @@ export const FlowCard = ({ article, reverse = false, className }: FlowCardProps)
     <div
       className={cn(
         'grid items-stretch gap-3 overflow-hidden rounded-sm bg-transparent transition-shadow duration-300',
-        'group-hover:shadow-xl',
+        'group-hover:shadow-card',
         reverse ? 'grid-cols-[minmax(0,1fr)_42%]' : 'grid-cols-[42%_minmax(0,1fr)]',
         className,
       )}

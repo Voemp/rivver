@@ -1,7 +1,9 @@
 import type { HomeArticleItem } from '@/components/common/article-card.tsx'
 import { HomeArticleCard } from '@/components/home/home-article-card.tsx'
+import { HomeFeedRecommendation, HomeFeedRecommendationSkeleton } from '@/components/home/home-feed-recommendation'
 import { Separator } from '@/components/ui/separator.tsx'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
+import { type ContentType } from '@/types/content'
 import { Link } from '@tanstack/react-router'
 
 export const FlowLink = ({ article, reverse }: { article: HomeArticleItem; reverse: boolean }) => {
@@ -33,13 +35,29 @@ export const FlowList = ({ items, className }: { items: HomeArticleItem[]; class
   )
 }
 
-export const HomeFlowSection = ({ items }: { items: HomeArticleItem[] }) => {
+export const HomeFlowSection = ({ items, contentType }: { items: HomeArticleItem[]; contentType?: ContentType }) => {
   return (
-    <section className="space-y-3 sm:mx-auto sm:w-full sm:max-w-xl lg:max-w-[48vw]">
-      <h2 className="hidden text-lg font-semibold tracking-tight text-foreground sm:block">流式列表</h2>
+    <section className="space-y-3">
+      <div
+        className="hidden lg:grid lg:grid-cols-[minmax(0,40rem)_18rem] lg:justify-center lg:gap-x-12 xl:grid-cols-[minmax(0,42rem)_19rem]">
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">flow articles</p>
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">流式列表</h2>
+          </div>
+          <FlowList items={items.slice(8)} />
+        </div>
+        <HomeFeedRecommendation contentType={contentType} />
+      </div>
 
-      <FlowList items={items.slice(8)} className="hidden lg:block" />
-      <FlowList items={items.slice(3)} className="hidden sm:block lg:hidden" />
+      <div className="hidden sm:block lg:hidden sm:mx-auto sm:w-full sm:max-w-xl">
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">flow articles</p>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">流式列表</h2>
+        </div>
+        <FlowList items={items.slice(3)} className="mt-3" />
+      </div>
+
       <FlowList items={items} className="sm:hidden" />
     </section>
   )
@@ -47,10 +65,36 @@ export const HomeFlowSection = ({ items }: { items: HomeArticleItem[] }) => {
 
 export const HomeFlowSectionSkeleton = () => {
   return (
-    <div className="space-y-3 lg:mx-auto lg:w-full lg:max-w-2xl xl:max-w-[36vw] 2xl:max-w-[34vw]">
-      {Array.from({ length: 5 }).map((_, index) => (
-        <Skeleton key={index} className="h-40 rounded-none" />
-      ))}
-    </div>
+    <>
+      <div
+        className="hidden lg:grid lg:grid-cols-[minmax(0,40rem)_18rem] lg:justify-center lg:gap-x-12 xl:grid-cols-[minmax(0,42rem)_19rem]">
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Skeleton className="h-3 w-24 rounded-none" />
+            <Skeleton className="h-6 w-24 rounded-none" />
+          </div>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton key={index} className="h-40 rounded-none" />
+          ))}
+        </div>
+        <HomeFeedRecommendationSkeleton />
+      </div>
+
+      <div className="hidden space-y-3 sm:mx-auto sm:block sm:w-full sm:max-w-xl lg:hidden">
+        <div className="space-y-1">
+          <Skeleton className="h-3 w-24 rounded-none" />
+          <Skeleton className="h-6 w-24 rounded-none" />
+        </div>
+        {Array.from({ length: 5 }).map((_, index) => (
+          <Skeleton key={index} className="h-40 rounded-none" />
+        ))}
+      </div>
+
+      <div className="space-y-3 sm:hidden">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <Skeleton key={index} className="h-40 rounded-none" />
+        ))}
+      </div>
+    </>
   )
 }

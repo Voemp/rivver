@@ -28,7 +28,7 @@ export const AppHeader = () => {
   const favoritesActive = location.pathname.startsWith('/favorites')
   const subscriptionsActive = location.pathname.startsWith('/subscriptions')
   const navItemClassName = (active: boolean) => cn(
-    'relative inline-flex items-center gap-1.5 px-3 py-3 text-sm font-medium transition-colors',
+    'relative inline-flex shrink-0 items-center gap-1.5 px-3 py-3 text-sm leading-none font-medium whitespace-nowrap transition-colors',
     'after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-0 after:-translate-x-1/2 after:rounded-full after:transition-all after:duration-300',
     active
       ? 'text-foreground after:w-6 after:bg-primary'
@@ -46,14 +46,13 @@ export const AppHeader = () => {
       <header
         className="sticky top-0 z-30 border-b border-border/70 bg-card/86 backdrop-blur supports-backdrop-filter:bg-card/78">
         <div className="mx-auto flex w-full max-w-420 items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
-          <Link
-            to="/"
-            className="inline-flex flex-1 items-center justify-start rounded-xl text-foreground transition-colors"
-          >
-            <img src={rivverLogo} alt="rivver_logo" className="h-8" />
-            <img src={rivverText} alt="rivver_text" className="block h-8 sm:hidden" />
+          <div className="inline-flex flex-1 items-center justify-start rounded-xl text-foreground transition-colors">
+            <Link to="/" className="inline-flex">
+              <img src={rivverLogo} alt="rivver_logo" className="h-8" />
+              <img src={rivverText} alt="rivver_text" className="block h-8 sm:hidden" />
+            </Link>
             {showHomeFilters ? (
-              <div className="ml-4 hidden items-center gap-1.5 lg:flex">
+              <div className="ml-4 hidden items-center gap-1.5 sm:flex">
                 {contentTypeOptions.map((type) => (
                   <Link
                     to="/"
@@ -66,7 +65,7 @@ export const AppHeader = () => {
                 ))}
               </div>
             ) : null}
-          </Link>
+          </div>
 
           <div className="hidden shrink-0 sm:block">
             <img src={rivverText} alt="rivver_text" className="h-10" />

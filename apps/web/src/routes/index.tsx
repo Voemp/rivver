@@ -65,7 +65,7 @@ function Home() {
 
       <Separator className="hidden sm:block" />
 
-      <HomeFlowSection items={items} />
+      <HomeFlowSection items={items} contentType={type} />
 
       <div ref={targetRef} className="py-4 text-center text-sm text-muted-foreground">
         {query.isFetchingNextPage ? '加载更多中...' : query.hasNextPage ? '下拉加载更多' : '没有更多内容了'}

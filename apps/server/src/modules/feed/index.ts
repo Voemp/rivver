@@ -14,6 +14,18 @@ export const feed = new Elysia({
   },
 })
   .use(betterAuth)
+  .get('/popular', async ({ query: { limit = 6, contentType } }) => {
+    const feeds = await feedRepo.listPopular(Math.min(limit, 12), contentType)
+    return status(200, feeds)
+  }, {
+    query: FeedModel.feedPopularQuery,
+    response: {
+      200: FeedModel.feedPopularResponse,
+    },
+    detail: {
+      security: [],
+    },
+  })
   .get('/:id', async ({ params: { id } }) => {
     const feedInfo = await feedRepo.findById(id)
     return status(200, feedInfo)
@@ -24,7 +36,6 @@ export const feed = new Elysia({
     },
   })
   .get('/:id/articles', async ({ params: { id }, query: { offset = 0, limit = 20, contentType } }) => {
-    console.log(contentType)
     const articles = await articleRepo.listByFeedId(id, offset, Math.min(limit, 50), contentType)
     return status(200, articles)
   }, {

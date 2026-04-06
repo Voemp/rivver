@@ -56,6 +56,16 @@ export const feedDetailQueryOptions = (id: number) =>
     staleTime: 1000 * 60 * 10,
   })
 
+export const feedPopularQueryOptions = (limit = 6, contentType?: ContentType) =>
+  queryOptions({
+    queryKey: ['feed', 'popular', limit, contentType ?? 'all'] as const,
+    queryFn: () => unwrapResponse(
+      appClient.feed.popular.get({ query: { limit, contentType } }),
+      'Failed to load popular feeds',
+    ),
+    staleTime: 1000 * 60 * 10,
+  })
+
 export const articleFavoriteQueryOptions = (id: number) =>
   queryOptions({
     queryKey: ['article', id, 'favorite'] as const,

@@ -22,7 +22,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   },
   component: RootComponent,
   notFoundComponent: () => NotFoundState,
-  errorComponent: () => ErrorState,
+  errorComponent: ErrorState,
 })
 
 function RootComponent() {
