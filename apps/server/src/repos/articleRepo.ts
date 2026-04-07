@@ -1,7 +1,15 @@
 import { db } from '@server/db'
-import { article, type ContentKind, type InsertArticle, type SelectArticle, userBehavior } from '@server/db/schema'
+import {
+  article, type ContentKind, feed, type InsertArticle, type SelectArticle, userBehavior,
+} from '@server/db/schema'
 import { subDays } from 'date-fns'
 import { and, desc, eq, gte, isNotNull, notInArray, sql } from 'drizzle-orm'
+
+const buildArticleSearchVector = () => sql`
+  setweight(to_tsvector('simple', coalesce(${article.title}, '')), 'A') ||
+  setweight(to_tsvector('simple', coalesce(${article.summary}, '')), 'B') ||
+  setweight(to_tsvector('simple', coalesce(${article.contentSnippet}, '')), 'C')
+`
 
 export const articleRepo = {
   create: async (newArticle: InsertArticle) => {
@@ -239,5 +247,46 @@ export const articleRepo = {
         },
       },
     })
+  },
+  search: async (queryText: string, offset: number, limit: number, contentType?: ContentKind) => {
+    const normalizedQuery = queryText.trim().replace(/\s+/g, ' ')
+    if (!normalizedQuery) return []
+
+    const searchVector = buildArticleSearchVector()
+    const tsQuery = sql`websearch_to_tsquery('simple', ${normalizedQuery})`
+    const trigramSimilarity = sql<number>`greatest(
+      similarity(coalesce(${article.title}, ''), ${normalizedQuery}),
+      similarity(coalesce(${article.summary}, ''), ${normalizedQuery}),
+      similarity(coalesce(${article.contentSnippet}, ''), ${normalizedQuery})
+    )`
+    const ftsRank = sql<number>`ts_rank_cd(${searchVector}, ${tsQuery})`
+    const searchScore = sql<number>`(${ftsRank} * 0.8) + (${trigramSimilarity} * 0.35)`
+    const matchesSearch = sql`(
+      ${searchVector} @@ ${tsQuery}
+      or coalesce(${article.title}, '') % ${normalizedQuery}
+      or coalesce(${article.summary}, '') % ${normalizedQuery}
+      or coalesce(${article.contentSnippet}, '') % ${normalizedQuery}
+    )`
+
+    return db
+      .select({
+        id: article.id,
+        title: article.title,
+        summary: article.summary,
+        enclosure: article.enclosure,
+        pubDate: article.pubDate,
+        feed: {
+          title: feed.title,
+          image: feed.image,
+        },
+        score: searchScore,
+      })
+      .from(article)
+      .leftJoin(feed, eq(article.feedId, feed.id))
+      .where(contentType ? and(eq(article.contentType, contentType), matchesSearch) : matchesSearch)
+      .orderBy(desc(searchScore), desc(article.pubDate), desc(article.createdAt), desc(article.id))
+      .offset(offset)
+      .limit(limit)
+      .then(rows => rows.map(({ score: _score, ...row }) => row))
   },
 } as const

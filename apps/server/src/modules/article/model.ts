@@ -16,7 +16,24 @@ export const ArticleModel = {
     limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
     contentType: t.Optional(t.UnionEnum(['article', 'image', 'video'], { default: undefined })),
   }),
+  articleSearchQuery: t.Object({
+    q: t.String({ minLength: 1 }),
+    offset: t.Optional(t.Number({ minimum: 0 })),
+    limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
+    contentType: t.Optional(t.UnionEnum(['article', 'image', 'video'], { default: undefined })),
+  }),
   articleListResponse: t.Array(t.Object({
+    id: articleSelect.id,
+    title: articleSelect.title,
+    summary: articleSelect.summary,
+    enclosure: articleSelect.enclosure,
+    pubDate: articleSelect.pubDate,
+    feed: t.Nullable(t.Object({
+      title: feedSelect.title,
+      image: feedSelect.image,
+    })),
+  })),
+  articleSearchResponse: t.Array(t.Object({
     id: articleSelect.id,
     title: articleSelect.title,
     summary: articleSelect.summary,

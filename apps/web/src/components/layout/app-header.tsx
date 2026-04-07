@@ -7,23 +7,32 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator.tsx'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import { type ContentType, contentTypeLabels, contentTypeOptions } from '@/types/content'
-import { Link, useLocation } from '@tanstack/react-router'
-import { LogOut, Rss, Star, UserRound } from 'lucide-react'
-import { useState } from 'react'
+import { Link, useLocation, useNavigate } from '@tanstack/react-router'
+import { LogOut, Rss, Search, Star, UserRound } from 'lucide-react'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 
 export const AppHeader = () => {
+  const navigate = useNavigate()
   const location = useLocation()
   const { session, signOut, openAuthDialog } = useAuth()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(location.pathname.startsWith('/search'))
+  const [searchValue, setSearchValue] = useState('')
+  const searchFormRef = useRef<HTMLFormElement | null>(null)
+  const searchAreaRef = useRef<HTMLDivElement | null>(null)
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
   const searchParams = new URLSearchParams(location.searchStr)
   const activeContentType = location.pathname === '/'
     ? (searchParams.get('type') as ContentType | null)
     : null
   const showHomeFilters = location.pathname === '/'
+  const isSearchPage = location.pathname.startsWith('/search')
+  const searchQuery = searchParams.get('q')?.trim() ?? ''
 
   const favoritesActive = location.pathname.startsWith('/favorites')
   const subscriptionsActive = location.pathname.startsWith('/subscriptions')
@@ -40,6 +49,57 @@ export const AppHeader = () => {
       ? 'bg-foreground text-background'
       : 'text-muted-foreground hover:bg-muted hover:text-foreground',
   )
+
+  useEffect(() => {
+    if (isSearchPage) {
+      setSearchValue(searchQuery)
+      return
+    }
+
+    setSearchOpen(false)
+    setSearchValue('')
+  }, [isSearchPage, location.pathname, searchQuery])
+
+  useEffect(() => {
+    if (searchOpen) {
+      searchInputRef.current?.focus()
+      searchInputRef.current?.select()
+    }
+  }, [searchOpen])
+
+  useEffect(() => {
+    if (!searchOpen) return
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target
+      if (!(target instanceof Node)) return
+      if (searchFormRef.current?.contains(target)) return
+      if (searchAreaRef.current?.contains(target)) return
+      setSearchOpen(false)
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+    }
+  }, [searchOpen])
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const nextQuery = searchValue.trim()
+    setSearchOpen(false)
+
+    void navigate({
+      to: '/search',
+      search: nextQuery ? { q: nextQuery } : {},
+    })
+  }
+
+  const openSearch = () => {
+    setSearchOpen(true)
+    setSearchValue(searchQuery)
+  }
 
   return (
     <>
@@ -67,11 +127,41 @@ export const AppHeader = () => {
             ) : null}
           </div>
 
-          <div className="hidden shrink-0 sm:block">
-            <img src={rivverText} alt="rivver_text" className="h-10" />
+          <div className="hidden h-10 min-w-0 shrink-0 sm:block sm:w-[20rem]">
+            {searchOpen ? (
+              <form ref={searchFormRef} onSubmit={handleSearchSubmit} className="relative h-10">
+                <Input
+                  ref={searchInputRef}
+                  value={searchValue}
+                  onChange={event => setSearchValue(event.target.value)}
+                  placeholder="搜索文章"
+                  className="h-10 rounded-full border-border/70 bg-background/90 pl-4 pr-12 text-sm shadow-none"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-1 top-1/2 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  aria-label="提交搜索"
+                >
+                  <Search className="size-4" />
+                </button>
+              </form>
+            ) : (
+              <div className="flex h-10 items-center justify-center">
+                <img src={rivverText} alt="rivver_text" className="h-10" />
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-1 h-4 items-center justify-end gap-2">
+          <div ref={searchAreaRef} className="flex flex-1 h-4 items-center justify-end gap-2">
+            {!isSearchPage ? (
+              <>
+                <Button variant="ghost" size="icon-sm" className="cursor-pointer rounded-full" onClick={openSearch}
+                        aria-label="搜索文章">
+                  <Search className="size-4" />
+                </Button>
+                <Separator orientation="vertical" className="opacity-50" />
+              </>
+            ) : null}
             {session?.user ? (
               <>
                 <Link

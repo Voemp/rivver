@@ -46,6 +46,19 @@ export const articleDetailQueryOptions = (id: number) =>
     staleTime: 1000 * 60 * 10,
   })
 
+export const searchArticles = async (q: string, offset = 0, limit = 24, contentType?: ContentType) =>
+  unwrapResponse(
+    appClient.article.search.get({ query: { q, offset, limit, contentType } }),
+    'Failed to search articles',
+  )
+
+export const articleSearchQueryOptions = (q: string, offset = 0, limit = 24, contentType?: ContentType) =>
+  queryOptions({
+    queryKey: ['article', 'search', q, offset, limit, contentType ?? 'all'] as const,
+    queryFn: () => searchArticles(q, offset, limit, contentType),
+    staleTime: 1000 * 30,
+  })
+
 export const postArticleAiSummary = async (id: number) =>
   unwrapResponse(appClient.article({ id })['ai-summary'].post(), 'Failed to generate AI summary')
 

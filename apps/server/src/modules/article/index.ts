@@ -26,6 +26,18 @@ export const article = new Elysia({
   },
 })
   .use(betterAuth)
+  .get('/search', async ({ query: { q, offset = 0, limit = 24, contentType } }) => {
+    const articles = await articleRepo.search(q, offset, Math.min(limit, 50), contentType)
+    return status(200, articles)
+  }, {
+    query: ArticleModel.articleSearchQuery,
+    response: {
+      200: ArticleModel.articleSearchResponse,
+    },
+    detail: {
+      security: [],
+    },
+  })
   .get('/:id', async ({ params: { id } }) => {
     const detail = await articleRepo.findById(id)
     return status(200, detail)

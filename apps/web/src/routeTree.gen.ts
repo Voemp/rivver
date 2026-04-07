@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FeedIdRouteImport } from './routes/feed.$id'
@@ -18,6 +19,11 @@ import { Route as ArticleIdRouteImport } from './routes/article.$id'
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
   id: '/subscriptions',
   path: '/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FavoritesRoute = FavoritesRouteImport.update({
@@ -44,6 +50,7 @@ const ArticleIdRoute = ArticleIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/search': typeof SearchRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/article/$id': typeof ArticleIdRoute
   '/feed/$id': typeof FeedIdRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/search': typeof SearchRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/article/$id': typeof ArticleIdRoute
   '/feed/$id': typeof FeedIdRoute
@@ -59,6 +67,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/search': typeof SearchRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/article/$id': typeof ArticleIdRoute
   '/feed/$id': typeof FeedIdRoute
@@ -68,15 +77,23 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/favorites'
+    | '/search'
     | '/subscriptions'
     | '/article/$id'
     | '/feed/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/favorites' | '/subscriptions' | '/article/$id' | '/feed/$id'
+  to:
+    | '/'
+    | '/favorites'
+    | '/search'
+    | '/subscriptions'
+    | '/article/$id'
+    | '/feed/$id'
   id:
     | '__root__'
     | '/'
     | '/favorites'
+    | '/search'
     | '/subscriptions'
     | '/article/$id'
     | '/feed/$id'
@@ -85,6 +102,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FavoritesRoute: typeof FavoritesRoute
+  SearchRoute: typeof SearchRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   ArticleIdRoute: typeof ArticleIdRoute
   FeedIdRoute: typeof FeedIdRoute
@@ -97,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/subscriptions'
       fullPath: '/subscriptions'
       preLoaderRoute: typeof SubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/favorites': {
@@ -133,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FavoritesRoute: FavoritesRoute,
+  SearchRoute: SearchRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   ArticleIdRoute: ArticleIdRoute,
   FeedIdRoute: FeedIdRoute,
