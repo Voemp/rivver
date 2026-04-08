@@ -65,8 +65,8 @@ export const HomeFeaturedSection = ({ items }: { items: HomeArticleItem[] }) => 
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Home Articles</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">精选文章</h1>
+        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Home Featured</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">精选内容</h1>
       </header>
 
       {/* LG 布局 */}

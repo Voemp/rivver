@@ -42,7 +42,7 @@ export const HomeFlowSection = ({ items, contentType }: { items: HomeArticleItem
         className="hidden lg:grid lg:grid-cols-[minmax(0,40rem)_18rem] lg:justify-center lg:gap-x-12 xl:grid-cols-[minmax(0,42rem)_19rem]">
         <div className="space-y-3">
           <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">flow articles</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Flow List</p>
             <h2 className="text-lg font-semibold tracking-tight text-foreground">流式列表</h2>
           </div>
           <FlowList items={items.slice(8)} />
