@@ -343,5 +343,4 @@ bun run db:studio
 - 完善测试、监控和部署能力
 
 ## License
-
-This project is private.
+Apache License 2.0
