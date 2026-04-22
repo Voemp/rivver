@@ -38,7 +38,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  --shadow-card: 0 0 8px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 0 8px 2px rgba(0, 0, 0, 0.12);
 }
 
 @theme inline {

@@ -12,10 +12,13 @@ import {
   refreshUserInterest, seedUserRecommendations,
 } from './service'
 
-function refreshRecommendations(userId: string) {
-  return refreshUserInterest(userId)
-    .then(() => seedUserRecommendations(userId))
-    .catch(() => undefined)
+async function refreshRecommendations(userId: string) {
+  try {
+    await refreshUserInterest(userId)
+    return await seedUserRecommendations(userId)
+  } catch {
+    return undefined
+  }
 }
 
 export const article = new Elysia({

@@ -2,10 +2,12 @@ import { feedPopularQueryOptions } from '@/api/queries'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils.ts'
 import { type ContentType, contentTypeLabels } from '@/types/content'
 import { formatRecentTime } from '@/utils/date'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import { ArrowUpRight } from 'lucide-react'
 
 type HomeFeedRecommendationProps = {
   contentType?: ContentType
@@ -69,6 +71,15 @@ export const HomeFeedRecommendation = ({ contentType }: HomeFeedRecommendationPr
                       <span>{(feed.subscriberCount ?? 0).toLocaleString('zh-CN')} 订阅</span>
                       <span className="h-3 w-px bg-border/60" />
                       <span>{formatRecentTime(feed.lastFetchedAt)}</span>
+                      <div
+                        className={cn(
+                          'pointer-events-none',
+                          'opacity-0 translate-y-1 transition-all duration-200',
+                          'group-hover:opacity-100 group-hover:translate-y-0',
+                        )}
+                      >
+                        <ArrowUpRight className="size-4 text-muted-foreground/80" />
+                      </div>
                     </div>
                   </div>
                 </div>
