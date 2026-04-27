@@ -20,5 +20,3 @@ export async function runEmbeddingGenerate() {
     running = false
   }
 }
-
-void runEmbeddingGenerate()
