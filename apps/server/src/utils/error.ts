@@ -2,11 +2,11 @@ import { res } from '@server/types/response'
 import { InvertedStatusMap } from 'elysia/utils'
 
 export class AppError extends Error {
-  readonly name = 'AppError'
+  override readonly name = 'AppError'
 
   constructor(
     readonly status: keyof InvertedStatusMap,
-    readonly message: string,
+    override readonly message: string,
     readonly code: string = 'INTERNAL_ERROR',
   ) {
     super(message)
