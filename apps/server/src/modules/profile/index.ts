@@ -5,7 +5,6 @@ import { profileRepo } from '@server/repos/profileRepo'
 import { ApiResponseModel } from '@server/types/response'
 import { AppError } from '@server/utils/error'
 import { Elysia, status } from 'elysia'
-import sharp from 'sharp'
 import { betterAuth } from '../auth/service'
 import { ProfileModel } from './model'
 
@@ -28,16 +27,15 @@ export const profile = new Elysia({
   })
   .put('/avatar', async ({ user, body }) => {
     const inputBuffer = Buffer.from(await body.file.arrayBuffer())
-    let output = await sharp(inputBuffer)
-      .rotate()
-      .resize(TARGET_SIZE, TARGET_SIZE, { fit: 'cover' })
+
+    let output = await new Bun.Image(inputBuffer)
+      .resize(TARGET_SIZE, TARGET_SIZE, { fit: 'inside' })
       .webp({ quality: 75 })
       .toBuffer()
 
     if (output.byteLength > MAX_OUTPUT_BYTES) {
-      output = await sharp(inputBuffer)
-        .rotate()
-        .resize(TARGET_SIZE, TARGET_SIZE, { fit: 'cover' })
+      output = await new Bun.Image(inputBuffer)
+        .resize(TARGET_SIZE, TARGET_SIZE, { fit: 'inside' })
         .webp({ quality: 65 })
         .toBuffer()
     }
@@ -47,6 +45,7 @@ export const profile = new Elysia({
     await ensureProfile(user.id)
 
     const profile = await profileRepo.updateAvatar(user.id, output, hash, 'image/webp')
+    if (!profile) throw new AppError(304, '更改头像失败', 'CHANGE_AVATAR_FAILED')
 
     return status(200, toProfileResponse(profile))
   }, {
@@ -54,6 +53,7 @@ export const profile = new Elysia({
     body: ProfileModel.avatarBody,
     response: {
       200: ProfileModel.profileResponse,
+      304: ApiResponseModel.error('更改头像失败', 'CHANGE_AVATAR_FAILED'),
     },
   })
   .get('/avatar', async ({ user, set, request, query }) => {

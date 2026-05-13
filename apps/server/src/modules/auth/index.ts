@@ -21,12 +21,12 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    },
-  },
+  // socialProviders: {
+  //   google: {
+  //     clientId: process.env.GOOGLE_CLIENT_ID!,
+  //     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+  //   },
+  // },
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
@@ -56,6 +56,8 @@ export const OpenAPI = {
       const reference: typeof paths = Object.create(null)
 
       for (const path of Object.keys(paths)) {
+        if (!paths[path]) continue
+
         const key = prefix + path
         reference[key] = paths[path]
 

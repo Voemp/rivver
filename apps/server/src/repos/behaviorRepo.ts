@@ -9,7 +9,7 @@ export const behaviorRepo = {
       .values(newBehavior)
       .returning()
 
-    return row
+    return row!
   },
   existsByUserArticleType: async (
     userId: string,

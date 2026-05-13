@@ -1,14 +1,14 @@
 import { db } from '@server/db'
-import { profile, type SelectProfile } from '@server/db/schema'
+import { type InsertProfile, profile, type SelectProfile } from '@server/db/schema'
 import { eq, sql } from 'drizzle-orm'
 
 export const profileRepo = {
-  create: async (data: Pick<SelectProfile, 'userId'>): Promise<SelectProfile> => {
+  create: async (data: Pick<InsertProfile, 'userId'>): Promise<SelectProfile> => {
     const [row] = await db
       .insert(profile)
       .values(data)
       .returning()
-    return row
+    return row!
   },
   findByUserId: async (userId: string): Promise<SelectProfile | undefined> => {
     return db.query.profile.findFirst({ where: { userId } })

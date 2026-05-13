@@ -1,7 +1,7 @@
 import { pipeline } from '@huggingface/transformers'
 import { db } from '@server/db'
 import { article } from '@server/db/schema'
-import { and, desc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 
 // 轻量中文模型（35MB）
 const generator = await pipeline('feature-extraction', 'TaylorAI/gte-tiny')
@@ -34,19 +34,19 @@ async function processBatch(articleIds: number[]) {
 }
 
 export async function generateEmbedding() {
-  const pending = await db
-    .select({
-      id: article.id,
-    })
-    .from(article)
-    .where(
-      and(
-        isNull(article.embedding),
-        isNotNull(article.contentSnippet),
-      ),
-    )
-    .orderBy(desc(article.createdAt))
-    .limit(100)
+  const pending = await db.query.article.findMany({
+    columns: {
+      id: true,
+    },
+    where: {
+      embedding: { isNull: true },
+      contentSnippet: { isNotNull: true },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    limit: 100,
+  })
 
   if (pending.length > 0) {
     console.log(`Processing ${pending.length} articles for embedding`)

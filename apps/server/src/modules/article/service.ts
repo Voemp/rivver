@@ -418,7 +418,7 @@ export async function refreshUserInterest(userId: string) {
     totalWeight += weight
 
     for (let index = 0; index < embedding.length; index++) {
-      vector[index] += embedding[index] * weight
+      vector[index]! += embedding[index]! * weight
     }
   }
 
