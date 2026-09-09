@@ -14,7 +14,7 @@
       "react",
       "react-dom"
     ],
-    "baseurl": ".",
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
