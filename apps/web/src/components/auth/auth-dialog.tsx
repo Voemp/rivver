@@ -1,10 +1,21 @@
 import { authClient } from '@/api/auth-client'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group.tsx'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group.tsx'
 import { Label } from '@/components/ui/label.tsx'
 import { Spinner } from '@/components/ui/spinner.tsx'
 import { useAuth } from '@/hooks/use-auth'
@@ -26,7 +37,8 @@ const authSchema = z.object({
 type AuthFormValues = z.infer<typeof authSchema>
 
 export function AuthDialog() {
-  const { authDialogMode, authDialogOpen, closeAuthDialog, openAuthDialog, refreshSession } = useAuth()
+  const { authDialogMode, authDialogOpen, closeAuthDialog, openAuthDialog, refreshSession } =
+    useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const isSignIn = authDialogMode === 'sign-in'
 
@@ -44,11 +56,15 @@ export function AuthDialog() {
     mutationFn: async (values: AuthFormValues) => {
       const { data, error } = isSignIn
         ? await authClient.signIn.email({
-          email: values.email,
-          password: values.password,
-          rememberMe: values.rememberMe,
-        })
-        : await authClient.signUp.email({ email: values.email, password: values.password, name: values.name! })
+            email: values.email,
+            password: values.password,
+            rememberMe: values.rememberMe,
+          })
+        : await authClient.signUp.email({
+            email: values.email,
+            password: values.password,
+            name: values.name!,
+          })
 
       if (error) throw new Error(error.message)
       return data
@@ -96,7 +112,12 @@ export function AuthDialog() {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="email">邮箱</FieldLabel>
-                    <Input {...field} type="email" placeholder="name@example.com" aria-invalid={fieldState.invalid} />
+                    <Input
+                      {...field}
+                      type="email"
+                      placeholder="name@example.com"
+                      aria-invalid={fieldState.invalid}
+                    />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}
@@ -118,7 +139,10 @@ export function AuthDialog() {
                       />
                       <InputGroupAddon align="inline-end">
                         <InputGroupButton
-                          type="button" aria-label="ShowPassword" title="显示/隐藏密码" size="icon-xs"
+                          type="button"
+                          aria-label="ShowPassword"
+                          title="显示/隐藏密码"
+                          size="icon-xs"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? <EyeOff /> : <Eye />}
@@ -152,11 +176,13 @@ export function AuthDialog() {
                 />
               )}
 
-              <Button type="submit" className="w-full h-11 text-base font-medium" disabled={isPending}>
+              <Button
+                type="submit"
+                className="w-full h-11 text-base font-medium"
+                disabled={isPending}
+              >
                 {isPending && <Spinner data-icon="inline-start" />}
-                {isSignIn
-                  ? isPending ? '登录中' : '登录'
-                  : isPending ? '注册中' : '注册'}
+                {isSignIn ? (isPending ? '登录中' : '登录') : isPending ? '注册中' : '注册'}
               </Button>
             </FieldGroup>
           </form>

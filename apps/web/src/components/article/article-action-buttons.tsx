@@ -1,6 +1,12 @@
 import { Button } from '@/components/ui/button'
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { cn } from '@/lib/utils'
@@ -29,17 +35,17 @@ type ArticleActionButtonsProps = {
 }
 
 export const ArticleActionButtons = ({
-                                       favorited = false,
-                                       originalLink,
-                                       sharePending,
-                                       sharePlatforms,
-                                       onFavorite,
-                                       onShare,
-                                       direction = 'column',
-                                       dropdownSide = 'top',
-                                       dropdownAlign = 'end',
-                                       className,
-                                     }: ArticleActionButtonsProps) => {
+  favorited = false,
+  originalLink,
+  sharePending,
+  sharePlatforms,
+  onFavorite,
+  onShare,
+  direction = 'column',
+  dropdownSide = 'top',
+  dropdownAlign = 'end',
+  className,
+}: ArticleActionButtonsProps) => {
   const buttonClassName =
     'h-10 w-10 rounded-full border-border/70 bg-background/80 shadow-none hover:bg-accent/50 supports-[backdrop-filter]:bg-background/65'
 
@@ -78,7 +84,7 @@ export const ArticleActionButtons = ({
       </Button>
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger>
           <Button
             size="icon-lg"
             variant="outline"
@@ -90,26 +96,30 @@ export const ArticleActionButtons = ({
             <Share2 className="size-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent side={dropdownSide} align={dropdownAlign}
-                             className="w-56 rounded-xl border-border/7 p-2 shadow-sm">
-          <DropdownMenuLabel>分享菜单</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {sharePlatforms.map(({ key, label, icon: Icon }) => (
-            <DropdownMenuItem
-              key={key}
-              onClick={() => onShare(key)}
-              className="rounded-sm py-2.5"
-            >
-              <Icon className="size-4" />
-              {label}
-            </DropdownMenuItem>
-          ))}
+        <DropdownMenuContent
+          side={dropdownSide}
+          align={dropdownAlign}
+          className="w-56 rounded-xl border-border/7 p-2 shadow-sm"
+        >
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>分享菜单</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {sharePlatforms.map(({ key, label, icon: Icon }) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => onShare(key)}
+                className="rounded-sm py-2.5"
+              >
+                <Icon className="size-4" />
+                {label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
   )
 }
-
 
 export const ArticleActionsSkeleton = () => (
   <div className="flex flex-col items-start gap-4 pt-6">
