@@ -9,21 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
-import { Route as SearchRouteImport } from './routes/search'
-import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as FeedIdRouteImport } from './routes/feed.$id'
+import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as ArticleIdRouteImport } from './routes/article.$id'
+import { Route as FeedIdRouteImport } from './routes/feed.$id'
 
-const SubscriptionsRoute = SubscriptionsRouteImport.update({
-  id: '/subscriptions',
-  path: '/subscriptions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FavoritesRoute = FavoritesRouteImport.update({
@@ -31,19 +26,24 @@ const FavoritesRoute = FavoritesRouteImport.update({
   path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FeedIdRoute = FeedIdRouteImport.update({
-  id: '/feed/$id',
-  path: '/feed/$id',
+const SubscriptionsRoute = SubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArticleIdRoute = ArticleIdRouteImport.update({
   id: '/article/$id',
   path: '/article/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedIdRoute = FeedIdRouteImport.update({
+  id: '/feed/$id',
+  path: '/feed/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -110,18 +110,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/subscriptions': {
-      id: '/subscriptions'
-      path: '/subscriptions'
-      fullPath: '/subscriptions'
-      preLoaderRoute: typeof SubscriptionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/search': {
-      id: '/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof SearchRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/favorites': {
@@ -131,18 +124,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/feed/$id': {
-      id: '/feed/$id'
-      path: '/feed/$id'
-      fullPath: '/feed/$id'
-      preLoaderRoute: typeof FeedIdRouteImport
+    '/subscriptions': {
+      id: '/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/subscriptions'
+      preLoaderRoute: typeof SubscriptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/article/$id': {
@@ -150,6 +143,13 @@ declare module '@tanstack/react-router' {
       path: '/article/$id'
       fullPath: '/article/$id'
       preLoaderRoute: typeof ArticleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed/$id': {
+      id: '/feed/$id'
+      path: '/feed/$id'
+      fullPath: '/feed/$id'
+      preLoaderRoute: typeof FeedIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
