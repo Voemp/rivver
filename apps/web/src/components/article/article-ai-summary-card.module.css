@@ -1,0 +1,59 @@
+/* AI 摘要卡片的旋转光束 + 光晕装饰。
+   颜色取自 Tailwind 内置调色板的原始值（teal-500 / yellow-400 / orange-500），
+   直接写死在这里，避免依赖按需生成的主题变量；两种主题下通用。 */
+.root {
+  --ai-accent-teal: oklch(0.704 0.14 182.503);
+  --ai-accent-yellow: oklch(0.852 0.199 91.936);
+  --ai-accent-orange: oklch(0.705 0.213 47.604);
+}
+
+/* 底层光晕：三层径向渐变 + 大半径模糊，衬在磨砂卡片后面 */
+.glow {
+  position: absolute;
+  inset: 0;
+  opacity: 0.75;
+  filter: blur(22px);
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in oklch, var(--ai-accent-teal) 20%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      color-mix(in oklch, var(--ai-accent-orange) 22%, transparent),
+      transparent 44%
+    ),
+    radial-gradient(
+      circle at center,
+      color-mix(in oklch, var(--ai-accent-yellow) 14%, transparent),
+      transparent 54%
+    );
+}
+
+/* 旋转光束：conic-gradient 转一圈，从磨砂卡片边缘透出流光 */
+.beam {
+  position: absolute;
+  inset: -130%;
+  opacity: 0.9;
+  background: conic-gradient(
+    from 90deg at 50% 50%,
+    transparent 0deg,
+    transparent 240deg,
+    var(--ai-accent-teal) 285deg,
+    var(--ai-accent-yellow) 320deg,
+    var(--ai-accent-orange) 350deg,
+    transparent 360deg
+  );
+  animation: ai-summary-border-spin 8s linear infinite;
+}
+
+@keyframes ai-summary-border-spin {
+  from {
+    transform: rotate(0deg) scale(1.05);
+  }
+
+  to {
+    transform: rotate(360deg) scale(1.05);
+  }
+}
