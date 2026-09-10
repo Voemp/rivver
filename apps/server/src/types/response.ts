@@ -7,10 +7,11 @@ export const ApiResponseModel = {
       data: t.Union([dataModel, t.Null()]),
       error: t.Null(),
     }),
-  error: (message?: string, code?: string) => t.Object({
-    code: code ? t.Literal(code) : t.String(),
-    message: message ? t.Literal(message) : t.String(),
-  }),
+  error: (message?: string, code?: string) =>
+    t.Object({
+      code: code ? t.Literal(code) : t.String(),
+      message: message ? t.Literal(message) : t.String(),
+    }),
 }
 
 export const res = {

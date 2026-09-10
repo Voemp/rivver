@@ -4,10 +4,7 @@ import { eq } from 'drizzle-orm'
 
 export const feedRepo = {
   create: async (newFeed: InsertFeed): Promise<SelectFeed> => {
-    const [row] = await db
-      .insert(feed)
-      .values(newFeed)
-      .returning()
+    const [row] = await db.insert(feed).values(newFeed).returning()
     if (!row) throw new Error('订阅源创建失败')
     return row
   },
@@ -28,12 +25,12 @@ export const feedRepo = {
     const feeds = await db.query.feed.findMany({
       where: contentType
         ? {
-          status: 'active',
-          contentType,
-        }
+            status: 'active',
+            contentType,
+          }
         : {
-          status: 'active',
-        },
+            status: 'active',
+          },
     })
 
     return feeds
@@ -53,9 +50,6 @@ export const feedRepo = {
       .slice(0, limit)
   },
   update: async (id: number, newFeed: Partial<InsertFeed>) => {
-    await db
-      .update(feed)
-      .set(newFeed)
-      .where(eq(feed.id, id))
+    await db.update(feed).set(newFeed).where(eq(feed.id, id))
   },
 } as const

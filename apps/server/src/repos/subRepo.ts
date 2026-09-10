@@ -1,16 +1,17 @@
 import { db } from '@server/db'
 import {
-  feed, type InsertSubscription, type SelectFeed, type SelectSubscription, subscription,
+  feed,
+  type InsertSubscription,
+  type SelectFeed,
+  type SelectSubscription,
+  subscription,
 } from '@server/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
 
 export const subRepo = {
   create: async (sub: InsertSubscription): Promise<SelectSubscription> => {
     return db.transaction(async (tx) => {
-      const [row] = await tx
-        .insert(subscription)
-        .values(sub)
-        .returning()
+      const [row] = await tx.insert(subscription).values(sub).returning()
       if (!row) throw new Error('订阅创建失败')
 
       await tx
@@ -25,12 +26,7 @@ export const subRepo = {
     return db.transaction(async (tx) => {
       const [row] = await tx
         .delete(subscription)
-        .where(
-          and(
-            eq(subscription.userId, userId),
-            eq(subscription.feedId, feedId),
-          ),
-        )
+        .where(and(eq(subscription.userId, userId), eq(subscription.feedId, feedId)))
         .returning({
           feedId: subscription.feedId,
         })
@@ -76,7 +72,10 @@ export const subRepo = {
       .innerJoin(feed, eq(subscription.feedId, feed.id))
       .where(eq(subscription.userId, userId))
   },
-  findByUserAndLink: async (userId: string, feedId: number): Promise<SelectSubscription | undefined> => {
+  findByUserAndLink: async (
+    userId: string,
+    feedId: number,
+  ): Promise<SelectSubscription | undefined> => {
     return db.query.subscription.findFirst({
       where: {
         userId,

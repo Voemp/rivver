@@ -7,10 +7,7 @@ export const ArticleModel = {
   articleParams: t.Object({
     id: t.Number(),
   }),
-  articleResponse: t.Omit(
-    articleSelect.schema,
-    ['summary', 'contentSnippet', 'embedding'],
-  ),
+  articleResponse: t.Omit(articleSelect.schema, ['summary', 'contentSnippet', 'embedding']),
   articleListQuery: t.Object({
     offset: t.Optional(t.Number({ minimum: 0 })),
     limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
@@ -22,28 +19,36 @@ export const ArticleModel = {
     limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
     contentType: t.Optional(t.UnionEnum(['article', 'image', 'video'], { default: undefined })),
   }),
-  articleListResponse: t.Array(t.Object({
-    id: articleSelect.id,
-    title: articleSelect.title,
-    summary: articleSelect.summary,
-    enclosure: articleSelect.enclosure,
-    pubDate: articleSelect.pubDate,
-    feed: t.Nullable(t.Object({
-      title: feedSelect.title,
-      image: feedSelect.image,
-    })),
-  })),
-  articleSearchResponse: t.Array(t.Object({
-    id: articleSelect.id,
-    title: articleSelect.title,
-    summary: articleSelect.summary,
-    enclosure: articleSelect.enclosure,
-    pubDate: articleSelect.pubDate,
-    feed: t.Nullable(t.Object({
-      title: feedSelect.title,
-      image: feedSelect.image,
-    })),
-  })),
+  articleListResponse: t.Array(
+    t.Object({
+      id: articleSelect.id,
+      title: articleSelect.title,
+      summary: articleSelect.summary,
+      enclosure: articleSelect.enclosure,
+      pubDate: articleSelect.pubDate,
+      feed: t.Nullable(
+        t.Object({
+          title: feedSelect.title,
+          image: feedSelect.image,
+        }),
+      ),
+    }),
+  ),
+  articleSearchResponse: t.Array(
+    t.Object({
+      id: articleSelect.id,
+      title: articleSelect.title,
+      summary: articleSelect.summary,
+      enclosure: articleSelect.enclosure,
+      pubDate: articleSelect.pubDate,
+      feed: t.Nullable(
+        t.Object({
+          title: feedSelect.title,
+          image: feedSelect.image,
+        }),
+      ),
+    }),
+  ),
   aiSummaryResponse: t.Object({
     articleId: t.Number(),
     aiSummary: t.String(),

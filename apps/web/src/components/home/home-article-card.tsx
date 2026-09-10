@@ -1,4 +1,9 @@
-import { AsideCard, FlowCard, type HomeArticleItem, VerticalCard } from '@/components/common/article-card.tsx'
+import {
+  AsideCard,
+  FlowCard,
+  type HomeArticleItem,
+  VerticalCard,
+} from '@/components/common/article-card.tsx'
 
 export type { HomeArticleItem } from '@/components/common/article-card.tsx'
 

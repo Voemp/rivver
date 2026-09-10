@@ -40,12 +40,12 @@ const getFeedFallback = (title: string) => {
 }
 
 export const FeedInfoCard = ({
-                               feed,
-                               subscribed = false,
-                               onSubscribe,
-                               onUnsubscribe,
-                               linkToFeed = false,
-                             }: FeedInfoCardProps) => {
+  feed,
+  subscribed = false,
+  onSubscribe,
+  onUnsubscribe,
+  linkToFeed = false,
+}: FeedInfoCardProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const description = feed.description?.trim() || feed.url || '暂无简介'
@@ -92,14 +92,11 @@ export const FeedInfoCard = ({
                 <p className="truncate text-sm font-semibold text-foreground group-hover:underline">
                   {feed.title || '未命名订阅源'}
                 </p>
-                <span
-                  className="inline-flex shrink-0 items-center rounded-full border border-border/70 bg-muted/55 px-2 py-0.5 text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+                <span className="inline-flex shrink-0 items-center rounded-full border border-border/70 bg-muted/55 px-2 py-0.5 text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
                   {contentTypeLabels[feed.contentType]}
                 </span>
               </div>
-              <p className="truncate text-xs leading-5 text-muted-foreground">
-                {description}
-              </p>
+              <p className="truncate text-xs leading-5 text-muted-foreground">{description}</p>
             </Link>
           ) : (
             <>
@@ -107,14 +104,11 @@ export const FeedInfoCard = ({
                 <p className="truncate text-sm font-semibold text-foreground">
                   {feed.title || '未命名订阅源'}
                 </p>
-                <span
-                  className="inline-flex shrink-0 items-center rounded-full border border-border/70 bg-muted/55 px-2 py-0.5 text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+                <span className="inline-flex shrink-0 items-center rounded-full border border-border/70 bg-muted/55 px-2 py-0.5 text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
                   {contentTypeLabels[feed.contentType]}
                 </span>
               </div>
-              <p className="truncate text-xs leading-5 text-muted-foreground">
-                {description}
-              </p>
+              <p className="truncate text-xs leading-5 text-muted-foreground">{description}</p>
             </>
           )}
         </div>

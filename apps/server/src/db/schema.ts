@@ -1,4 +1,18 @@
-import { boolean, bytea, index, integer, jsonb, pgEnum, pgTableCreator, primaryKey, serial, text, timestamp, uuid, vector } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  bytea,
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTableCreator,
+  primaryKey,
+  serial,
+  text,
+  timestamp,
+  uuid,
+  vector,
+} from 'drizzle-orm/pg-core'
 
 const pgTable = pgTableCreator((name) => name, 'snake_case')
 
@@ -61,7 +75,10 @@ export const account = pgTable.withRLS(
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (table) => [index('account_provider_account_idx').on(table.providerId, table.accountId), index('account_user_idx').on(table.userId)],
+  (table) => [
+    index('account_provider_account_idx').on(table.providerId, table.accountId),
+    index('account_user_idx').on(table.userId),
+  ],
 )
 
 export const verification = pgTable.withRLS(
@@ -165,7 +182,10 @@ export const article = pgTable.withRLS(
     pubDate: timestamp({ withTimezone: true }),
     createdAt: timestamp().notNull().defaultNow(),
   },
-  (table) => [index('articles_pub_date_idx').on(table.pubDate), index('embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops'))],
+  (table) => [
+    index('articles_pub_date_idx').on(table.pubDate),
+    index('embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
+  ],
 )
 export type SelectArticle = typeof article.$inferSelect
 export type InsertArticle = typeof article.$inferInsert
@@ -209,7 +229,10 @@ export const userFavorite = pgTable.withRLS(
       .notNull(),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [primaryKey({ columns: [table.userId, table.articleId] }), index('user_favorite_user_created_idx').on(table.userId, table.createdAt)],
+  (table) => [
+    primaryKey({ columns: [table.userId, table.articleId] }),
+    index('user_favorite_user_created_idx').on(table.userId, table.createdAt),
+  ],
 )
 
 export type SelectUserFavorite = typeof userFavorite.$inferSelect
@@ -235,7 +258,10 @@ export const userRecommendation = pgTable.withRLS(
       .notNull(),
     rank: integer().notNull(),
   },
-  (table) => [primaryKey({ columns: [table.userId, table.articleId] }), index('user_rank_idx').on(table.userId, table.rank)],
+  (table) => [
+    primaryKey({ columns: [table.userId, table.articleId] }),
+    index('user_rank_idx').on(table.userId, table.rank),
+  ],
 )
 export type InsertUserRecommendation = typeof userRecommendation.$inferInsert
 

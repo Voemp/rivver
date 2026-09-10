@@ -44,7 +44,9 @@ type PopularityCandidate = {
 }
 
 type WeightedSignal = Awaited<ReturnType<typeof behaviorRepo.listWeightedSignals>>[number]
-type RecommendationCandidate = Awaited<ReturnType<typeof articleRepo.listRecommendationCandidates>>[number]
+type RecommendationCandidate = Awaited<
+  ReturnType<typeof articleRepo.listRecommendationCandidates>
+>[number]
 type RankedRecommendationCandidate = {
   candidate: RecommendationCandidate
   score: number
@@ -82,7 +84,7 @@ function normalizeVector(vector: number[]) {
   const magnitude = Math.sqrt(vector.reduce((sum, value) => sum + value * value, 0))
   if (magnitude === 0) return null
 
-  return vector.map(value => value / magnitude)
+  return vector.map((value) => value / magnitude)
 }
 
 function normalizeWeightMap<T>(entries: Map<T, number>) {
@@ -101,7 +103,9 @@ function normalizeWeightMap<T>(entries: Map<T, number>) {
   return normalized
 }
 
-function normalizeContentTypeWeights(entries: Record<ContentKind, number>): Record<ContentKind, number> {
+function normalizeContentTypeWeights(
+  entries: Record<ContentKind, number>,
+): Record<ContentKind, number> {
   const totalWeight = entries.article + entries.image + entries.video
   if (totalWeight <= 0) {
     return {
@@ -144,7 +148,7 @@ function calcPopularityScore(candidate: PopularityCandidate, nowMs: number, base
   const scoreComponent = Math.log(1 + Math.max(0, rawScore))
   const recencyComponent = 1 / (1 + ageInDays / POPULAR_RECENCY_HALF_LIFE_DAYS)
 
-  return (POPULAR_SCORE_WEIGHT * scoreComponent) + (POPULAR_RECENCY_WEIGHT * recencyComponent)
+  return POPULAR_SCORE_WEIGHT * scoreComponent + POPULAR_RECENCY_WEIGHT * recencyComponent
 }
 
 function rankPopularityCandidates<T extends PopularityCandidate>(candidates: T[]): T[] {
@@ -165,15 +169,18 @@ function rankPopularityCandidates<T extends PopularityCandidate>(candidates: T[]
     return b.candidate.id - a.candidate.id
   })
 
-  return sorted.map(entry => entry.candidate)
+  return sorted.map((entry) => entry.candidate)
 }
 
 function orderArticlesByIds<T extends { id: number }>(articles: T[], ids: number[]): T[] {
-  const map = new Map(articles.map(article => [article.id, article]))
-  return ids.map(id => map.get(id)).filter(Boolean) as T[]
+  const map = new Map(articles.map((article) => [article.id, article]))
+  return ids.map((id) => map.get(id)).filter(Boolean) as T[]
 }
 
-function buildPreferenceProfile(signals: WeightedSignal[], interestVector: number[] | null): PreferenceProfile {
+function buildPreferenceProfile(
+  signals: WeightedSignal[],
+  interestVector: number[] | null,
+): PreferenceProfile {
   const rawFeedWeights = new Map<number, number>()
   const rawRecentFeedWeights = new Map<number, number>()
   const rawContentTypeWeights: Record<ContentKind, number> = {
@@ -197,7 +204,10 @@ function buildPreferenceProfile(signals: WeightedSignal[], interestVector: numbe
     if (index < RECENT_SIGNAL_WINDOW) {
       const recentDecay = 1 - (index / RECENT_SIGNAL_WINDOW) * 0.7
       const recentWeight = weight * (1.4 + recentDecay)
-      rawRecentFeedWeights.set(signal.feedId, (rawRecentFeedWeights.get(signal.feedId) ?? 0) + recentWeight)
+      rawRecentFeedWeights.set(
+        signal.feedId,
+        (rawRecentFeedWeights.get(signal.feedId) ?? 0) + recentWeight,
+      )
       rawRecentContentTypeWeights[signal.contentType] += recentWeight
     }
   }
@@ -216,9 +226,12 @@ function scoreRecommendationCandidate(
   profile: PreferenceProfile,
   popularityScore: number,
 ) {
-  const semanticScore = candidate.contentType === 'article' && profile.interestVector && candidate.embedding?.length === INTEREST_DIMENSIONS
-    ? cosineSimilarity(profile.interestVector, candidate.embedding)
-    : 0
+  const semanticScore =
+    candidate.contentType === 'article' &&
+    profile.interestVector &&
+    candidate.embedding?.length === INTEREST_DIMENSIONS
+      ? cosineSimilarity(profile.interestVector, candidate.embedding)
+      : 0
   const feedScore = profile.feedWeights.get(candidate.feedId) ?? 0
   const recentFeedScore = profile.recentFeedWeights.get(candidate.feedId) ?? 0
   const typeScore = profile.contentTypeWeights[candidate.contentType]
@@ -227,26 +240,29 @@ function scoreRecommendationCandidate(
 
   if (isMedia) {
     return (
-      (semanticScore * MEDIA_SEMANTIC_WEIGHT) +
-      (feedScore * MEDIA_FEED_WEIGHT) +
-      (typeScore * MEDIA_TYPE_WEIGHT) +
-      (recentFeedScore * MEDIA_RECENT_FEED_WEIGHT) +
-      (recentTypeScore * MEDIA_RECENT_TYPE_WEIGHT) +
-      (popularityScore * MEDIA_POPULARITY_WEIGHT)
+      semanticScore * MEDIA_SEMANTIC_WEIGHT +
+      feedScore * MEDIA_FEED_WEIGHT +
+      typeScore * MEDIA_TYPE_WEIGHT +
+      recentFeedScore * MEDIA_RECENT_FEED_WEIGHT +
+      recentTypeScore * MEDIA_RECENT_TYPE_WEIGHT +
+      popularityScore * MEDIA_POPULARITY_WEIGHT
     )
   }
 
   return (
-    (semanticScore * ARTICLE_SEMANTIC_WEIGHT) +
-    (feedScore * ARTICLE_FEED_WEIGHT) +
-    (typeScore * ARTICLE_TYPE_WEIGHT) +
-    (recentFeedScore * ARTICLE_RECENT_FEED_WEIGHT) +
-    (recentTypeScore * ARTICLE_RECENT_TYPE_WEIGHT) +
-    (popularityScore * ARTICLE_POPULARITY_WEIGHT)
+    semanticScore * ARTICLE_SEMANTIC_WEIGHT +
+    feedScore * ARTICLE_FEED_WEIGHT +
+    typeScore * ARTICLE_TYPE_WEIGHT +
+    recentFeedScore * ARTICLE_RECENT_FEED_WEIGHT +
+    recentTypeScore * ARTICLE_RECENT_TYPE_WEIGHT +
+    popularityScore * ARTICLE_POPULARITY_WEIGHT
   )
 }
 
-function rankRecommendationCandidates(candidates: RecommendationCandidate[], profile: PreferenceProfile) {
+function rankRecommendationCandidates(
+  candidates: RecommendationCandidate[],
+  profile: PreferenceProfile,
+) {
   const nowMs = Date.now()
   const rawPopularity = candidates.map((candidate) => {
     const baseDate = candidate.pubDate ?? candidate.createdAt
@@ -313,8 +329,8 @@ function pickDiversifiedCandidateIndex(
     .toSorted((a, b) => b.adjustedScore - a.adjustedScore)
 
   const pool = scored.slice(0, Math.min(DIVERSITY_RANDOM_POOL_SIZE, scored.length))
-  const minScore = Math.min(...pool.map(item => item.adjustedScore))
-  const weights = pool.map(item => Math.max(0.001, item.adjustedScore - minScore + 0.01))
+  const minScore = Math.min(...pool.map((item) => item.adjustedScore))
+  const weights = pool.map((item) => Math.max(0.001, item.adjustedScore - minScore + 0.01))
   const totalWeight = weights.reduce((sum, value) => sum + value, 0)
   let random = Math.random() * totalWeight
 
@@ -328,11 +344,11 @@ function pickDiversifiedCandidateIndex(
   return pool[0]?.index ?? 0
 }
 
-function diversifyRecommendationCandidates(
-  ranked: RankedRecommendationCandidate[],
-  limit: number,
-) {
-  const remaining = ranked.slice(0, Math.min(ranked.length, limit * DIVERSIFIED_CANDIDATE_MULTIPLIER))
+function diversifyRecommendationCandidates(ranked: RankedRecommendationCandidate[], limit: number) {
+  const remaining = ranked.slice(
+    0,
+    Math.min(ranked.length, limit * DIVERSIFIED_CANDIDATE_MULTIPLIER),
+  )
   const selected: RankedRecommendationCandidate[] = []
   const feedCounts = new Map<number, number>()
   const typeCounts: Record<ContentKind, number> = {
@@ -355,19 +371,23 @@ function diversifyRecommendationCandidates(
   if (selected.length < limit) {
     for (const entry of ranked) {
       if (selected.length >= limit) break
-      if (selected.some(item => item.candidate.id === entry.candidate.id)) continue
+      if (selected.some((item) => item.candidate.id === entry.candidate.id)) continue
       selected.push(entry)
     }
   }
 
-  return selected.map(entry => entry.candidate)
+  return selected.map((entry) => entry.candidate)
 }
 
-export async function listPopularArticles(offset: number, limit: number, contentType?: ContentKind) {
+export async function listPopularArticles(
+  offset: number,
+  limit: number,
+  contentType?: ContentKind,
+) {
   const candidates = await articleRepo.listPopularityCandidates([], contentType)
   const orderedIds = rankPopularityCandidates(candidates)
     .slice(offset, offset + limit)
-    .map(candidate => candidate.id)
+    .map((candidate) => candidate.id)
 
   if (orderedIds.length === 0) return []
 
@@ -375,11 +395,15 @@ export async function listPopularArticles(offset: number, limit: number, content
   return orderArticlesByIds(articles, orderedIds)
 }
 
-export async function listFallbackForRecommendation(excludedIds: number[], limit: number, contentType?: ContentKind) {
+export async function listFallbackForRecommendation(
+  excludedIds: number[],
+  limit: number,
+  contentType?: ContentKind,
+) {
   const candidates = await articleRepo.listPopularityCandidates(excludedIds, contentType)
   return rankPopularityCandidates(candidates)
     .slice(0, limit)
-    .map(candidate => candidate.id)
+    .map((candidate) => candidate.id)
 }
 
 export function calcReadScore(progress: number): number {
@@ -424,7 +448,7 @@ export async function refreshUserInterest(userId: string) {
     return null
   }
 
-  const averaged = vector.map(value => value / totalWeight)
+  const averaged = vector.map((value) => value / totalWeight)
   const normalized = normalizeVector(averaged)
   if (!normalized) return null
 
@@ -450,26 +474,30 @@ export async function seedUserRecommendations(userId: string, contentType?: Cont
   const candidateIds = diversifyRecommendationCandidates(
     rankRecommendationCandidates(candidates, profile),
     MAX_RECOMMENDATIONS,
-  )
-    .map(candidate => candidate.id)
+  ).map((candidate) => candidate.id)
 
-  const fallbackIds = candidateIds.length < MAX_RECOMMENDATIONS
-    ? await listFallbackForRecommendation(
-      [...seenArticleIds, ...candidateIds],
-      MAX_RECOMMENDATIONS - candidateIds.length,
-      contentType,
-    )
-    : []
+  const fallbackIds =
+    candidateIds.length < MAX_RECOMMENDATIONS
+      ? await listFallbackForRecommendation(
+          [...seenArticleIds, ...candidateIds],
+          MAX_RECOMMENDATIONS - candidateIds.length,
+          contentType,
+        )
+      : []
 
   const articleIds = [...candidateIds, ...fallbackIds]
 
   await recommendRepo.clearByUser(userId)
 
-  await Promise.all(articleIds.map((articleId, rank) => recommendRepo.create({
-    userId,
-    articleId,
-    rank,
-  })))
+  await Promise.all(
+    articleIds.map((articleId, rank) =>
+      recommendRepo.create({
+        userId,
+        articleId,
+        rank,
+      }),
+    ),
+  )
 
   return articleIds
 }

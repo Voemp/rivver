@@ -9,7 +9,8 @@ export const interestRepo = {
     })
   },
   upsert: async (userId: string, interestVector: number[], articleCount: number) => {
-    const [row] = await db.insert(userInterest)
+    const [row] = await db
+      .insert(userInterest)
       .values({
         userId,
         interestVector,
@@ -29,7 +30,8 @@ export const interestRepo = {
     return row
   },
   touchEmpty: async (userId: string) => {
-    await db.update(userInterest)
+    await db
+      .update(userInterest)
       .set({ updatedAt: new Date() })
       .where(eq(userInterest.userId, userId))
   },

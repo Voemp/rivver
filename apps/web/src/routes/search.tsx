@@ -15,7 +15,7 @@ const searchPageSchema = z.object({
 })
 
 export const Route = createFileRoute('/search')({
-  validateSearch: search => searchPageSchema.parse(search),
+  validateSearch: (search) => searchPageSchema.parse(search),
   loaderDeps: ({ search }) => ({ q: search.q?.trim() ?? '' }),
   loader: async ({ context, deps: { q } }) => {
     if (!q) return null
@@ -54,7 +54,9 @@ function SearchPage({ q }: { q?: string }) {
     <section className="mx-auto w-full max-w-6xl space-y-6">
       <div className="space-y-4">
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Article Search</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+            Article Search
+          </p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">搜索文章</h1>
         </div>
 
@@ -62,7 +64,7 @@ function SearchPage({ q }: { q?: string }) {
           <div className="relative">
             <Input
               value={value}
-              onChange={event => setValue(event.target.value)}
+              onChange={(event) => setValue(event.target.value)}
               placeholder="搜索标题、摘要或正文片段"
               className="h-11 rounded-full pl-4 pr-14 text-sm"
             />
@@ -100,7 +102,9 @@ function SearchPage({ q }: { q?: string }) {
           <div className="flex items-end justify-between gap-3">
             <div className="space-y-1">
               <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Results</p>
-              <h2 className="text-lg font-semibold tracking-tight text-foreground">“{q}” 的搜索结果</h2>
+              <h2 className="text-lg font-semibold tracking-tight text-foreground">
+                “{q}” 的搜索结果
+              </h2>
             </div>
             <p className="text-sm text-muted-foreground">{query.data.length} 条结果</p>
           </div>

@@ -25,22 +25,22 @@ type MediaArticle = {
 
 type ParsedVideoEmbed =
   | {
-  kind: 'iframe'
-  src: string
-  title?: string | null
-  allow?: string | null
-  allowFullScreen: boolean
-}
+      kind: 'iframe'
+      src: string
+      title?: string | null
+      allow?: string | null
+      allowFullScreen: boolean
+    }
   | {
-  kind: 'video'
-  src: string
-  poster?: string | null
-}
+      kind: 'video'
+      src: string
+      poster?: string | null
+    }
   | {
-  kind: 'embed'
-  src: string
-  type?: string | null
-}
+      kind: 'embed'
+      src: string
+      type?: string | null
+    }
 
 type ParsedMediaContent = {
   images: string[]
@@ -53,16 +53,21 @@ type ArticleMediaDetailProps = {
   feed: FeedInfo
 }
 
-const EMPTY_WRAPPER_PATTERN = /<(div|section|figure|picture|p|span)[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/\1>/gi
+const EMPTY_WRAPPER_PATTERN =
+  /<(div|section|figure|picture|p|span)[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/\1>/gi
 const TAG_PATTERN = /<[^>]+>/g
 const WHITESPACE_PATTERN = /\s+/g
 
-function extractMediaFallback(content?: string | null, enclosure?: MediaArticle['enclosure']): ParsedMediaContent {
+function extractMediaFallback(
+  content?: string | null,
+  enclosure?: MediaArticle['enclosure'],
+): ParsedMediaContent {
   const contentValue = content ?? ''
   const imageMatches = Array.from(contentValue.matchAll(/<img\b[^>]*\bsrc=(['"]?)([^'" >]+)\1/gi))
     .map((match) => match[2]?.trim())
     .filter((value): value is string => Boolean(value))
-  const enclosureImage = enclosure?.type?.startsWith('image/') && enclosure.url ? [enclosure.url] : []
+  const enclosureImage =
+    enclosure?.type?.startsWith('image/') && enclosure.url ? [enclosure.url] : []
   const images = [...new Set([...imageMatches, ...enclosureImage])]
   const iframeMatch = contentValue.match(/<iframe\b[^>]*\bsrc=(['"]?)([^'" >]+)\1[^>]*>/i)
   const videoMatch = contentValue.match(/<video\b[^>]*\bsrc=(['"]?)([^'" >]+)\1[^>]*>/i)
@@ -118,16 +123,20 @@ function hasMeaningfulText(content: string) {
   return content.replace(TAG_PATTERN, ' ').replace(WHITESPACE_PATTERN, '').length > 0
 }
 
-function parseMediaContent(content?: string | null, enclosure?: MediaArticle['enclosure']): ParsedMediaContent {
+function parseMediaContent(
+  content?: string | null,
+  enclosure?: MediaArticle['enclosure'],
+): ParsedMediaContent {
   if (typeof window === 'undefined' || typeof DOMParser === 'undefined') {
     return extractMediaFallback(content, enclosure)
   }
 
   const doc = new DOMParser().parseFromString(content ?? '', 'text/html')
   const imageUrls = Array.from(doc.querySelectorAll('img'))
-    .map(node => node.getAttribute('src')?.trim())
+    .map((node) => node.getAttribute('src')?.trim())
     .filter((value): value is string => Boolean(value))
-  const enclosureImage = enclosure?.type?.startsWith('image/') && enclosure.url ? [enclosure.url] : []
+  const enclosureImage =
+    enclosure?.type?.startsWith('image/') && enclosure.url ? [enclosure.url] : []
   const images = [...new Set([...imageUrls, ...enclosureImage])]
 
   const mediaNode = doc.querySelector('iframe, video, embed')
@@ -173,9 +182,7 @@ function parseMediaContent(content?: string | null, enclosure?: MediaArticle['en
     node.remove()
   }
 
-  const textContent = doc.body.innerHTML
-    .replace(EMPTY_WRAPPER_PATTERN, '')
-    .trim()
+  const textContent = doc.body.innerHTML.replace(EMPTY_WRAPPER_PATTERN, '').trim()
 
   return {
     images,
@@ -190,18 +197,17 @@ function getFeedFallback(title: string) {
 }
 
 function MediaMetaBlock({
-                          article,
-                          feed,
-                          extraLabel,
-                        }: {
+  article,
+  feed,
+  extraLabel,
+}: {
   article: MediaArticle
   feed: FeedInfo
   extraLabel: string
 }) {
   return (
     <header className="mx-auto max-w-3xl pt-1">
-      <div
-        className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/80">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/80">
         <span className="inline-flex items-center text-foreground/86">
           {contentTypeLabels[article.contentType]}
         </span>
@@ -222,19 +228,27 @@ function MediaMetaBlock({
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">来源</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">
+              来源
+            </p>
             <p className="truncate text-sm font-medium text-foreground">{feed.title}</p>
           </div>
         </div>
 
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">Author</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">
+            Author
+          </p>
           <p className="mt-1 text-sm font-medium text-foreground">{article.author ?? 'Unknown'}</p>
         </div>
 
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">Published</p>
-          <p className="mt-1 text-sm font-medium text-foreground">{formatRecentTime(article.pubDate) || '未知时间'}</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">
+            Published
+          </p>
+          <p className="mt-1 text-sm font-medium text-foreground">
+            {formatRecentTime(article.pubDate) || '未知时间'}
+          </p>
         </div>
       </div>
     </header>
@@ -252,11 +266,15 @@ export const ArticleMediaDetail = ({ article, feed }: ArticleMediaDetailProps) =
 
   // 渲染期调整 state（React 官方推荐模式，避免 effect 级联渲染）：
   // 切换文章时重置图片选择；切换内容类型/图片时同步加载态
-  const [prevSync, setPrevSync] = useState({ articleId: article.id, contentType: article.contentType, currentImage })
+  const [prevSync, setPrevSync] = useState({
+    articleId: article.id,
+    contentType: article.contentType,
+    currentImage,
+  })
   if (
-    prevSync.articleId !== article.id
-    || prevSync.contentType !== article.contentType
-    || prevSync.currentImage !== currentImage
+    prevSync.articleId !== article.id ||
+    prevSync.contentType !== article.contentType ||
+    prevSync.currentImage !== currentImage
   ) {
     setPrevSync({ articleId: article.id, contentType: article.contentType, currentImage })
     if (prevSync.articleId !== article.id) {
@@ -276,13 +294,11 @@ export const ArticleMediaDetail = ({ article, feed }: ArticleMediaDetailProps) =
       <section className="space-y-5">
         <div className="mx-auto max-w-5xl">
           <div className="relative overflow-hidden bg-muted/24">
-            <div
-              className="absolute top-4 left-4 z-10 bg-background/88 px-2.5 py-1 text-xs font-medium text-foreground/88">
+            <div className="absolute top-4 left-4 z-10 bg-background/88 px-2.5 py-1 text-xs font-medium text-foreground/88">
               {imageCount > 0 ? `${activeImageIndex + 1} / ${imageCount}` : '暂无图片'}
             </div>
 
-            <div
-              className="relative flex h-92 items-center justify-center overflow-hidden rounded-xl border bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.14),transparent_58%)] px-4 py-8 sm:h-124 sm:px-8 lg:h-152">
+            <div className="relative flex h-92 items-center justify-center overflow-hidden rounded-xl border bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.14),transparent_58%)] px-4 py-8 sm:h-124 sm:px-8 lg:h-152">
               {currentImage ? (
                 <>
                   <img
@@ -299,8 +315,7 @@ export const ArticleMediaDetail = ({ article, feed }: ArticleMediaDetailProps) =
                     )}
                   />
                   {isImageLoading ? (
-                    <div
-                      className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/72 backdrop-blur-[1px]">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/72 backdrop-blur-[1px]">
                       <Spinner className="size-5 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">图片加载中</p>
                     </div>
@@ -319,7 +334,9 @@ export const ArticleMediaDetail = ({ article, feed }: ArticleMediaDetailProps) =
                     variant="outline"
                     size="icon-lg"
                     className="absolute left-4 rounded-full border-border/60 bg-background/88 sm:left-6"
-                    onClick={() => setActiveImageIndex(index => (index - 1 + imageCount) % imageCount)}
+                    onClick={() =>
+                      setActiveImageIndex((index) => (index - 1 + imageCount) % imageCount)
+                    }
                     aria-label="上一张"
                   >
                     <ChevronLeft className="size-4" />
@@ -328,7 +345,7 @@ export const ArticleMediaDetail = ({ article, feed }: ArticleMediaDetailProps) =
                     variant="outline"
                     size="icon-lg"
                     className="absolute right-4 rounded-full border-border/60 bg-background/88 sm:right-6"
-                    onClick={() => setActiveImageIndex(index => (index + 1) % imageCount)}
+                    onClick={() => setActiveImageIndex((index) => (index + 1) % imageCount)}
                     aria-label="下一张"
                   >
                     <ChevronRight className="size-4" />

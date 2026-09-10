@@ -1,14 +1,28 @@
 import {
-  articleDetailQueryOptions, articleFavoriteQueryOptions, deleteFavorite, deleteSubscription, feedDetailQueryOptions,
-  feedSubscriptionQueryOptions, postArticleAiSummary, postArticleClick, postArticleShare, postFavorite,
+  articleDetailQueryOptions,
+  articleFavoriteQueryOptions,
+  deleteFavorite,
+  deleteSubscription,
+  feedDetailQueryOptions,
+  feedSubscriptionQueryOptions,
+  postArticleAiSummary,
+  postArticleClick,
+  postArticleShare,
+  postFavorite,
   postSubscription,
 } from '@/api/queries'
 import {
-  ArticleActionButtons, ArticleActionsSkeleton, type SharePlatform, type SharePlatformItem,
+  ArticleActionButtons,
+  ArticleActionsSkeleton,
+  type SharePlatform,
+  type SharePlatformItem,
 } from '@/components/article/article-action-buttons'
 import { ArticleAiSummaryCard } from '@/components/article/article-ai-summary-card'
 import { ArticleAudioCard, ArticleAudioSkeleton } from '@/components/article/article-audio-card'
-import { ArticleContentCard, ArticleContentSkeleton } from '@/components/article/article-content-card'
+import {
+  ArticleContentCard,
+  ArticleContentSkeleton,
+} from '@/components/article/article-content-card'
 import { ArticleMediaDetail } from '@/components/article/article-media-detail'
 import { ArticleTitleCard, ArticleTitleSkeleton } from '@/components/article/article-title-card.tsx'
 import { ArticleTocCard, ArticleTocSkeleton } from '@/components/article/article-toc-card'
@@ -89,7 +103,11 @@ const shareToPlatform = async (platform: SharePlatform, url: string): Promise<vo
       window.open(`https://x.com/intent/tweet?url=${encodedUrl}`, '_blank', windowFeatures)
       break
     case 'weibo':
-      window.open(`https://service.weibo.com/share/share.php?url=${encodedUrl}`, '_blank', windowFeatures)
+      window.open(
+        `https://service.weibo.com/share/share.php?url=${encodedUrl}`,
+        '_blank',
+        windowFeatures,
+      )
       break
     case 'telegram':
       window.open(`https://t.me/share/url?url=${encodedUrl}`, '_blank', windowFeatures)
@@ -123,10 +141,13 @@ function Article() {
       await queryClient.cancelQueries({ queryKey: ['article', id, 'favorite'] })
       const previousFavorite = queryClient.getQueryData(['article', id, 'favorite'])
 
-      queryClient.setQueryData(['article', id, 'favorite'], (old: { favorited?: boolean } | undefined) => ({
-        ...old,
-        favorited: !old?.favorited,
-      }))
+      queryClient.setQueryData(
+        ['article', id, 'favorite'],
+        (old: { favorited?: boolean } | undefined) => ({
+          ...old,
+          favorited: !old?.favorited,
+        }),
+      )
 
       return { previousFavorite }
     },
@@ -149,7 +170,11 @@ function Article() {
         queryClient.cancelQueries({ queryKey: ['feed', article.feedId, 'subscription'] }),
         queryClient.cancelQueries({ queryKey: ['feed', article.feedId, 'detail'] }),
       ])
-      const previousSubscription = queryClient.getQueryData(['feed', article.feedId, 'subscription'])
+      const previousSubscription = queryClient.getQueryData([
+        'feed',
+        article.feedId,
+        'subscription',
+      ])
       const previousFeedDetail = queryClient.getQueryData(['feed', article.feedId, 'detail'])
 
       queryClient.setQueryData(
@@ -173,8 +198,14 @@ function Article() {
       return { previousSubscription, previousFeedDetail }
     },
     onError: (err, _new, onMutateResult) => {
-      queryClient.setQueryData(['feed', article.feedId, 'subscription'], onMutateResult?.previousSubscription)
-      queryClient.setQueryData(['feed', article.feedId, 'detail'], onMutateResult?.previousFeedDetail)
+      queryClient.setQueryData(
+        ['feed', article.feedId, 'subscription'],
+        onMutateResult?.previousSubscription,
+      )
+      queryClient.setQueryData(
+        ['feed', article.feedId, 'detail'],
+        onMutateResult?.previousFeedDetail,
+      )
       toast.error(err.message || 'Failed to update subscription')
     },
     onSettled: () => {
@@ -260,28 +291,27 @@ type ArticlePageProps = {
 }
 
 function StandardArticleLayout({
-                                 article,
-                                 feed,
-                                 subscribed,
-                                 favorited,
-                                 sharePending,
-                                 onSubscribe,
-                                 onUnsubscribe,
-                                 onFavorite,
-                                 onShare,
-                               }: ArticlePageProps) {
+  article,
+  feed,
+  subscribed,
+  favorited,
+  sharePending,
+  onSubscribe,
+  onUnsubscribe,
+  onFavorite,
+  onShare,
+}: ArticlePageProps) {
   const id = article.id
   const queryClient = useQueryClient()
   const aiSummaryMutation = useMutation({
     mutationFn: async () => postArticleAiSummary(id),
     onSuccess: (result) => {
-      queryClient.setQueryData(
-        ['article', id, 'detail'],
-        (old: typeof article | undefined) => old
+      queryClient.setQueryData(['article', id, 'detail'], (old: typeof article | undefined) =>
+        old
           ? {
-            ...old,
-            aiSummary: result.aiSummary,
-          }
+              ...old,
+              aiSummary: result.aiSummary,
+            }
           : old,
       )
     },
@@ -305,7 +335,13 @@ function StandardArticleLayout({
     if (isAiSummaryPending || isAiSummarySuccess || isAiSummaryError) return
 
     generateAiSummary()
-  }, [article.aiSummary, generateAiSummary, isAiSummaryError, isAiSummaryPending, isAiSummarySuccess])
+  }, [
+    article.aiSummary,
+    generateAiSummary,
+    isAiSummaryError,
+    isAiSummaryPending,
+    isAiSummarySuccess,
+  ])
 
   const { progress, headings } = useReadingProgress({ articleId: id })
   const content = article.content ?? ''
@@ -315,8 +351,7 @@ function StandardArticleLayout({
 
   return (
     <section className="relative isolate py-4 pb-16 sm:py-6 lg:py-8">
-      <div
-        className="mx-auto grid max-w-368 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,52rem)_18rem] lg:gap-x-8 xl:grid-cols-[20rem_minmax(0,52rem)_18rem] xl:gap-x-10">
+      <div className="mx-auto grid max-w-368 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,52rem)_18rem] lg:gap-x-8 xl:grid-cols-[20rem_minmax(0,52rem)_18rem] xl:gap-x-10">
         <aside className="hidden xl:block xl:col-start-1">
           <div className="sticky top-30 space-y-6 pr-2">
             <ArticleAiSummaryCard
@@ -331,7 +366,12 @@ function StandardArticleLayout({
 
         <article className="mx-auto min-w-0 w-full max-w-4xl lg:col-start-2 lg:mx-0">
           <Suspense fallback={<ArticleDetailSkeleton />}>
-            <ArticleTitleCard title={article.title} author={article.author} pubDate={article.pubDate} feed={feed} />
+            <ArticleTitleCard
+              title={article.title}
+              author={article.author}
+              pubDate={article.pubDate}
+              feed={feed}
+            />
 
             <Separator />
 
@@ -384,20 +424,19 @@ function StandardArticleLayout({
 }
 
 function MediaArticleLayout({
-                              article,
-                              feed,
-                              subscribed,
-                              favorited,
-                              sharePending,
-                              onSubscribe,
-                              onUnsubscribe,
-                              onFavorite,
-                              onShare,
-                            }: ArticlePageProps) {
+  article,
+  feed,
+  subscribed,
+  favorited,
+  sharePending,
+  onSubscribe,
+  onUnsubscribe,
+  onFavorite,
+  onShare,
+}: ArticlePageProps) {
   return (
     <section className="relative isolate py-4 pb-16 sm:py-6 lg:py-8">
-      <div
-        className="mx-auto grid max-w-376 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,64rem)_18rem] lg:gap-x-8 xl:grid-cols-[minmax(0,68rem)_18rem] xl:gap-x-10">
+      <div className="mx-auto grid max-w-376 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,64rem)_18rem] lg:gap-x-8 xl:grid-cols-[minmax(0,68rem)_18rem] xl:gap-x-10">
         <article className="mx-auto min-w-0 w-full max-w-5xl lg:mx-0">
           <Suspense fallback={<ArticleDetailSkeleton />}>
             <ArticleMediaDetail article={article} feed={feed} />
@@ -447,8 +486,7 @@ const ArticleDetailSkeleton = () => (
 function ArticleSkeleton() {
   return (
     <section className="relative isolate py-4 pb-16 sm:py-6 lg:py-8">
-      <div
-        className="mx-auto grid max-w-368 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,52rem)_18rem] lg:gap-x-8 xl:grid-cols-[20rem_minmax(0,52rem)_18rem] xl:gap-x-10">
+      <div className="mx-auto grid max-w-368 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,52rem)_18rem] lg:gap-x-8 xl:grid-cols-[20rem_minmax(0,52rem)_18rem] xl:gap-x-10">
         <aside className="hidden xl:block xl:col-start-1">
           <div className="sticky top-30 pr-2">
             <ArticleAiSummaryCard summary={null} pending errorMessage={undefined} layout="aside" />

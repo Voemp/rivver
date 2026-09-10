@@ -1,16 +1,10 @@
 {
   "compilerOptions": {
-    "lib": [
-      "ESNext"
-    ],
+    "lib": ["ESNext"],
     "target": "ESNext",
-    "types": [
-      "bun"
-    ],
+    "types": ["bun"],
     "paths": {
-      "@server/*": [
-        "./src/*"
-      ]
+      "@server/*": ["./src/*"]
     },
     // 模块系统
     "module": "Preserve",
@@ -37,5 +31,5 @@
     // 工程兼容性
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
-  },
+  }
 }

@@ -1,13 +1,15 @@
 import { db } from '@server/db'
-import { article, type InsertUserBehavior, type SelectUserBehavior, userBehavior } from '@server/db/schema'
+import {
+  article,
+  type InsertUserBehavior,
+  type SelectUserBehavior,
+  userBehavior,
+} from '@server/db/schema'
 import { and, desc, eq, gt } from 'drizzle-orm'
 
 export const behaviorRepo = {
   create: async (newBehavior: InsertUserBehavior): Promise<SelectUserBehavior> => {
-    const [row] = await db
-      .insert(userBehavior)
-      .values(newBehavior)
-      .returning()
+    const [row] = await db.insert(userBehavior).values(newBehavior).returning()
 
     if (!row) throw new Error('行为记录创建失败')
     return row
@@ -46,11 +48,13 @@ export const behaviorRepo = {
     await db
       .update(userBehavior)
       .set(newBehavior)
-      .where(and(
-        eq(userBehavior.userId, userId),
-        eq(userBehavior.articleId, articleId),
-        eq(userBehavior.type, 'read'),
-      ))
+      .where(
+        and(
+          eq(userBehavior.userId, userId),
+          eq(userBehavior.articleId, articleId),
+          eq(userBehavior.type, 'read'),
+        ),
+      )
   },
   listWeightedSignals: async (userId: string, limit: number) => {
     return db
@@ -64,17 +68,14 @@ export const behaviorRepo = {
       })
       .from(userBehavior)
       .innerJoin(article, eq(userBehavior.articleId, article.id))
-      .where(and(
-        eq(userBehavior.userId, userId),
-        gt(userBehavior.score, 0),
-      ))
+      .where(and(eq(userBehavior.userId, userId), gt(userBehavior.score, 0)))
       .orderBy(desc(userBehavior.createdAt))
       .limit(limit)
   },
   listWeightedForInterest: async (userId: string, limit: number) => {
     return behaviorRepo
       .listWeightedSignals(userId, limit)
-      .then(rows => rows.filter(row => row.embedding && row.embedding.length > 0))
+      .then((rows) => rows.filter((row) => row.embedding && row.embedding.length > 0))
   },
   listSeenArticleIds: async (userId: string, limit = 500) => {
     return db
@@ -85,6 +86,6 @@ export const behaviorRepo = {
       .where(eq(userBehavior.userId, userId))
       .orderBy(desc(userBehavior.createdAt))
       .limit(limit)
-      .then(rows => Array.from(new Set(rows.map(row => row.articleId))))
+      .then((rows) => Array.from(new Set(rows.map((row) => row.articleId))))
   },
 } as const

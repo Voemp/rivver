@@ -27,9 +27,7 @@ async function processBatch(articleIds: number[]) {
     const embedding = Array.from(output.data)
 
     // 更新数据库
-    await db.update(article)
-      .set({ embedding })
-      .where(eq(article.id, a.id))
+    await db.update(article).set({ embedding }).where(eq(article.id, a.id))
   }
 }
 
@@ -50,6 +48,6 @@ export async function generateEmbedding() {
 
   if (pending.length > 0) {
     console.log(`Processing ${pending.length} articles for embedding`)
-    await processBatch(pending.map(p => p.id))
+    await processBatch(pending.map((p) => p.id))
   }
 }

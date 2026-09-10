@@ -14,12 +14,14 @@ type RssItem = Parser.Item & RssCustomItemFields
 const parser = new Parser<RssCustomItemFields, RssCustomItemFields>()
 const IMG_SRC_PATTERN = /<img\b[^>]*?\bsrc=(['"]?)([^'" >]+)\1/i
 const IMG_TAG_PATTERN = /<img\b[^>]*>/gi
-const VIDEO_TAG_PATTERN = /<(video|iframe|embed)\b[^>]*>[\s\S]*?<\/\1>|<(video|iframe|embed)\b[^>]*\/?>/gi
+const VIDEO_TAG_PATTERN =
+  /<(video|iframe|embed)\b[^>]*>[\s\S]*?<\/\1>|<(video|iframe|embed)\b[^>]*\/?>/gi
 const TEXT_BLOCK_TAG_PATTERN = /<(p|li|h[1-6]|blockquote|pre|td|th|figcaption|summary)\b[^>]*>/gi
 const LIGHT_TEXT_TAG_PATTERN = /<(br|span|strong|em|b|i)\b[^>]*\/?>/gi
 const COMMENT_PATTERN = /<!--[\s\S]*?-->/g
 const SCRIPT_STYLE_PATTERN = /<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi
-const WRAPPER_TAG_PATTERN = /<\/?(div|section|article|main|figure|figcaption|picture|p|span|a|br|hr)\b[^>]*>/gi
+const WRAPPER_TAG_PATTERN =
+  /<\/?(div|section|article|main|figure|figcaption|picture|p|span|a|br|hr)\b[^>]*>/gi
 const SELF_CLOSING_MEDIA_PATTERN = /<(img|source)\b[^>]*\/?>/gi
 const VIDEO_TEXT_MAX = 140
 const IMAGE_TEXT_MAX = 80
@@ -79,16 +81,14 @@ function stripHtmlToText(content: string) {
     .replace(/&amp;/gi, '&')
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>')
-    .replace(/&#39;/gi, '\'')
+    .replace(/&#39;/gi, "'")
     .replace(/&quot;/gi, '"')
     .replace(/\s+/g, ' ')
     .trim()
 }
 
 function getMeaningfulTextLength(content: string) {
-  return stripHtmlToText(content)
-    .replace(/\s+/g, '')
-    .length
+  return stripHtmlToText(content).replace(/\s+/g, '').length
 }
 
 function countPattern(content: string, pattern: RegExp) {
@@ -166,14 +166,16 @@ export async function fetchAllFeeds() {
   const limit = pLimit(10)
   const feeds = await feedRepo.list()
 
-  const tasks = feeds.map(feed => limit(async () => {
-    try {
-      console.log(`[RSS] fetching feed: ${feed.url}`)
-      await fetchSingleFeed(feed)
-    } catch (err) {
-      console.error(`[RSS] fetch failed: ${feed.url}`, err)
-    }
-  }))
+  const tasks = feeds.map((feed) =>
+    limit(async () => {
+      try {
+        console.log(`[RSS] fetching feed: ${feed.url}`)
+        await fetchSingleFeed(feed)
+      } catch (err) {
+        console.error(`[RSS] fetch failed: ${feed.url}`, err)
+      }
+    }),
+  )
 
   await Promise.all(tasks)
 }

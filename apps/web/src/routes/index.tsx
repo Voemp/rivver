@@ -1,7 +1,10 @@
 import { articlesInfiniteOptions } from '@/api/queries'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { ErrorState } from '@/components/feedback/error-state'
-import { HomeFeaturedSection, HomeFeaturedSectionSkeleton } from '@/components/home/home-featured-section.tsx'
+import {
+  HomeFeaturedSection,
+  HomeFeaturedSectionSkeleton,
+} from '@/components/home/home-featured-section.tsx'
 import { HomeFlowSection, HomeFlowSectionSkeleton } from '@/components/home/home-flow-section.tsx'
 import { Separator } from '@/components/ui/separator'
 import { env } from '@/config/env'
@@ -18,7 +21,7 @@ const contentTypeSearchSchema = z.object({
 })
 
 export const Route = createFileRoute('/')({
-  validateSearch: search => contentTypeSearchSchema.parse(search),
+  validateSearch: (search) => contentTypeSearchSchema.parse(search),
   loader: async ({ context: { queryClient, isAuthed } }) => {
     const pageSize = env.articleListPageSize
     await queryClient.ensureInfiniteQueryData(articlesInfiniteOptions(isAuthed, pageSize))
@@ -68,7 +71,11 @@ function Home() {
       <HomeFlowSection items={items} contentType={type} />
 
       <div ref={targetRef} className="py-4 text-center text-sm text-muted-foreground">
-        {query.isFetchingNextPage ? '加载更多中...' : query.hasNextPage ? '下拉加载更多' : '没有更多内容了'}
+        {query.isFetchingNextPage
+          ? '加载更多中...'
+          : query.hasNextPage
+            ? '下拉加载更多'
+            : '没有更多内容了'}
       </div>
     </section>
   )

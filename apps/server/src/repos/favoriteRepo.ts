@@ -1,16 +1,16 @@
 import { db } from '@server/db'
 import {
-  type InsertUserBehavior, type InsertUserFavorite, type SelectUserFavorite, userBehavior, userFavorite,
+  type InsertUserBehavior,
+  type InsertUserFavorite,
+  type SelectUserFavorite,
+  userBehavior,
+  userFavorite,
 } from '@server/db/schema'
 import { and, eq } from 'drizzle-orm'
 
 export const favoriteRepo = {
   create: async (favorite: InsertUserFavorite): Promise<SelectUserFavorite> => {
-    const [row] = await db
-      .insert(userFavorite)
-      .values(favorite)
-      .onConflictDoNothing()
-      .returning()
+    const [row] = await db.insert(userFavorite).values(favorite).onConflictDoNothing().returning()
 
     if (row) return row
 
@@ -37,11 +37,13 @@ export const favoriteRepo = {
 
       await tx
         .delete(userBehavior)
-        .where(and(
-          eq(userBehavior.userId, userId),
-          eq(userBehavior.articleId, articleId),
-          eq(userBehavior.type, 'favorite'),
-        ))
+        .where(
+          and(
+            eq(userBehavior.userId, userId),
+            eq(userBehavior.articleId, articleId),
+            eq(userBehavior.type, 'favorite'),
+          ),
+        )
 
       return true
     })
@@ -57,53 +59,48 @@ export const favoriteRepo = {
     return !!row
   },
   listByUser: async (userId: string, offset: number, limit: number) => {
-    return db.query.userFavorite.findMany({
-      where: {
-        userId,
-      },
-      with: {
-        article: {
-          columns: {
-            id: true,
-            title: true,
-            contentType: true,
-            summary: true,
-            enclosure: true,
-            pubDate: true,
-          },
-          with: {
-            feed: {
-              columns: {
-                title: true,
-                image: true,
+    return db.query.userFavorite
+      .findMany({
+        where: {
+          userId,
+        },
+        with: {
+          article: {
+            columns: {
+              id: true,
+              title: true,
+              contentType: true,
+              summary: true,
+              enclosure: true,
+              pubDate: true,
+            },
+            with: {
+              feed: {
+                columns: {
+                  title: true,
+                  image: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      offset,
-      limit,
-    }).then(rows => rows
-      .map(r => r.article)
-      .filter((article): article is NonNullable<typeof article> => article !== null))
+        orderBy: {
+          createdAt: 'desc',
+        },
+        offset,
+        limit,
+      })
+      .then((rows) =>
+        rows
+          .map((r) => r.article)
+          .filter((article): article is NonNullable<typeof article> => article !== null),
+      )
   },
-  createWithBehavior: async (
-    favorite: InsertUserFavorite,
-    behavior: InsertUserBehavior,
-  ) => {
+  createWithBehavior: async (favorite: InsertUserFavorite, behavior: InsertUserBehavior) => {
     return db.transaction(async (tx) => {
-      await tx
-        .insert(userFavorite)
-        .values(favorite)
-        .onConflictDoNothing()
+      await tx.insert(userFavorite).values(favorite).onConflictDoNothing()
 
-      const [row] = await tx
-        .insert(userBehavior)
-        .values(behavior)
-        .returning()
+      const [row] = await tx.insert(userBehavior).values(behavior).returning()
 
       return row
     })

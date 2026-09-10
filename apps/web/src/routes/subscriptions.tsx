@@ -4,7 +4,12 @@ import { FeedInfoCard, FeedInfoSkeleton } from '@/components/feed/feed-info-card
 import { EmptyState } from '@/components/feedback/empty-state'
 import { Button } from '@/components/ui/button'
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog'
 import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -35,10 +40,12 @@ type SubscriptionAction = {
   action: 'subscribe' | 'unsubscribe'
 }
 
-const updateSubscriberCount = (count: number | null, delta: number) => Math.max(0, (count ?? 0) + delta)
+const updateSubscriberCount = (count: number | null, delta: number) =>
+  Math.max(0, (count ?? 0) + delta)
 const normalizeUrl = (value: string) => value.replace(/\/+$/, '')
 const subscriptionSchema = z.object({
-  url: z.url('请输入有效的订阅链接')
+  url: z
+    .url('请输入有效的订阅链接')
     .trim()
     .min(1, '请输入订阅链接')
     .transform((value) => normalizeUrl(value)),
@@ -91,9 +98,11 @@ function Subscriptions() {
       void queryClient.invalidateQueries({ queryKey: ['subscription', 'list'] })
     },
     onSettled: async (_data, _error, variables) => {
-      setOriginalSubscribed(produce(originalSubscribed, (draft) => {
-        draft[variables.feed.id] = variables.action === 'subscribe'
-      }))
+      setOriginalSubscribed(
+        produce(originalSubscribed, (draft) => {
+          draft[variables.feed.id] = variables.action === 'subscribe'
+        }),
+      )
       void Promise.all([
         queryClient.invalidateQueries({ queryKey: ['feed', variables.feed.id, 'subscription'] }),
         queryClient.invalidateQueries({ queryKey: ['feed', variables.feed.id, 'detail'] }),
@@ -121,7 +130,7 @@ function Subscriptions() {
 
     // 乐观更新本地 UI 状态
     const nextSubscribed = action === 'subscribe'
-    setOptimisticSubscribed(prev => ({ ...prev, [feed.id]: nextSubscribed }))
+    setOptimisticSubscribed((prev) => ({ ...prev, [feed.id]: nextSubscribed }))
 
     // 乐观更新 QueryCache 中的数字
     queryClient.setQueryData(['subscription', 'list'], (old: SubscriptionItem[] | undefined) => {
@@ -170,12 +179,12 @@ function Subscriptions() {
         <EmptyState
           title="暂无订阅"
           description="添加你关注的订阅源，最新内容会第一时间推送给你。"
-          action={(
+          action={
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="size-4" />
               添加订阅
             </Button>
-          )}
+          }
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
@@ -213,10 +222,7 @@ function Subscriptions() {
             <DialogDescription>粘贴订阅源地址，系统会自动解析内容。</DialogDescription>
           </DialogHeader>
 
-          <form
-            className="grid gap-4"
-            onSubmit={form.handleSubmit(handleSubmit)}
-          >
+          <form className="grid gap-4" onSubmit={form.handleSubmit(handleSubmit)}>
             <Field>
               <FieldLabel htmlFor="subscription-url">订阅地址</FieldLabel>
               <FieldContent>

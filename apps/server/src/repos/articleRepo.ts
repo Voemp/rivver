@@ -1,6 +1,11 @@
 import { db } from '@server/db'
 import {
-  article, type ContentKind, feed, type InsertArticle, type SelectArticle, userBehavior,
+  article,
+  type ContentKind,
+  feed,
+  type InsertArticle,
+  type SelectArticle,
+  userBehavior,
 } from '@server/db/schema'
 import { subDays } from 'date-fns'
 import { and, desc, eq, gte, isNotNull, notInArray, sql } from 'drizzle-orm'
@@ -13,30 +18,16 @@ const buildArticleSearchVector = () => sql`
 
 export const articleRepo = {
   create: async (newArticle: InsertArticle) => {
-    return db
-      .insert(article)
-      .values(newArticle)
-      .onConflictDoNothing()
-      .returning()
+    return db.insert(article).values(newArticle).onConflictDoNothing().returning()
   },
   update: async (id: number, newArticle: Partial<InsertArticle>) => {
-    return db
-      .update(article)
-      .set(newArticle)
-      .where(
-        eq(article.id, id),
-      )
-      .returning()
+    return db.update(article).set(newArticle).where(eq(article.id, id)).returning()
   },
   updateAiSummary: async (id: number, aiSummary: string) => {
-    return db
-      .update(article)
-      .set({ aiSummary })
-      .where(eq(article.id, id))
-      .returning({
-        id: article.id,
-        aiSummary: article.aiSummary,
-      })
+    return db.update(article).set({ aiSummary }).where(eq(article.id, id)).returning({
+      id: article.id,
+      aiSummary: article.aiSummary,
+    })
   },
   findById: async (id: number) => {
     return db.query.article.findFirst({
@@ -98,10 +89,9 @@ export const articleRepo = {
       .leftJoin(behaviorScore, eq(article.id, behaviorScore.articleId))
 
     if (excludedIds.length > 0 && contentType) {
-      return query.where(and(
-        notInArray(article.id, excludedIds),
-        eq(article.contentType, contentType),
-      ))
+      return query.where(
+        and(notInArray(article.id, excludedIds), eq(article.contentType, contentType)),
+      )
     }
 
     if (excludedIds.length > 0) {
@@ -122,14 +112,16 @@ export const articleRepo = {
         id: article.id,
       })
       .from(article)
-      .where(and(
-        gte(article.pubDate, subDays(new Date(), 28)),
-        isNotNull(article.embedding),
-        ...(excludedIds.length > 0 ? [notInArray(article.id, excludedIds)] : []),
-      ))
+      .where(
+        and(
+          gte(article.pubDate, subDays(new Date(), 28)),
+          isNotNull(article.embedding),
+          ...(excludedIds.length > 0 ? [notInArray(article.id, excludedIds)] : []),
+        ),
+      )
       .orderBy(sql`${article.embedding} <=> ${sql.raw(`'${vectorLiteral}'::vector`)}`)
       .limit(limit)
-      .then(rows => rows.map(row => row.id))
+      .then((rows) => rows.map((row) => row.id))
   },
   getContentTypeCountsByFeedId: async (feedId: number): Promise<Record<ContentKind, number>> => {
     const [row] = await db
@@ -147,7 +139,11 @@ export const articleRepo = {
       video: row?.video ?? 0,
     }
   },
-  listRecommendationCandidates: async (excludedIds: number[] = [], limit = 400, contentType?: ContentKind) => {
+  listRecommendationCandidates: async (
+    excludedIds: number[] = [],
+    limit = 400,
+    contentType?: ContentKind,
+  ) => {
     const behaviorScore = db
       .select({
         articleId: userBehavior.articleId,
@@ -173,10 +169,9 @@ export const articleRepo = {
       .limit(limit)
 
     if (excludedIds.length > 0 && contentType) {
-      return query.where(and(
-        notInArray(article.id, excludedIds),
-        eq(article.contentType, contentType),
-      ))
+      return query.where(
+        and(notInArray(article.id, excludedIds), eq(article.contentType, contentType)),
+      )
     }
 
     if (excludedIds.length > 0) {
@@ -189,7 +184,12 @@ export const articleRepo = {
 
     return query
   },
-  listByFeedId: async (feedId: number, offset: number, limit: number, contentType?: ContentKind) => {
+  listByFeedId: async (
+    feedId: number,
+    offset: number,
+    limit: number,
+    contentType?: ContentKind,
+  ) => {
     return db.query.article.findMany({
       columns: {
         id: true,
@@ -200,11 +200,8 @@ export const articleRepo = {
       },
       where: contentType
         ? {
-          AND: [
-            { feedId },
-            { contentType },
-          ],
-        }
+            AND: [{ feedId }, { contentType }],
+          }
         : { feedId },
       with: {
         feed: {
@@ -232,11 +229,8 @@ export const articleRepo = {
       },
       where: contentType
         ? {
-          AND: [
-            { id: { in: ids } },
-            { contentType },
-          ],
-        }
+            AND: [{ id: { in: ids } }, { contentType }],
+          }
         : { id: { in: ids } },
       with: {
         feed: {
@@ -287,6 +281,6 @@ export const articleRepo = {
       .orderBy(desc(searchScore), desc(article.pubDate), desc(article.createdAt), desc(article.id))
       .offset(offset)
       .limit(limit)
-      .then(rows => rows.map(({ score: _score, ...row }) => row))
+      .then((rows) => rows.map(({ score: _score, ...row }) => row))
   },
 } as const

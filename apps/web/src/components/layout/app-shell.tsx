@@ -8,7 +8,8 @@ type AppShellProps = {
 
 export const AppShell = ({ children }: AppShellProps) => {
   const backgroundStyle = {
-    background: 'radial-gradient(circle_at_top,rgba(15,23,42,0.06),transparent_45%),var(--background)',
+    background:
+      'radial-gradient(circle_at_top,rgba(15,23,42,0.06),transparent_45%),var(--background)',
   }
 
   return (

@@ -3,10 +3,7 @@ import { type InsertUser, type SelectUser, user } from '@server/db/schema'
 
 export default {
   create: async (newUser: InsertUser): Promise<SelectUser> => {
-    const [row] = await db
-      .insert(user)
-      .values(newUser)
-      .returning()
+    const [row] = await db.insert(user).values(newUser).returning()
     if (!row) throw new Error('用户创建失败')
     return row
   },

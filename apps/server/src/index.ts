@@ -15,45 +15,51 @@ import { trustedOrigins } from './utils/cors'
 import { AppError } from './utils/error'
 
 const app = new Elysia()
-  .use(openapi({
-    documentation: {
-      info: {
-        title: 'Rivver Documentation',
-        version: `${version}`,
-      },
-      tags: [
-        { name: 'Profile', description: 'Profile endpoints' },
-        { name: 'Subscription', description: 'Subscription endpoints' },
-        { name: 'Article', description: 'Article endpoints' },
-        { name: 'Feed', description: 'Feed endpoints' },
-      ],
-      components: {
-        ...await OpenAPI.components,
-        securitySchemes: {
-          cookieAuth: {
-            type: 'apiKey',
-            in: 'cookie',
-            name: 'better-auth.session_token',
+  .use(
+    openapi({
+      documentation: {
+        info: {
+          title: 'Rivver Documentation',
+          version: `${version}`,
+        },
+        tags: [
+          { name: 'Profile', description: 'Profile endpoints' },
+          { name: 'Subscription', description: 'Subscription endpoints' },
+          { name: 'Article', description: 'Article endpoints' },
+          { name: 'Feed', description: 'Feed endpoints' },
+        ],
+        components: {
+          ...(await OpenAPI.components),
+          securitySchemes: {
+            cookieAuth: {
+              type: 'apiKey',
+              in: 'cookie',
+              name: 'better-auth.session_token',
+            },
           },
         },
+        paths: await OpenAPI.getPaths(),
       },
-      paths: await OpenAPI.getPaths(),
-    },
-  }))
-  .use(cron({
-    name: 'article-fetch',
-    pattern: Patterns.everyHours(24),
-    run() {
-      void runRssFetch()
-      void runEmbeddingGenerate()
-    },
-  }))
-  .use(cors({
-    origin: trustedOrigins.length > 0 ? trustedOrigins : true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  }))
+    }),
+  )
+  .use(
+    cron({
+      name: 'article-fetch',
+      pattern: Patterns.everyHours(24),
+      run() {
+        void runRssFetch()
+        void runEmbeddingGenerate()
+      },
+    }),
+  )
+  .use(
+    cors({
+      origin: trustedOrigins.length > 0 ? trustedOrigins : true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    }),
+  )
   .error({ AppError })
   .onError(({ error, code }) => {
     switch (code) {
@@ -74,7 +80,7 @@ const app = new Elysia()
 app.listen(process.env.PORT ?? 3000, () => {
   console.log(
     `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}\n` +
-    `📖 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
+      `📖 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
   )
 })
 

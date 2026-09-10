@@ -32,7 +32,10 @@ function RootComponent() {
         <AppShell>
           <Outlet />
         </AppShell>
-        <Toaster richColors toastOptions={{ className: 'border border-border bg-card text-card-foreground' }} />
+        <Toaster
+          richColors
+          toastOptions={{ className: 'border border-border bg-card text-card-foreground' }}
+        />
       </AuthProvider>
       {import.meta.env.DEV ? (
         <TanStackDevtools

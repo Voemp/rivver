@@ -85,6 +85,43 @@ OpenAPI/Swagger UI is served at `/openapi` when the server runs.
 - `apps/web/src/components/ui/**` is ignored by both oxlint and oxfmt (vendored Base UI kit / shadcn-style output — don't aggressively reformat it).
 - Install anything new with `bun add`, and prefer keeping both apps' dependency lists tidy.
 
+## Lint conventions (oxlint)
+
+`bun run lint` runs oxlint with `typeAware`/`typeCheck` (tsgolint), so most TypeScript errors surface as lint diagnostics. The codebase is lint-clean — a passing run is exit 0 with **zero warnings**; treat a new warning as a failure and fix it, don't leave it behind.
+
+### Suppressing rules
+
+- Use line-level suppressions with a short Chinese root cause after `--`:
+
+  ```tsx
+  // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
+  <Skeleton key={index} />
+  ```
+
+- `react/no-array-index-key` may only be suppressed for skeleton screens and static layout configs where the index genuinely is the element's identity (e.g. rendering `LAYOUT_CONFIGS`); dynamic data lists must key on data.
+- Do not re-add `react-perf/jsx-no-new-object-as-prop` / `jsx-no-new-array-as-prop`: they were deliberately removed because the React Compiler auto-memoizes JSX props.
+- `useMountEffect`'s missing-dependency warning is suppressed in the hook itself — mount-once semantics require an empty dep array.
+
+### Gotchas (all hit in practice — read before touching the flagged areas)
+
+- **Base UI, not Radix**: there is no `asChild`. Use the `render` prop: `<PopoverTrigger render={<Button … />}>label</PopoverTrigger>`. Base UI Slider change handlers receive `(value: number | readonly number[], details)` — flatten with `[value].flat()`.
+- **`set-state-in-effect`**: never call `setState` synchronously inside an effect. Derive during render, or use React's "adjust state during render" pattern (keep a `prev` state, compare, then set both in the render body) — see `app-header.tsx` and `article-media-detail.tsx`.
+- **`exactOptionalPropertyTypes` is on**: `prop: undefined` is not assignable to `prop?: T`. Build objects with conditional spread: `...(x ? { prop: x } : {})`.
+- **`noUncheckedIndexedAccess` (server)**: `const [row] = await ….returning()` types as `T | undefined` — guard with `if (!row) throw …` instead of `row!`.
+- **`unicorn/no-array-sort`**: use `toSorted()`; it returns a new array, so assign the result (don't call it and discard).
+- **`unicorn/no-useless-undefined`**: no `.catch(() => undefined)` (use an empty catch with a comment) and no bare `return undefined`.
+- **`no-floating-promises`**: intentionally-unawaited promises need `void` or a `.catch`.
+- **React 19 types**: the global `JSX` namespace is gone — `import type { JSX } from 'react'`. Narrow DOM queries via generics: `querySelectorAll<HTMLHeadingElement>('h1, h2, h3')`.
+- **better-auth client types**: without `$InferServerPlugin`, `authClient.getSession()`'s data is loosely typed; `use-auth.tsx` declares an explicit `AuthUser` and casts once inside `sessionQueryOptions`. Update `AuthUser` when the server `user` table changes.
+- **better-auth OpenAPI**: `auth.api.generateOpenAPISchema()` paths are structurally `OpenAPIV3.PathItemObject` but typed separately — convert once at the boundary (`modules/auth/index.ts`). `openapi-types` currently resolves via hoisting from `@elysiajs/openapi`; add it to `apps/server` dependencies if the import breaks.
+- **drizzle-kit rc.4**: the kit's `Config` type lacks a top-level `casing` field, but the runtime does read it (verified in `cli.js`); `drizzle.config.ts` keeps the option via a type intersection. Don't delete it to satisfy the type checker.
+- **rss-parser custom fields** (`content:encoded`, `content:encodedSnippet`) are declared through the `Parser<T, U>` generics in `worker/rss/fetcher.ts` — don't fall back to index signatures or `any`.
+
+### Repo state notes
+
+- Working-tree files use CRLF; git's "LF will be replaced by CRLF" warnings are harmless. When scripting edits, don't silently convert line endings.
+- `bun run fmt:check` currently fails on a pre-existing baseline (~85 files predate oxfmt adoption). Do not run a repo-wide `bun run fmt` to "fix" it — that buries real changes in a mass reformat.
+
 ## Server architecture (`apps/server`)
 
 - **Elysia** app assembled in `src/index.ts`. It `use()`s modules per domain: `profile`, `subscription`, `article`, `feed`, plus `auth` (Better Auth, mounted via `.mount(auth.handler)`).
@@ -133,4 +170,4 @@ Follows `README.md`; key facts an agent should know:
 - Working tree is usually on `master` and commits are small, scoped, conventional (`feat(scope): …`, `refactor(scope): …`, `fix(scope): …`), with Chinese descriptions.
 - The codebase is React 19 + React Compiler (via `babel-plugin-react-compiler` — the Vite babel preset is `reactCompilerPreset()`). Keep components compatible with the compiler (avoid patterns it disallows).
 - When changing DB fields, keep `schema.ts`, `relations.ts`, `db/model.ts` refinements, and any `contentType` unions (`content_kind`) consistent. The `ContentType` union is mirrored in web's `src/types/content.ts` and `types/response.ts`-style models.
-- Prefer small, surgical diffs. Run `bun run lint` and `bun run fmt:check` before finishing.
+- Prefer small, surgical diffs. Run `bun run lint` before finishing — it must pass with zero errors **and zero warnings** (see "Lint conventions"). `bun run fmt:check` is expected to fail on the pre-existing baseline; only keep formatting clean in the files you touched.

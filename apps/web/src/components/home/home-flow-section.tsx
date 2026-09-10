@@ -1,6 +1,9 @@
 import type { HomeArticleItem } from '@/components/common/article-card.tsx'
 import { HomeArticleCard } from '@/components/home/home-article-card.tsx'
-import { HomeFeedRecommendation, HomeFeedRecommendationSkeleton } from '@/components/home/home-feed-recommendation'
+import {
+  HomeFeedRecommendation,
+  HomeFeedRecommendationSkeleton,
+} from '@/components/home/home-feed-recommendation'
 import { Separator } from '@/components/ui/separator.tsx'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { type ContentType } from '@/types/content'
@@ -18,7 +21,13 @@ export const FlowLink = ({ article, reverse }: { article: HomeArticleItem; rever
   )
 }
 
-export const FlowList = ({ items, className }: { items: HomeArticleItem[]; className?: string }) => {
+export const FlowList = ({
+  items,
+  className,
+}: {
+  items: HomeArticleItem[]
+  className?: string
+}) => {
   if (items.length === 0) {
     return <div className={className} />
   }
@@ -35,11 +44,16 @@ export const FlowList = ({ items, className }: { items: HomeArticleItem[]; class
   )
 }
 
-export const HomeFlowSection = ({ items, contentType }: { items: HomeArticleItem[]; contentType?: ContentType }) => {
+export const HomeFlowSection = ({
+  items,
+  contentType,
+}: {
+  items: HomeArticleItem[]
+  contentType?: ContentType
+}) => {
   return (
     <section className="space-y-3">
-      <div
-        className="hidden lg:grid lg:grid-cols-[minmax(0,40rem)_18rem] lg:justify-center lg:gap-x-12 xl:grid-cols-[minmax(0,42rem)_19rem]">
+      <div className="hidden lg:grid lg:grid-cols-[minmax(0,40rem)_18rem] lg:justify-center lg:gap-x-12 xl:grid-cols-[minmax(0,42rem)_19rem]">
         <div className="space-y-3">
           <div className="space-y-1">
             <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Flow List</p>
@@ -66,8 +80,7 @@ export const HomeFlowSection = ({ items, contentType }: { items: HomeArticleItem
 export const HomeFlowSectionSkeleton = () => {
   return (
     <>
-      <div
-        className="hidden lg:grid lg:grid-cols-[minmax(0,40rem)_18rem] lg:justify-center lg:gap-x-12 xl:grid-cols-[minmax(0,42rem)_19rem]">
+      <div className="hidden lg:grid lg:grid-cols-[minmax(0,40rem)_18rem] lg:justify-center lg:gap-x-12 xl:grid-cols-[minmax(0,42rem)_19rem]">
         <div className="space-y-3">
           <div className="space-y-1">
             <Skeleton className="h-3 w-24 rounded-none" />

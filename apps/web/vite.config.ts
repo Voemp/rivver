@@ -5,6 +5,7 @@ import path from 'node:path'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  server: { port: 4016 },
   plugins: [
     tailwindcss(),
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),

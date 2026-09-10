@@ -25,12 +25,13 @@ export const unwrapResponse = async <T>(
     status: number
   }>,
   fallbackMessage: string,
-): Promise<T> => payload.then((payload) => {
-  const { data, error, status } = payload
+): Promise<T> =>
+  payload.then((payload) => {
+    const { data, error, status } = payload
 
-  if (error || data === null) {
-    throw new ApiError(fallbackMessage, status, error)
-  }
+    if (error || data === null) {
+      throw new ApiError(fallbackMessage, status, error)
+    }
 
-  return data
-})
+    return data
+  })

@@ -7,7 +7,7 @@ const SUMMARY_REQUEST_TIMEOUT_MS = 30000
 type ChatCompletionResponse = {
   choices?: Array<{
     message?: {
-      content?: string | Array<{ type?: string, text?: string }>
+      content?: string | Array<{ type?: string; text?: string }>
     }
   }>
 }
@@ -23,7 +23,7 @@ function stripHtml(input: string) {
     .replace(/&amp;/gi, '&')
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>')
-    .replace(/&#39;/gi, '\'')
+    .replace(/&#39;/gi, "'")
     .replace(/&quot;/gi, '"')
     .replace(/\s+/g, ' ')
     .trim()
@@ -38,7 +38,7 @@ function extractMessageContent(payload: ChatCompletionResponse) {
 
   if (Array.isArray(content)) {
     return content
-      .map(part => part.text?.trim() ?? '')
+      .map((part) => part.text?.trim() ?? '')
       .filter(Boolean)
       .join('\n')
       .trim()
@@ -81,7 +81,8 @@ async function requestAiSummary(source: string) {
       messages: [
         {
           role: 'system',
-          content: 'You summarize articles. Respond in Chinese as the source text. Return 3 to 5 concise markdown bullet points only.',
+          content:
+            'You summarize articles. Respond in Chinese as the source text. Return 3 to 5 concise markdown bullet points only.',
         },
         {
           role: 'user',
@@ -97,7 +98,7 @@ async function requestAiSummary(source: string) {
     throw new AppError(502, detail || 'AI 总结生成失败', 'AI_SUMMARY_REQUEST_FAILED')
   }
 
-  const payload = await response.json() as ChatCompletionResponse
+  const payload = (await response.json()) as ChatCompletionResponse
   const aiSummary = extractMessageContent(payload)
 
   if (!aiSummary) {
@@ -145,10 +146,9 @@ export async function ensureArticleAiSummary(articleId: number) {
     return inflight
   }
 
-  const task = generateAndPersistAiSummary(articleId)
-    .finally(() => {
-      inflightSummaryTasks.delete(articleId)
-    })
+  const task = generateAndPersistAiSummary(articleId).finally(() => {
+    inflightSummaryTasks.delete(articleId)
+  })
 
   inflightSummaryTasks.set(articleId, task)
 

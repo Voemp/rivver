@@ -148,16 +148,13 @@ export const ArticleAudioCard = ({ url }: ArticleAudioCardProps) => {
   return (
     <section className="mx-auto mt-10 max-w-3xl py-6">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <div
-          className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground/80">
+        <div className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground/80">
           <Headphones className="size-4" />
           <span>Audio</span>
         </div>
 
         <Button
-          render={
-            <a href={url} download aria-label="Download audio" title="Download audio" />
-          }
+          render={<a href={url} download aria-label="Download audio" title="Download audio" />}
           size="icon-sm"
           variant="outline"
           className="rounded-full border-border/70 bg-background/80 shadow-none hover:bg-accent/60"
@@ -222,9 +219,10 @@ export const ArticleAudioCard = ({ url }: ArticleAudioCardProps) => {
               </div>
             </div>
 
-            <div
-              className="mt-2 flex items-center justify-start text-[11px] tracking-[0.12em] text-muted-foreground/90">
-              <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
+            <div className="mt-2 flex items-center justify-start text-[11px] tracking-[0.12em] text-muted-foreground/90">
+              <span>
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </span>
             </div>
           </div>
         </div>

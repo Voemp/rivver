@@ -1,5 +1,9 @@
 import {
-  deleteSubscription, feedArticlesQueryOptions, feedDetailQueryOptions, feedSubscriptionQueryOptions, postSubscription,
+  deleteSubscription,
+  feedArticlesQueryOptions,
+  feedDetailQueryOptions,
+  feedSubscriptionQueryOptions,
+  postSubscription,
 } from '@/api/queries'
 import { VerticalCard } from '@/components/common/article-card'
 import { EmptyState } from '@/components/feedback/empty-state'
@@ -26,7 +30,7 @@ export const Route = createFileRoute('/feed/$id')({
   parseParams: (params) => ({
     id: z.coerce.number().parse(params.id),
   }),
-  validateSearch: search => contentTypeSearchSchema.parse(search),
+  validateSearch: (search) => contentTypeSearchSchema.parse(search),
   loader: ({ context: { queryClient, isAuthed }, params: { id } }) => {
     void queryClient.ensureQueryData(feedDetailQueryOptions(id))
     if (isAuthed) {
@@ -115,8 +119,7 @@ function FeedDetail() {
 
   return (
     <section className="mx-auto w-full max-w-6xl space-y-6">
-      <div
-        className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex min-w-0 items-center gap-4">
           <Avatar className="size-14 ring-1 ring-border/60">
             <AvatarImage src={feed.image ?? undefined} alt={feed.title} />
@@ -129,19 +132,23 @@ function FeedDetail() {
               <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">
                 {feed.title || '未命名订阅源'}
               </h1>
-              <span
-                className="ml-2 inline-flex shrink-0 items-center rounded-full border border-border/70 bg-muted/55 px-2.5 py-1 text-[11px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+              <span className="ml-2 inline-flex shrink-0 items-center rounded-full border border-border/70 bg-muted/55 px-2.5 py-1 text-[11px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
                 {contentTypeLabels[feed.contentType]}
               </span>
-              {feed.link &&
-                <Button size="icon-sm" variant="link" className="rounded-full cursor-pointer"
-                        onClick={() => feed.link && window.open(feed.link)} aria-label="打开订阅源链接" title="打开订阅源链接">
+              {feed.link && (
+                <Button
+                  size="icon-sm"
+                  variant="link"
+                  className="rounded-full cursor-pointer"
+                  onClick={() => feed.link && window.open(feed.link)}
+                  aria-label="打开订阅源链接"
+                  title="打开订阅源链接"
+                >
                   <ExternalLink />
-                </Button>}
+                </Button>
+              )}
             </div>
-            <p className="line-clamp-2 text-sm text-muted-foreground">
-              {description}
-            </p>
+            <p className="line-clamp-2 text-sm text-muted-foreground">{description}</p>
           </div>
         </div>
 
@@ -178,7 +185,9 @@ function FeedDetail() {
         className="gap-4"
       >
         <TabsList>
-          <TabsTrigger value="all" className="flex-none px-4">全部</TabsTrigger>
+          <TabsTrigger value="all" className="flex-none px-4">
+            全部
+          </TabsTrigger>
           {contentTypeOptions.map((contentType) => (
             <TabsTrigger key={contentType} value={contentType} className="flex-none px-4">
               {contentTypeLabels[contentType]}
@@ -217,8 +226,7 @@ function FeedDetail() {
 }
 
 const FeedHeaderSkeleton = () => (
-  <div
-    className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+  <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
     <div className="flex min-w-0 items-center gap-4">
       <Skeleton className="size-14 rounded-full" />
       <div className="min-w-0 space-y-2">

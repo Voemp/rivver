@@ -1,10 +1,10 @@
+import type { toOpenAPISchema } from '@elysiajs/openapi'
 import { db } from '@server/db'
 import { account, session, user, verification } from '@server/db/schema'
 import { trustedOrigins } from '@server/utils/cors'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { betterAuth } from 'better-auth/minimal'
 import { openAPI } from 'better-auth/plugins'
-import type { OpenAPIV3 } from 'openapi-types'
 
 export const auth = betterAuth({
   appName: 'Rivver',
@@ -49,22 +49,19 @@ export const auth = betterAuth({
 let _schema: ReturnType<typeof auth.api.generateOpenAPISchema> | undefined
 const getSchema = () => (_schema ??= auth.api.generateOpenAPISchema())
 
-const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const
-
-// better-auth 的 Path 结构与 OpenAPIV3.PathItemObject 结构兼容，但类型来源不同，在边界处转换一次
 export const OpenAPI = {
-  getPaths: (prefix = '/auth'): Promise<OpenAPIV3.PathsObject> =>
+  getPaths: (prefix = '/auth'): Promise<ReturnType<typeof toOpenAPISchema>['paths']> =>
     getSchema().then(({ paths }) => {
-      const reference: OpenAPIV3.PathsObject = Object.create(null)
+      const reference = Object.create(null)
 
       for (const path of Object.keys(paths)) {
-        const pathItem = paths[path] as OpenAPIV3.PathItemObject | undefined
+        const pathItem = paths[path]
         if (!pathItem) continue
 
         const key = prefix + path
         reference[key] = pathItem
 
-        for (const method of HTTP_METHODS) {
+        for (const method of Object.keys(pathItem)) {
           const operation = reference[key][method]
           if (!operation) continue
 
@@ -74,5 +71,7 @@ export const OpenAPI = {
 
       return reference
     }),
-  components: getSchema().then(({ components }) => components as OpenAPIV3.ComponentsObject),
+  components: getSchema().then(
+    ({ components }) => components as ReturnType<typeof toOpenAPISchema>['components'],
+  ),
 } as const

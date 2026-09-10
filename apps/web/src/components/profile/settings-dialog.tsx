@@ -2,7 +2,13 @@ import { authClient } from '@/api/auth-client.ts'
 import { putAvatar } from '@/api/queries'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { env } from '@/config/env.ts'
@@ -53,7 +59,10 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
   // objectURL 是 avatarFile 的纯派生值：渲染期直接创建，effect 只负责回收，
   // 避免为同步派生状态而设置的 setState-in-effect 级联
-  const avatarPreview = useMemo(() => (avatarFile ? URL.createObjectURL(avatarFile) : null), [avatarFile])
+  const avatarPreview = useMemo(
+    () => (avatarFile ? URL.createObjectURL(avatarFile) : null),
+    [avatarFile],
+  )
 
   useEffect(() => {
     return () => {
@@ -99,10 +108,8 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
                 <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? 'avatar'} />
                 <AvatarFallback>{displayName.slice(0, 1).toUpperCase()}</AvatarFallback>
               </Avatar>
-              <span
-                className="pointer-events-none absolute inset-0 rounded-full bg-black/35 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-              <span
-                className="pointer-events-none absolute inset-0 flex items-center justify-center text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <span className="pointer-events-none absolute inset-0 rounded-full bg-black/35 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                 <Pencil className="size-4" />
               </span>
             </button>
@@ -154,7 +161,9 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="avatar-upload" className="text-xs text-muted-foreground">选择图片</Label>
+              <Label htmlFor="avatar-upload" className="text-xs text-muted-foreground">
+                选择图片
+              </Label>
               <Input
                 id="avatar-upload"
                 type="file"
@@ -197,8 +206,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
                 </div>
               </div>
             ) : (
-              <div
-                className="rounded-lg border border-dashed border-border/70 bg-muted/40 px-4 py-6 text-center text-xs text-muted-foreground">
+              <div className="rounded-lg border border-dashed border-border/70 bg-muted/40 px-4 py-6 text-center text-xs text-muted-foreground">
                 请选择要上传的图片
               </div>
             )}
@@ -208,4 +216,3 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     </Dialog>
   )
 }
-

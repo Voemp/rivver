@@ -16,11 +16,13 @@ export const DBModel = createModel(table, {
   },
   article: {
     link: t.Nullable(t.String({ format: 'uri' })),
-    enclosure: t.Nullable(t.Object({
-      url: t.String({ format: 'uri' }),
-      length: t.Optional(t.Number()),
-      type: t.Optional(t.String()),
-    })),
+    enclosure: t.Nullable(
+      t.Object({
+        url: t.String({ format: 'uri' }),
+        length: t.Optional(t.Number()),
+        type: t.Optional(t.String()),
+      }),
+    ),
     pubDate: t.Nullable(t.Date()),
     createdAt: t.Date(),
   },

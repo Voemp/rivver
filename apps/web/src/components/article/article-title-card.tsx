@@ -13,31 +13,35 @@ type ArticleTitleCardProps = {
 export const ArticleTitleCard = ({ title, author, pubDate, feed }: ArticleTitleCardProps) => {
   return (
     <header className="mx-auto max-w-3xl pb-10 sm:pb-12">
-      <div
-        className="mb-6 flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.28em] text-muted-foreground/80">
+      <div className="mb-6 flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.28em] text-muted-foreground/80">
         <span>Title</span>
         <span className="h-px w-12 bg-border/70" />
       </div>
 
       <div className="space-y-8">
-        <h1
-          className="text-4xl font-semibold leading-[1.06] tracking-[-0.04em] text-foreground text-balance sm:text-5xl lg:text-6xl">
+        <h1 className="text-4xl font-semibold leading-[1.06] tracking-[-0.04em] text-foreground text-balance sm:text-5xl lg:text-6xl">
           {title ?? 'Untitled Article'}
         </h1>
 
         <div className="grid gap-5 text-sm text-muted-foreground grid-cols-3 sm:text-left lg:grid-cols-2">
           <div className="space-y-1.5">
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">Author</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">
+              Author
+            </p>
             <p className="text-sm font-medium text-foreground">{author ?? 'Unknown'}</p>
           </div>
 
           <div className="space-y-1.5">
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">Published</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">
+              Published
+            </p>
             <p className="text-sm font-medium text-foreground">{formatRecentTime(pubDate)}</p>
           </div>
 
           <div className="space-y-1.5 lg:hidden">
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">Feed</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">
+              Feed
+            </p>
             <div className="flex items-center space-x-1.5">
               <Avatar className="size-6 ring-1 ring-border/70">
                 <AvatarImage src={feed.image ?? undefined} alt={feed.title} />
