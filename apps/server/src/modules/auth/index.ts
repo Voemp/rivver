@@ -4,6 +4,7 @@ import { trustedOrigins } from '@server/utils/cors'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { betterAuth } from 'better-auth/minimal'
 import { openAPI } from 'better-auth/plugins'
+import type { OpenAPIV3 } from 'openapi-types'
 
 export const auth = betterAuth({
   appName: 'Rivver',
@@ -42,33 +43,36 @@ export const auth = betterAuth({
       generateId: 'uuid',
     },
   },
-  plugins: [
-    openAPI(),
-  ],
+  plugins: [openAPI()],
 })
 
-let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>
-const getSchema = async () => (_schema ??= auth.api.generateOpenAPISchema())
+let _schema: ReturnType<typeof auth.api.generateOpenAPISchema> | undefined
+const getSchema = () => (_schema ??= auth.api.generateOpenAPISchema())
 
+const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const
+
+// better-auth 的 Path 结构与 OpenAPIV3.PathItemObject 结构兼容，但类型来源不同，在边界处转换一次
 export const OpenAPI = {
-  getPaths: (prefix = '/auth') =>
+  getPaths: (prefix = '/auth'): Promise<OpenAPIV3.PathsObject> =>
     getSchema().then(({ paths }) => {
-      const reference: typeof paths = Object.create(null)
+      const reference: OpenAPIV3.PathsObject = Object.create(null)
 
       for (const path of Object.keys(paths)) {
-        if (!paths[path]) continue
+        const pathItem = paths[path] as OpenAPIV3.PathItemObject | undefined
+        if (!pathItem) continue
 
         const key = prefix + path
-        reference[key] = paths[path]
+        reference[key] = pathItem
 
-        for (const method of Object.keys(paths[path])) {
-          const operation = (reference[key] as any)[method]
+        for (const method of HTTP_METHODS) {
+          const operation = reference[key][method]
+          if (!operation) continue
 
           operation.tags = ['Better Auth']
         }
       }
 
       return reference
-    }) as Promise<any>,
-  components: getSchema().then(({ components }) => components) as Promise<any>,
+    }),
+  components: getSchema().then(({ components }) => components as OpenAPIV3.ComponentsObject),
 } as const

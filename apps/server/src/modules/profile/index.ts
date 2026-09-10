@@ -60,7 +60,7 @@ export const profile = new Elysia({
     const profile = await profileRepo.findByUserId(user.id)
     if (!profile?.avatarBytes) throw new AppError(404, '头像不存在', 'AVATAR_NOT_FOUND')
 
-    const version = query?.v
+    const version = query.v
     const isCurrentVersion = version === profile.avatarVersion
     const etag = profile.avatarHash ? `"${profile.avatarVersion}-${profile.avatarHash}"` : undefined
     if (etag && request.headers.get('if-none-match') === etag) {

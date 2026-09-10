@@ -14,7 +14,7 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tansta
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { produce } from 'immer'
 import { ExternalLink } from 'lucide-react'
-import { startTransition, useMemo } from 'react'
+import { startTransition } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -28,8 +28,10 @@ export const Route = createFileRoute('/feed/$id')({
   }),
   validateSearch: search => contentTypeSearchSchema.parse(search),
   loader: ({ context: { queryClient, isAuthed }, params: { id } }) => {
-    queryClient.ensureQueryData(feedDetailQueryOptions(id))
-    isAuthed && queryClient.ensureQueryData(feedSubscriptionQueryOptions(id))
+    void queryClient.ensureQueryData(feedDetailQueryOptions(id))
+    if (isAuthed) {
+      void queryClient.ensureQueryData(feedSubscriptionQueryOptions(id))
+    }
   },
   pendingComponent: FeedDetailSkeleton,
   component: FeedDetail,
@@ -40,7 +42,7 @@ function FeedDetail() {
   const queryClient = useQueryClient()
   const navigate = useNavigate({ from: '/feed/$id' })
   const id = Route.useParams().id
-  const { type } = Route.useSearch() as { type?: ContentType }
+  const { type } = Route.useSearch()
 
   const { data: feed } = useSuspenseQuery(feedDetailQueryOptions(id))
   const { data: subscription } = useQuery(feedSubscriptionQueryOptions(id))
@@ -49,10 +51,7 @@ function FeedDetail() {
   const isArticleListPending = articlesQuery.isPending && articles.length === 0
   const isArticleListRefreshing = articlesQuery.isFetching && articles.length > 0
 
-  const description = useMemo(() => {
-    const trimmed = feed.description?.trim()
-    return trimmed || feed.url || '暂无简介'
-  }, [feed.description, feed.url])
+  const description = feed.description?.trim() || feed.url || '暂无简介'
 
   const subscriptionMutation = useMutation({
     mutationFn: async (action: 'subscribe' | 'unsubscribe') =>
@@ -77,10 +76,8 @@ function FeedDetail() {
       queryClient.setQueryData(
         ['feed', id, 'detail'],
         produce((draft: typeof feed) => {
-          if (!draft) return
-          const currentCount = draft.subscriberCount ?? 0
           const delta = action === 'subscribe' ? 1 : -1
-          draft.subscriberCount = Math.max(0, currentCount + delta)
+          draft.subscriberCount = Math.max(0, draft.subscriberCount + delta)
         }),
       )
 
@@ -112,7 +109,7 @@ function FeedDetail() {
 
   const subscribed = subscription?.subscribed
   const actionLabel = subscribed ? '取消订阅' : '订阅'
-  const subscriberCount = (feed.subscriberCount ?? 0).toLocaleString('zh-CN')
+  const subscriberCount = feed.subscriberCount.toLocaleString('zh-CN')
   const articleCount = articles.length.toLocaleString('zh-CN')
   const tabValue = type ?? 'all'
 
@@ -138,7 +135,7 @@ function FeedDetail() {
               </span>
               {feed.link &&
                 <Button size="icon-sm" variant="link" className="rounded-full cursor-pointer"
-                        onClick={() => window.open(feed.link!)} aria-label="打开订阅源链接" title="打开订阅源链接">
+                        onClick={() => feed.link && window.open(feed.link)} aria-label="打开订阅源链接" title="打开订阅源链接">
                   <ExternalLink />
                 </Button>}
             </div>
@@ -193,6 +190,7 @@ function FeedDetail() {
       {isArticleListPending || isArticleListRefreshing ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, index) => (
+            // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
             <FeedArticleSkeleton key={index} />
           ))}
         </div>
@@ -265,6 +263,7 @@ function FeedDetailSkeleton() {
       <Skeleton className="h-9 w-62" />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, index) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
           <FeedArticleSkeleton key={index} />
         ))}
       </div>

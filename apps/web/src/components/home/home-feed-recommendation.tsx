@@ -25,7 +25,7 @@ export const HomeFeedRecommendation = ({ contentType }: HomeFeedRecommendationPr
     return <HomeFeedRecommendationSkeleton />
   }
 
-  if (query.isError || !query.data || query.data.length === 0) {
+  if (query.isError || query.data.length === 0) {
     return null
   }
 
@@ -68,7 +68,7 @@ export const HomeFeedRecommendation = ({ contentType }: HomeFeedRecommendationPr
                     </p>
 
                     <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                      <span>{(feed.subscriberCount ?? 0).toLocaleString('zh-CN')} 订阅</span>
+                      <span>{feed.subscriberCount.toLocaleString('zh-CN')} 订阅</span>
                       <span className="h-3 w-px bg-border/60" />
                       <span>{formatRecentTime(feed.lastFetchedAt)}</span>
                       <div
@@ -104,6 +104,7 @@ export const HomeFeedRecommendationSkeleton = () => (
 
       <div className="space-y-3">
         {Array.from({ length: 6 }).map((_, index) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
           <div key={index}>
             <div className="flex items-start gap-3 py-1">
               <Skeleton className="size-10 rounded-full" />

@@ -33,10 +33,12 @@ export const Route = createFileRoute('/article/$id')({
   loader: async ({ context: { queryClient, isAuthed }, params: { id } }) => {
     const article = await queryClient.ensureQueryData(articleDetailQueryOptions(id))
     await queryClient.ensureQueryData(feedDetailQueryOptions(article.feedId))
-    isAuthed && await Promise.all([
-      queryClient.ensureQueryData(feedSubscriptionQueryOptions(article.feedId)),
-      queryClient.ensureQueryData(articleFavoriteQueryOptions(id)),
-    ])
+    if (isAuthed) {
+      await Promise.all([
+        queryClient.ensureQueryData(feedSubscriptionQueryOptions(article.feedId)),
+        queryClient.ensureQueryData(articleFavoriteQueryOptions(id)),
+      ])
+    }
   },
   pendingComponent: ArticleSkeleton,
   component: Article,
@@ -92,9 +94,11 @@ const shareToPlatform = async (platform: SharePlatform, url: string): Promise<vo
     case 'telegram':
       window.open(`https://t.me/share/url?url=${encodedUrl}`, '_blank', windowFeatures)
       break
-    default:
-      console.warn(`Unknown share platform: ${platform}`)
+    default: {
+      const exhaustive: never = platform
+      console.warn(`Unknown share platform: ${String(exhaustive)}`)
       break
+    }
   }
 
   return Promise.resolve()
@@ -119,7 +123,7 @@ function Article() {
       await queryClient.cancelQueries({ queryKey: ['article', id, 'favorite'] })
       const previousFavorite = queryClient.getQueryData(['article', id, 'favorite'])
 
-      queryClient.setQueryData(['article', id, 'favorite'], (old: any) => ({
+      queryClient.setQueryData(['article', id, 'favorite'], (old: { favorited?: boolean } | undefined) => ({
         ...old,
         favorited: !old?.favorited,
       }))
@@ -158,7 +162,11 @@ function Article() {
       queryClient.setQueryData(
         ['feed', article.feedId, 'detail'],
         produce((draft: typeof feed) => {
-          variables === 'subscribe' ? draft.subscriberCount++ : draft.subscriberCount--
+          if (variables === 'subscribe') {
+            draft.subscriberCount++
+          } else {
+            draft.subscriberCount--
+          }
         }),
       )
 

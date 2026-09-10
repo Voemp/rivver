@@ -22,15 +22,16 @@ export const ArticleTocCard = ({ progress, headings }: ArticleTocCardProps) => {
   return (
     <nav aria-label="Article contents" className="w-full min-w-0">
       <div className="space-y-3 pb-4">
-        <div
-          className="flex items-center justify-between gap-3 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground/80">
+        <div className="flex items-center justify-between gap-3 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground/80">
           <span>Reading</span>
           <span className="text-foreground/90">{clampedProgress}%</span>
         </div>
 
         <div className="h-px bg-border/80">
-          <div className="h-full bg-foreground/85 transition-[width] duration-300"
-               style={{ width: `${clampedProgress}%` }} />
+          <div
+            className="h-full bg-foreground/85 transition-[width] duration-300"
+            style={{ width: `${clampedProgress}%` }}
+          />
         </div>
       </div>
 
@@ -85,6 +86,7 @@ export const ArticleTocSkeleton = () => (
       {Array.from({ length: 8 }).map((_, index) => {
         const width = index % 3 === 0 ? 'w-5/6' : index % 2 === 0 ? 'w-2/3' : 'w-4/5'
         return (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
           <div key={index} className="flex items-center gap-2">
             <Skeleton className="size-1.5 rounded-full" />
             <Skeleton className={`h-3 ${width} rounded-none`} />

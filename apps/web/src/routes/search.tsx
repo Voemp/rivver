@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { Search } from 'lucide-react'
-import { type ChangeEvent, useEffect, useState } from 'react'
+import { type ChangeEvent, useState } from 'react'
 import { z } from 'zod'
 
 const searchPageSchema = z.object({
@@ -23,21 +23,21 @@ export const Route = createFileRoute('/search')({
     return null
   },
   pendingComponent: SearchPageSkeleton,
-  component: SearchPage,
+  // key 绑定 q：路由参数变化时重挂载 SearchPage，本地输入框状态随 URL 重置
+  component: () => {
+    const { q } = Route.useSearch()
+    return <SearchPage key={q ?? ''} q={q} />
+  },
 })
 
-function SearchPage() {
+function SearchPage({ q }: { q?: string }) {
   const navigate = useNavigate({ from: '/search' })
-  const { q = '' } = Route.useSearch()
-  const [value, setValue] = useState(q)
-
-  useEffect(() => {
-    setValue(q)
-  }, [q])
+  // 以 key 绑定路由参数：q 变化时组件重挂载，初始 state 直接来自 URL，无需 effect 同步
+  const [value, setValue] = useState(q ?? '')
 
   const query = useQuery({
-    ...articleSearchQueryOptions(q),
-    enabled: q.trim().length > 0,
+    ...articleSearchQueryOptions(q ?? ''),
+    enabled: (q ?? '').trim().length > 0,
   })
 
   const handleSubmit = (event: ChangeEvent<HTMLFormElement>) => {
@@ -77,7 +77,7 @@ function SearchPage() {
         </form>
       </div>
 
-      {!q.trim() ? (
+      {!(q ?? '').trim() ? (
         <EmptyState
           title="输入关键词开始搜索"
           description="支持标题、摘要和正文片段检索，并包含模糊匹配。"
@@ -136,6 +136,7 @@ function SearchPageSkeleton() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, index) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
           <Skeleton key={index} className="h-80 rounded-none" />
         ))}
       </div>

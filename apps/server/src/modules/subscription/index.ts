@@ -39,9 +39,11 @@ export const subscription = new Elysia({
       }
       feed = await feedRepo.create(_feed)
       // 新增订阅时，立即异步 fetch 数据
+      const createdFeed = feed
       queueMicrotask(() => {
-        if (!feed) return
-        fetchSingleFeed(feed)
+        void fetchSingleFeed(createdFeed).catch((err) => {
+          console.error(`[RSS] fetch failed: ${createdFeed.url}`, err)
+        })
       })
     }
 

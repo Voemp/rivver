@@ -8,7 +8,7 @@ import { Fragment } from 'react'
 type FeaturedVariant = 'feature' | 'stack' | 'aside'
 
 interface ColumnConfig {
-  indices: number[]    // 对应 items 数组中的索引
+  indices: number[] // 对应 items 数组中的索引
   variant: FeaturedVariant
   rows: number
 }
@@ -27,7 +27,13 @@ const LAYOUT_CONFIGS = {
 }
 
 // --- 3. 基础原子组件 ---
-const FeaturedLink = ({ article, variant }: { article: HomeArticleItem; variant: FeaturedVariant }) => (
+const FeaturedLink = ({
+  article,
+  variant,
+}: {
+  article: HomeArticleItem
+  variant: FeaturedVariant
+}) => (
   <Link
     to="/article/$id"
     params={{ id: article.id }}
@@ -44,13 +50,19 @@ const FeaturedColumn = ({ items, config }: { items: HomeArticleItem[]; config: C
   return (
     <div className="flex min-h-0 flex-col">
       {indices.map((dataIndex, i) => {
+        // items 可能不足 LAYOUT_CONFIGS 的索引数，运行时需要真值兜底
         const item = items[dataIndex]
         const isLast = i === indices.length - 1
 
         return (
           <Fragment key={dataIndex}>
             <div className="min-h-0 flex-1">
-              {item ? <FeaturedLink article={item} variant={variant} /> : <div className="h-full" />}
+              {/* oxlint-disable-next-line typescript/no-unnecessary-condition */}
+              {item ? (
+                <FeaturedLink article={item} variant={variant} />
+              ) : (
+                <div className="h-full" />
+              )}
             </div>
             {!isLast && <Separator className={rows === 5 ? 'my-1.5' : 'my-2'} />}
           </Fragment>
@@ -66,35 +78,44 @@ export const HomeFeaturedSection = ({ items }: { items: HomeArticleItem[] }) => 
     <section className="space-y-6">
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Home Featured</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">精选内容</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          精选内容
+        </h1>
       </header>
 
-      {/* LG 布局 */}
+      {/* LG 布局：按 LAYOUT_CONFIGS 静态配置渲染，index 即其唯一身份 */}
       <div className="hidden lg:grid lg:h-180 lg:grid-cols-[1fr_1.24fr_1fr] lg:gap-x-16 relative">
         {LAYOUT_CONFIGS.lg.map((conf, i) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态布局配置项
           <Fragment key={i}>
             <FeaturedColumn items={items} config={conf} />
             {i < LAYOUT_CONFIGS.lg.length - 1 && (
-              <Separator orientation="vertical" className="absolute"
-                         style={{
-                           left: i === 0
-                             ? `calc((100% / (1 + 1.24 + 1)) * 1)`
-                             : `calc((100% / (1 + 1.24 + 1)) * 2.24)`,
-                         }}
+              <Separator
+                orientation="vertical"
+                className="absolute"
+                style={{
+                  left:
+                    i === 0
+                      ? `calc((100% / (1 + 1.24 + 1)) * 1)`
+                      : `calc((100% / (1 + 1.24 + 1)) * 2.24)`,
+                }}
               />
             )}
           </Fragment>
         ))}
       </div>
 
-      {/* SM 布局 */}
+      {/* SM 布局：按 LAYOUT_CONFIGS 静态配置渲染，index 即其唯一身份 */}
       <div className="hidden sm:grid sm:h-168 sm:grid-cols-[1.2fr_1fr] sm:gap-x-8 relative lg:hidden">
         {LAYOUT_CONFIGS.sm.map((conf, i) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态布局配置项
           <Fragment key={i}>
             <FeaturedColumn items={items} config={conf} />
             {i < LAYOUT_CONFIGS.sm.length - 1 && (
-              <Separator orientation="vertical" className="absolute"
-                         style={{ left: 'calc((100% / (1.2 + 1)) * 1.2)' }}
+              <Separator
+                orientation="vertical"
+                className="absolute"
+                style={{ left: 'calc((100% / (1.2 + 1)) * 1.2)' }}
               />
             )}
           </Fragment>
@@ -113,6 +134,7 @@ const FeaturedColumnSkeleton = ({ config }: { config: ColumnConfig }) => {
       {indices.map((_, i) => {
         const isLast = i === indices.length - 1
         return (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态布局配置项
           <Fragment key={i}>
             <div className="min-h-0 flex-1">
               <Skeleton className="h-full w-full rounded-none" />
@@ -138,6 +160,7 @@ export const HomeFeaturedSectionSkeleton = () => {
       {/* 使用相同的 LAYOUT_CONFIGS 渲染 XL 骨架 */}
       <div className="hidden lg:grid lg:h-180 lg:grid-cols-[1fr_1.24fr_1fr] lg:gap-8">
         {LAYOUT_CONFIGS.lg.map((conf, i) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态布局配置项
           <FeaturedColumnSkeleton key={`xl-skel-${i}`} config={conf} />
         ))}
       </div>
@@ -145,6 +168,7 @@ export const HomeFeaturedSectionSkeleton = () => {
       {/* 使用相同的 LAYOUT_CONFIGS 渲染 LG 骨架 */}
       <div className="hidden sm:grid sm:h-168 sm:grid-cols-[1.2fr_1fr] sm:gap-8 lg:hidden">
         {LAYOUT_CONFIGS.sm.map((conf, i) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态布局配置项
           <FeaturedColumnSkeleton key={`lg-skel-${i}`} config={conf} />
         ))}
       </div>

@@ -273,6 +273,7 @@ function SubscriptionsSkeleton() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {Array.from({ length: 6 }).map((_, index) => (
           <div
+            // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
             key={index}
             className="rounded-2xl border border-border/50 bg-card/70 px-4 pt-4"
           >

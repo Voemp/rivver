@@ -27,8 +27,8 @@ export const NotFoundState = ({
         </div>
         <h3 className="text-lg font-semibold">{title}</h3>
         <p className="text-sm text-muted-foreground">{message}</p>
-        <Button asChild className="mt-2">
-          <Link to="/">{homeLabel}</Link>
+        <Button render={<Link to="/" />} className="mt-2">
+          {homeLabel}
         </Button>
       </div>
     </div>

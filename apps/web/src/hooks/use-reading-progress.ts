@@ -19,7 +19,8 @@ const MIN_PROGRESS_DELTA = 2
 
 const clampProgress = (value: number) => Math.max(0, Math.min(100, Math.round(value)))
 
-const buildReadProgressUrl = (articleId: number) => `${env.apiBaseUrl}/article/${articleId}/read-progress`
+const buildReadProgressUrl = (articleId: number) =>
+  `${env.apiBaseUrl}/article/${articleId}/read-progress`
 
 export const useReadingProgress = ({ articleId }: UseReadingProgressParams) => {
   const [progress, setProgress] = useState(0)
@@ -32,66 +33,80 @@ export const useReadingProgress = ({ articleId }: UseReadingProgressParams) => {
   const queuedProgressRef = useRef<number | null>(null)
   const unmountedRef = useRef(false)
 
-  const sendProgress = useCallback(async (value: number, force = false) => {
-    const normalized = clampProgress(value)
-    const lastSent = lastSentProgressRef.current
-    const delta = Math.abs(normalized - lastSent)
+  const sendProgress = useCallback(
+    async (value: number, force = false) => {
+      const normalized = clampProgress(value)
+      const lastSent = lastSentProgressRef.current
+      const delta = Math.abs(normalized - lastSent)
 
-    if (!force && normalized !== 100 && lastSent >= 0 && delta < MIN_PROGRESS_DELTA) {
-      return
-    }
-
-    if (inFlightRef.current) {
-      queuedProgressRef.current = normalized
-      return
-    }
-
-    inFlightRef.current = true
-    try {
-      await postReadProgress(articleId, normalized)
-      lastSentProgressRef.current = normalized
-    } catch {
-      // 进度上报失败时静默降级，避免影响阅读体验。
-    } finally {
-      inFlightRef.current = false
-
-      const queued = queuedProgressRef.current
-      queuedProgressRef.current = null
-
-      if (queued !== null && queued !== lastSentProgressRef.current && !unmountedRef.current) {
-        void sendProgress(queued, true)
+      if (!force && normalized !== 100 && lastSent >= 0 && delta < MIN_PROGRESS_DELTA) {
+        return
       }
-    }
-  }, [articleId])
 
-  const flushOnPageLeave = useCallback((value: number) => {
-    const normalized = clampProgress(value)
-    if (normalized === lastSentProgressRef.current) {
-      return
-    }
+      if (inFlightRef.current) {
+        queuedProgressRef.current = normalized
+        return
+      }
 
-    const payload = JSON.stringify({ progress: normalized })
-    const endpoint = buildReadProgressUrl(articleId)
+      // 循环消化排队进度，替代原来的递归调用（React Compiler 无法保持递归 useCallback 的记忆化）
+      let current: number | null = normalized
+      while (current !== null) {
+        inFlightRef.current = true
+        try {
+          await postReadProgress(articleId, current)
+          lastSentProgressRef.current = current
+        } catch {
+          // 进度上报失败时静默降级，避免影响阅读体验。
+        } finally {
+          inFlightRef.current = false
+        }
 
-    let beaconSent = false
-    if (typeof navigator.sendBeacon === 'function') {
-      beaconSent = navigator.sendBeacon(endpoint, new Blob([payload], { type: 'application/json' }))
-    }
+        const queued = queuedProgressRef.current
+        queuedProgressRef.current = null
+        if (queued !== null && queued !== lastSentProgressRef.current && !unmountedRef.current) {
+          current = queued
+          continue
+        }
+        current = null
+      }
+    },
+    [articleId],
+  )
 
-    if (!beaconSent) {
-      void fetch(endpoint, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: payload,
-        keepalive: true,
-      }).catch(() => undefined)
-    }
+  const flushOnPageLeave = useCallback(
+    (value: number) => {
+      const normalized = clampProgress(value)
+      if (normalized === lastSentProgressRef.current) {
+        return
+      }
 
-    lastSentProgressRef.current = normalized
-  }, [articleId])
+      const payload = JSON.stringify({ progress: normalized })
+      const endpoint = buildReadProgressUrl(articleId)
+
+      let beaconSent = false
+      if (typeof navigator.sendBeacon === 'function') {
+        beaconSent = navigator.sendBeacon(
+          endpoint,
+          new Blob([payload], { type: 'application/json' }),
+        )
+      }
+
+      if (!beaconSent) {
+        void fetch(endpoint, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: payload,
+          keepalive: true,
+        }).catch(() => {})
+      }
+
+      lastSentProgressRef.current = normalized
+    },
+    [articleId],
+  )
 
   useEffect(() => {
     unmountedRef.current = false
@@ -108,47 +123,56 @@ export const useReadingProgress = ({ articleId }: UseReadingProgressParams) => {
       return
     }
 
-    const titleNodes = Array.from(contentRoot.querySelectorAll('h1, h2, h3')) as HTMLHeadingElement[]
-    const mapped = titleNodes.map((node, index) => {
-      if (!node.id) {
-        node.id = `heading-${index}`
-      }
-      return {
-        id: node.id,
-        text: node.innerText,
-        level: Number(node.tagName[1]),
-        progress: 0,
-        active: false,
-      }
-    })
-    setHeadings(mapped)
+    const titleNodes = Array.from(contentRoot.querySelectorAll<HTMLHeadingElement>('h1, h2, h3'))
+    // headings 以函数式 setState 从 DOM 派生初始化，与后续滚动更新走同一条更新路径
+    const buildInitialHeadings = (): HeadingProgressItem[] =>
+      titleNodes.map((node, index) => {
+        if (!node.id) {
+          node.id = `heading-${index}`
+        }
+        return {
+          id: node.id,
+          text: node.innerText,
+          level: Number(node.tagName[1]),
+          progress: 0,
+          active: false,
+        }
+      })
 
-    const updateHeadingProgress = () => {
+    const updateHeadingProgress = (initial?: HeadingProgressItem[]) => {
       const viewportOffset = window.innerHeight * 0.24
 
-      setHeadings((current) => current.map((heading, index) => {
-        const node = document.getElementById(heading.id)
-        if (!node) {
-          return heading
+      setHeadings((current) => {
+        const base = current.length > 0 ? current : (initial ?? [])
+        if (base.length === 0) {
+          return base
         }
 
-        const currentTop = node.getBoundingClientRect().top + window.scrollY
-        const nextNode = index < current.length - 1 ? document.getElementById(current[index + 1].id) : null
-        const nextTop = nextNode
-          ? nextNode.getBoundingClientRect().top + window.scrollY
-          : document.documentElement.scrollHeight - window.innerHeight + viewportOffset
+        return base.map((heading, index) => {
+          const node = document.getElementById(heading.id)
+          if (!node) {
+            return heading
+          }
 
-        const range = Math.max(nextTop - currentTop, 1)
-        const raw = ((window.scrollY + viewportOffset - currentTop) / range) * 100
-        const itemProgress = Math.max(0, Math.min(100, Math.round(raw)))
-        const isActive = itemProgress > 0 && itemProgress < 100
+          const currentTop = node.getBoundingClientRect().top + window.scrollY
+          const nextNode =
+            index < base.length - 1 ? document.getElementById(base[index + 1].id) : null
+          const nextTop = nextNode
+            ? nextNode.getBoundingClientRect().top + window.scrollY
+            : document.documentElement.scrollHeight - window.innerHeight + viewportOffset
 
-        return {
-          ...heading,
-          progress: itemProgress,
-          active: isActive,
-        }
-      }))
+          const range = Math.max(nextTop - currentTop, 1)
+          const raw = ((window.scrollY + viewportOffset - currentTop) / range) * 100
+          const itemProgress = Math.max(0, Math.min(100, Math.round(raw)))
+          const isActive = itemProgress > 0 && itemProgress < 100
+
+          return {
+            ...heading,
+            progress: itemProgress,
+            active: isActive,
+          }
+        })
+      })
     }
 
     const scheduleIdleSend = () => {
@@ -161,13 +185,16 @@ export const useReadingProgress = ({ articleId }: UseReadingProgressParams) => {
       }, SCROLL_IDLE_MS)
     }
 
-    const updateReadingProgress = () => {
+    const updateReadingProgress = (initialHeadings?: HeadingProgressItem[]) => {
       const scrollTop = window.scrollY
       const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
-      const next = scrollHeight <= 0 ? 100 : Math.min(100, Math.max(0, Math.round((scrollTop / scrollHeight) * 100)))
+      const next =
+        scrollHeight <= 0
+          ? 100
+          : Math.min(100, Math.max(0, Math.round((scrollTop / scrollHeight) * 100)))
       setProgress(next)
       latestProgressRef.current = next
-      updateHeadingProgress()
+      updateHeadingProgress(initialHeadings)
     }
 
     const onScroll = () => {
@@ -201,7 +228,7 @@ export const useReadingProgress = ({ articleId }: UseReadingProgressParams) => {
     window.addEventListener('pagehide', flushForLeave)
     window.addEventListener('beforeunload', flushForLeave)
 
-    updateReadingProgress()
+    updateReadingProgress(buildInitialHeadings())
 
     return () => {
       unmountedRef.current = true

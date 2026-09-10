@@ -35,8 +35,8 @@ export const ErrorState = ({
         <p className="text-sm text-muted-foreground">{message}</p>
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           {showRetry ? <Button onClick={onRetry}>{retryLabel}</Button> : null}
-          <Button asChild variant={showRetry ? 'outline' : 'default'}>
-            <Link to="/">{homeLabel}</Link>
+          <Button variant={showRetry ? 'outline' : 'default'} render={<Link to="/" />}>
+            {homeLabel}
           </Button>
         </div>
       </div>

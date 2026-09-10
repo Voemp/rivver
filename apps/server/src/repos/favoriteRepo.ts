@@ -21,7 +21,8 @@ export const favoriteRepo = {
       },
     })
 
-    return existing!
+    if (!existing) throw new Error('收藏记录不存在')
+    return existing
   },
   removeWithBehavior: async (userId: string, articleId: number): Promise<boolean> => {
     return db.transaction(async (tx) => {
@@ -85,7 +86,9 @@ export const favoriteRepo = {
       },
       offset,
       limit,
-    }).then(rows => rows.map(r => r.article!).filter(Boolean))
+    }).then(rows => rows
+      .map(r => r.article)
+      .filter((article): article is NonNullable<typeof article> => article !== null))
   },
   createWithBehavior: async (
     favorite: InsertUserFavorite,

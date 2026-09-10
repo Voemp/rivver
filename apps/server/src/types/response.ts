@@ -14,7 +14,7 @@ export const ApiResponseModel = {
 }
 
 export const res = {
-  success: (data: any) => {
+  success: <T>(data: T) => {
     return { success: true, data, error: null }
   },
   error: (message: string, code: string = 'INTERNAL_ERROR') => {

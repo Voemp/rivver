@@ -1,6 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { cn } from '@/lib/utils'
-import ReactMarkdown, { type Options } from 'react-markdown'
+import type { JSX } from 'react'
+import ReactMarkdown, { type ExtraProps, type Options } from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 
@@ -35,10 +36,10 @@ const customSchema = {
 const markdownRehypePlugins: Options['rehypePlugins'] = [rehypeRaw, [rehypeSanitize, customSchema]]
 
 const markdownComponents: Options['components'] = {
-  iframe: ({ node: _node, className, ...props }: any) => {
+  iframe: ({ node: _node, className, ...props }: JSX.IntrinsicElements['iframe'] & ExtraProps) => {
     return (
       <div className="my-6 aspect-video w-full overflow-hidden rounded-xl border bg-muted shadow-sm">
-        <iframe {...props} className={`h-full w-full ${className ?? ''}`} />
+        <iframe {...props} className={cn('h-full w-full', className)} />
       </div>
     )
   },
@@ -71,10 +72,12 @@ export const ArticleContentSkeleton = () => {
     <section className="mx-auto mt-10 max-w-3xl">
       <div className="space-y-10">
         {blocks.map((block, blockIndex) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
           <div key={blockIndex} className="space-y-3">
             {block.heading ? <Skeleton className={`h-5 ${block.heading} rounded-none`} /> : null}
             {block.lines.map((width, lineIndex) => (
               <Skeleton
+                // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
                 key={`${blockIndex}-${lineIndex}`}
                 className={`h-4 ${width} rounded-none`}
               />

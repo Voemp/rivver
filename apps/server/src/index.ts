@@ -62,6 +62,7 @@ const app = new Elysia()
       case 'VALIDATION':
         return res.error(error.message, error.code)
     }
+    return null
   })
   .guard({ response: { 422: ApiResponseModel.error(undefined, 'VALIDATION') } })
   .mount(auth.handler)

@@ -12,7 +12,7 @@ export const Route = createFileRoute('/favorites')({
 })
 
 function Favorites() {
-  const { data: items = [] } = useSuspenseQuery(favoritesQueryOptions(0, 10))
+  const { data: items } = useSuspenseQuery(favoritesQueryOptions(0, 10))
 
   return (
     <section className="mx-auto w-full max-w-6xl space-y-6">
@@ -72,6 +72,7 @@ function FavoritesSkeleton() {
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, index) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
           <FavoriteCardSkeleton key={index} />
         ))}
       </div>

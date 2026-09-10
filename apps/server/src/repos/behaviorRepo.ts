@@ -9,7 +9,8 @@ export const behaviorRepo = {
       .values(newBehavior)
       .returning()
 
-    return row!
+    if (!row) throw new Error('行为记录创建失败')
+    return row
   },
   existsByUserArticleType: async (
     userId: string,

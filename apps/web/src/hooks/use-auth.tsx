@@ -4,10 +4,21 @@ import { createContext, type ReactNode, useContext, useMemo, useState } from 're
 
 type AuthDialogMode = 'sign-in' | 'sign-up'
 
-type SessionPayload = Awaited<ReturnType<typeof authClient.getSession>>['data']
+// better-auth 未配置 $InferServerPlugin 时 getSession 泛型推导为 any，这里
+// 从实际响应结构显式声明 user 字段，使用方拿到精确类型
+type AuthUser = {
+  id: string
+  name: string
+  email: string
+  emailVerified: boolean
+  image: string | null
+  username?: string | null
+  createdAt: Date
+  updatedAt: Date
+}
 
 export type AuthContextValue = {
-  session: SessionPayload | null
+  session: AuthSession | null
   isAuthed: boolean
   isPending: boolean
   authDialogOpen: boolean
@@ -21,13 +32,17 @@ export type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
+export type AuthSession = { user: AuthUser }
+
 export const AUTH_SESSION_QUERY_KEY = ['auth', 'session'] as const
 
 export const sessionQueryOptions = queryOptions({
   queryKey: AUTH_SESSION_QUERY_KEY,
-  queryFn: async () => {
+  queryFn: async (): Promise<AuthSession | null> => {
     const response = await authClient.getSession()
-    return response.data ?? null
+    const data = response.data
+    if (!data?.user) return null
+    return { user: data.user as AuthUser }
   },
 })
 

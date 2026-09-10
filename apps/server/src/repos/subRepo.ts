@@ -11,6 +11,7 @@ export const subRepo = {
         .insert(subscription)
         .values(sub)
         .returning()
+      if (!row) throw new Error('订阅创建失败')
 
       await tx
         .update(feed)
@@ -33,6 +34,7 @@ export const subRepo = {
         .returning({
           feedId: subscription.feedId,
         })
+      if (!row) throw new Error('订阅不存在')
 
       await tx
         .update(feed)

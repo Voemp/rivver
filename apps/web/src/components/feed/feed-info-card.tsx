@@ -121,16 +121,18 @@ export const FeedInfoCard = ({
 
         {subscribed ? (
           <Popover open={confirmOpen} onOpenChange={setConfirmOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full border-transparent bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-              >
-                已订阅
-              </Button>
-            </PopoverTrigger>
+            <PopoverTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-transparent bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                >
+                  已订阅
+                </Button>
+              }
+            />
             <PopoverContent align="end" className="w-72 rounded-2xl p-4">
               <div className="space-y-3">
                 <div className="space-y-1">

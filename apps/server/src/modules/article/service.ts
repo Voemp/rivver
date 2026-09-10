@@ -159,13 +159,13 @@ function rankPopularityCandidates<T extends PopularityCandidate>(candidates: T[]
     }
   })
 
-  ranked.sort((a, b) => {
+  const sorted = ranked.toSorted((a, b) => {
     if (a.score !== b.score) return b.score - a.score
     if (a.baseDateMs !== b.baseDateMs) return b.baseDateMs - a.baseDateMs
     return b.candidate.id - a.candidate.id
   })
 
-  return ranked.map(entry => entry.candidate)
+  return sorted.map(entry => entry.candidate)
 }
 
 function orderArticlesByIds<T extends { id: number }>(articles: T[], ids: number[]): T[] {
@@ -221,8 +221,8 @@ function scoreRecommendationCandidate(
     : 0
   const feedScore = profile.feedWeights.get(candidate.feedId) ?? 0
   const recentFeedScore = profile.recentFeedWeights.get(candidate.feedId) ?? 0
-  const typeScore = profile.contentTypeWeights[candidate.contentType] ?? 0
-  const recentTypeScore = profile.recentContentTypeWeights[candidate.contentType] ?? 0
+  const typeScore = profile.contentTypeWeights[candidate.contentType]
+  const recentTypeScore = profile.recentContentTypeWeights[candidate.contentType]
   const isMedia = candidate.contentType !== 'article'
 
   if (isMedia) {
@@ -255,7 +255,7 @@ function rankRecommendationCandidates(candidates: RecommendationCandidate[], pro
   const maxPopularity = Math.max(0, ...rawPopularity)
 
   const ranked: RankedRecommendationCandidate[] = candidates.map((candidate, index) => {
-    const popularityScore = maxPopularity > 0 ? rawPopularity[index]! / maxPopularity : 0
+    const popularityScore = maxPopularity > 0 ? (rawPopularity[index] ?? 0) / maxPopularity : 0
     const baseDateMs = (candidate.pubDate ?? candidate.createdAt).getTime()
     const baseScore = scoreRecommendationCandidate(candidate, profile, popularityScore)
     const randomJitter = (Math.random() - 0.5) * RANKING_RANDOM_JITTER
@@ -267,13 +267,11 @@ function rankRecommendationCandidates(candidates: RecommendationCandidate[], pro
     }
   })
 
-  ranked.sort((a, b) => {
+  return ranked.toSorted((a, b) => {
     if (a.score !== b.score) return b.score - a.score
     if (a.baseDateMs !== b.baseDateMs) return b.baseDateMs - a.baseDateMs
     return b.candidate.id - a.candidate.id
   })
-
-  return ranked
 }
 
 function calcDiversityPenalty(
@@ -312,7 +310,7 @@ function pickDiversifiedCandidateIndex(
       index,
       adjustedScore: entry.score - calcDiversityPenalty(entry, selected, feedCounts, typeCounts),
     }))
-    .sort((a, b) => b.adjustedScore - a.adjustedScore)
+    .toSorted((a, b) => b.adjustedScore - a.adjustedScore)
 
   const pool = scored.slice(0, Math.min(DIVERSITY_RANDOM_POOL_SIZE, scored.length))
   const minScore = Math.min(...pool.map(item => item.adjustedScore))
@@ -321,20 +319,20 @@ function pickDiversifiedCandidateIndex(
   let random = Math.random() * totalWeight
 
   for (let index = 0; index < pool.length; index++) {
-    random -= weights[index]!
+    random -= weights[index] ?? 0
     if (random <= 0) {
-      return pool[index]!.index
+      return pool[index]?.index ?? 0
     }
   }
 
-  return pool[0]!.index
+  return pool[0]?.index ?? 0
 }
 
 function diversifyRecommendationCandidates(
   ranked: RankedRecommendationCandidate[],
   limit: number,
 ) {
-  const remaining = [...ranked.slice(0, Math.min(ranked.length, limit * DIVERSIFIED_CANDIDATE_MULTIPLIER))]
+  const remaining = ranked.slice(0, Math.min(ranked.length, limit * DIVERSIFIED_CANDIDATE_MULTIPLIER))
   const selected: RankedRecommendationCandidate[] = []
   const feedCounts = new Map<number, number>()
   const typeCounts: Record<ContentKind, number> = {
@@ -418,7 +416,7 @@ export async function refreshUserInterest(userId: string) {
     totalWeight += weight
 
     for (let index = 0; index < embedding.length; index++) {
-      vector[index]! += embedding[index]! * weight
+      vector[index] = (vector[index] ?? 0) + (embedding[index] ?? 0) * weight
     }
   }
 
@@ -437,7 +435,7 @@ export async function seedUserRecommendations(userId: string, contentType?: Cont
   const interest = await interestRepo.findByUser(userId)
   const seenArticleIds = await behaviorRepo.listSeenArticleIds(userId)
   const signals = await behaviorRepo.listWeightedSignals(userId, MAX_BEHAVIORS)
-  const interestVector = interest?.interestVector?.length ? interest.interestVector : null
+  const interestVector = interest?.interestVector.length ? interest.interestVector : null
 
   if (signals.length === 0 && !interestVector) {
     return []

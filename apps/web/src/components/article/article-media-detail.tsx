@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import { contentTypeLabels } from '@/types/content'
 import { formatRecentTime } from '@/utils/date'
 import { ChevronLeft, ChevronRight, ImageIcon, PlayCircle } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 type MediaArticle = {
   id: number
@@ -250,18 +250,24 @@ export const ArticleMediaDetail = ({ article, feed }: ArticleMediaDetailProps) =
   const [isImageLoading, setIsImageLoading] = useState(false)
   const currentImage = images[activeImageIndex] ?? null
 
-  useEffect(() => {
-    setActiveImageIndex(0)
-  }, [article.id])
-
-  useEffect(() => {
+  // 渲染期调整 state（React 官方推荐模式，避免 effect 级联渲染）：
+  // 切换文章时重置图片选择；切换内容类型/图片时同步加载态
+  const [prevSync, setPrevSync] = useState({ articleId: article.id, contentType: article.contentType, currentImage })
+  if (
+    prevSync.articleId !== article.id
+    || prevSync.contentType !== article.contentType
+    || prevSync.currentImage !== currentImage
+  ) {
+    setPrevSync({ articleId: article.id, contentType: article.contentType, currentImage })
+    if (prevSync.articleId !== article.id) {
+      setActiveImageIndex(0)
+    }
     if (article.contentType !== 'image') {
       setIsImageLoading(false)
-      return
+    } else {
+      setIsImageLoading(Boolean(currentImage))
     }
-
-    setIsImageLoading(Boolean(currentImage))
-  }, [article.contentType, currentImage])
+  }
 
   if (article.contentType === 'image') {
     const imageCount = images.length

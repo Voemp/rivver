@@ -26,4 +26,9 @@ declare module '@tanstack/react-router' {
   }
 }
 
-createRoot(document.getElementById('app')!).render(<RouterProvider router={router} />)
+const appElement = document.getElementById('app')
+if (!appElement) {
+  throw new Error('未找到 #app 挂载节点')
+}
+
+createRoot(appElement).render(<RouterProvider router={router} />)

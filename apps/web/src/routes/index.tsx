@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { env } from '@/config/env'
 import { useAuth } from '@/hooks/use-auth.tsx'
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll'
-import { type ContentType, contentTypeOptions } from '@/types/content'
+import { contentTypeOptions } from '@/types/content'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo } from 'react'
@@ -30,7 +30,7 @@ export const Route = createFileRoute('/')({
 function Home() {
   const pageSize = env.articleListPageSize
   const { isAuthed } = useAuth()
-  const { type } = Route.useSearch() as { type?: ContentType }
+  const { type } = Route.useSearch()
   const query = useInfiniteQuery(articlesInfiniteOptions(isAuthed, pageSize, type))
 
   const items = useMemo(() => {

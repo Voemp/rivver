@@ -8,6 +8,7 @@ export const feedRepo = {
       .insert(feed)
       .values(newFeed)
       .returning()
+    if (!row) throw new Error('订阅源创建失败')
     return row
   },
   list: async () => {
@@ -36,8 +37,8 @@ export const feedRepo = {
     })
 
     return feeds
-      .sort((a, b) => {
-        const subscriberDelta = (b.subscriberCount ?? 0) - (a.subscriberCount ?? 0)
+      .toSorted((a, b) => {
+        const subscriberDelta = b.subscriberCount - a.subscriberCount
         if (subscriberDelta !== 0) return subscriberDelta
 
         const totalContentA = a.articleContentCount + a.imageContentCount + a.videoContentCount

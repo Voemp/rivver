@@ -17,7 +17,7 @@ async function refreshRecommendations(userId: string) {
     await refreshUserInterest(userId)
     return await seedUserRecommendations(userId)
   } catch {
-    return undefined
+    return null
   }
 }
 

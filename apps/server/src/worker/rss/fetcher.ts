@@ -4,7 +4,14 @@ import { feedRepo } from '@server/repos/feedRepo'
 import pLimit from 'p-limit'
 import Parser from 'rss-parser'
 
-const parser = new Parser()
+type RssCustomItemFields = {
+  'content:encoded'?: string
+  'content:encodedSnippet'?: string
+}
+
+type RssItem = Parser.Item & RssCustomItemFields
+
+const parser = new Parser<RssCustomItemFields, RssCustomItemFields>()
 const IMG_SRC_PATTERN = /<img\b[^>]*?\bsrc=(['"]?)([^'" >]+)\1/i
 const IMG_TAG_PATTERN = /<img\b[^>]*>/gi
 const VIDEO_TAG_PATTERN = /<(video|iframe|embed)\b[^>]*>[\s\S]*?<\/\1>|<(video|iframe|embed)\b[^>]*\/?>/gi
@@ -24,14 +31,17 @@ const IMAGE_LIGHT_TAG_BASE_MAX = 4
 const VIDEO_TAG_DOMINANCE_MIN = 1
 const IMAGE_TAG_DOMINANCE_MIN = 2
 
-function normalizeEnclosure(enclosure: Parser.Item['enclosure']) {
-  if (!enclosure || typeof enclosure !== 'object') {
-    return undefined
+type ArticleEnclosure = NonNullable<InsertArticle['enclosure']>
+
+function normalizeEnclosure(enclosure: Parser.Item['enclosure']): ArticleEnclosure | null {
+  if (!enclosure || typeof enclosure !== 'object' || !enclosure.url) {
+    return null
   }
 
   return {
-    ...enclosure,
-    length: enclosure.length ? Number(enclosure.length) : undefined,
+    url: enclosure.url,
+    ...(enclosure.length ? { length: Number(enclosure.length) } : {}),
+    ...(enclosure.type ? { type: enclosure.type } : {}),
   }
 }
 
@@ -48,11 +58,11 @@ function inferImageMimeType(url: string) {
   return 'image/*'
 }
 
-function extractImageEnclosureFromContent(content?: string | null) {
-  if (!content) return undefined
+function extractImageEnclosureFromContent(content?: string | null): ArticleEnclosure | null {
+  if (!content) return null
 
   const src = content.match(IMG_SRC_PATTERN)?.[2]?.trim()
-  if (!src) return undefined
+  if (!src) return null
 
   return {
     url: src,
@@ -172,10 +182,6 @@ export async function fetchSingleFeed(feed: SelectFeed) {
   await feedRepo.update(feed.id, { status: 'pending' })
 
   const feedInfo = await parser.parseURL(feed.url)
-  if (!feedInfo) {
-    await feedRepo.update(feed.id, { status: 'blocked' })
-    throw Error
-  }
 
   for (const item of feedInfo.items) {
     const article: InsertArticle | null = mapRssItem(feed.id, item)
@@ -196,7 +202,7 @@ export async function fetchSingleFeed(feed: SelectFeed) {
   })
 }
 
-function mapRssItem(feedId: number, item: { [key: string]: any } & Parser.Item): InsertArticle | null {
+function mapRssItem(feedId: number, item: RssItem): InsertArticle | null {
   const key = item.guid ?? item.link
   if (!key) return null
 

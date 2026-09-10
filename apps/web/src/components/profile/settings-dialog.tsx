@@ -9,7 +9,7 @@ import { env } from '@/config/env.ts'
 import { AUTH_SESSION_QUERY_KEY, useAuth } from '@/hooks/use-auth.tsx'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Cropper from 'react-easy-crop'
 import { toast } from 'sonner'
 
@@ -22,7 +22,6 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const [usernameInput, setUsernameInput] = useState('')
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const { session } = useAuth()
@@ -52,19 +51,17 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     onError: (error: Error) => toast.error(error.message || '头像更新失败'),
   })
 
+  // objectURL 是 avatarFile 的纯派生值：渲染期直接创建，effect 只负责回收，
+  // 避免为同步派生状态而设置的 setState-in-effect 级联
+  const avatarPreview = useMemo(() => (avatarFile ? URL.createObjectURL(avatarFile) : null), [avatarFile])
+
   useEffect(() => {
-    if (!avatarFile) {
-      setAvatarPreview(null)
-      return
-    }
-
-    const url = URL.createObjectURL(avatarFile)
-    setAvatarPreview(url)
-
     return () => {
-      URL.revokeObjectURL(url)
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview)
+      }
     }
-  }, [avatarFile])
+  }, [avatarPreview])
 
   const resetAvatarEditor = () => {
     setAvatarFile(null)

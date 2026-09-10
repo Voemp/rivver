@@ -1,5 +1,5 @@
+import type { InvertedStatusMap } from 'elysia/utils'
 import { res } from '@server/types/response'
-import { InvertedStatusMap } from 'elysia/utils'
 
 export class AppError extends Error {
   override readonly name = 'AppError'

@@ -8,7 +8,8 @@ export const profileRepo = {
       .insert(profile)
       .values(data)
       .returning()
-    return row!
+    if (!row) throw new Error('用户资料创建失败')
+    return row
   },
   findByUserId: async (userId: string): Promise<SelectProfile | undefined> => {
     return db.query.profile.findFirst({ where: { userId } })

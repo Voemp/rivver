@@ -63,7 +63,7 @@ export function AuthDialog() {
         : await authClient.signUp.email({
             email: values.email,
             password: values.password,
-            name: values.name!,
+            name: values.name ?? '',
           })
 
       if (error) throw new Error(error.message)

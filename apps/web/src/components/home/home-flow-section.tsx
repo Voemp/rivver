@@ -74,6 +74,7 @@ export const HomeFlowSectionSkeleton = () => {
             <Skeleton className="h-6 w-24 rounded-none" />
           </div>
           {Array.from({ length: 5 }).map((_, index) => (
+            // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
             <Skeleton key={index} className="h-40 rounded-none" />
           ))}
         </div>
@@ -86,12 +87,14 @@ export const HomeFlowSectionSkeleton = () => {
           <Skeleton className="h-6 w-24 rounded-none" />
         </div>
         {Array.from({ length: 5 }).map((_, index) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
           <Skeleton key={index} className="h-40 rounded-none" />
         ))}
       </div>
 
       <div className="space-y-3 sm:hidden">
         {Array.from({ length: 5 }).map((_, index) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 静态骨架屏项
           <Skeleton key={index} className="h-40 rounded-none" />
         ))}
       </div>

@@ -84,18 +84,20 @@ export const ArticleActionButtons = ({
       </Button>
 
       <DropdownMenu>
-        <DropdownMenuTrigger>
-          <Button
-            size="icon-lg"
-            variant="outline"
-            className={buttonClassName}
-            disabled={sharePending}
-            aria-label="分享"
-            title="分享"
-          >
-            <Share2 className="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              size="icon-lg"
+              variant="outline"
+              className={buttonClassName}
+              disabled={sharePending}
+              aria-label="分享"
+              title="分享"
+            >
+              <Share2 className="size-4" />
+            </Button>
+          }
+        ></DropdownMenuTrigger>
         <DropdownMenuContent
           side={dropdownSide}
           align={dropdownAlign}

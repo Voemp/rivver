@@ -44,7 +44,7 @@ const getCardImage = (article: HomeArticleItem) => {
 }
 
 export const ArticleMeta = ({ article, compact = false, className }: ArticleMetaProps) => {
-  const feedName = article.feed?.title?.trim() || '未知来源'
+  const feedName = article.feed?.title.trim() || '未知来源'
   const feedInitial = feedName.slice(0, 1).toUpperCase()
 
   return (

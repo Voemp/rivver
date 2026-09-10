@@ -102,16 +102,18 @@ export const ArticleAudioCard = ({ url }: ArticleAudioCardProps) => {
     }
 
     if (audio.paused) {
-      void audio.play().catch(() => undefined)
+      audio.play().catch(() => {
+        // 自动播放被浏览器策略拒绝时静默处理。
+      })
       return
     }
 
     audio.pause()
   }
 
-  const handleSeek = (values: number[]) => {
+  const handleSeek = (value: number | readonly number[]) => {
     const audio = audioRef.current
-    const nextTime = values[0] ?? 0
+    const nextTime = Math.min(...[value].flat())
     if (!audio || !Number.isFinite(duration) || duration <= 0) {
       return
     }
@@ -120,9 +122,9 @@ export const ArticleAudioCard = ({ url }: ArticleAudioCardProps) => {
     setCurrentTime(nextTime)
   }
 
-  const handleVolumeChange = (values: number[]) => {
+  const handleVolumeChange = (value: number | readonly number[]) => {
     const audio = audioRef.current
-    const nextVolume = values[0] ?? 0
+    const nextVolume = Math.min(...[value].flat())
     if (!audio) {
       return
     }
@@ -153,14 +155,14 @@ export const ArticleAudioCard = ({ url }: ArticleAudioCardProps) => {
         </div>
 
         <Button
-          asChild
+          render={
+            <a href={url} download aria-label="Download audio" title="Download audio" />
+          }
           size="icon-sm"
           variant="outline"
           className="rounded-full border-border/70 bg-background/80 shadow-none hover:bg-accent/60"
         >
-          <a href={url} download aria-label="Download audio" title="Download audio">
-            <Download className="size-4" />
-          </a>
+          <Download className="size-4" />
         </Button>
       </div>
 

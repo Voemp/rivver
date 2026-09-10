@@ -50,15 +50,18 @@ export const AppHeader = () => {
       : 'text-muted-foreground hover:bg-muted hover:text-foreground',
   )
 
-  useEffect(() => {
+  // 渲染期同步路由变化（React 官方推荐的“调整 state”模式，避免 effect 级联渲染）：
+  // 进入搜索页时回填 URL 中的搜索词，离开时收起搜索框并清空输入
+  const [prevRouteState, setPrevRouteState] = useState({ isSearchPage, searchQuery })
+  if (prevRouteState.isSearchPage !== isSearchPage || prevRouteState.searchQuery !== searchQuery) {
+    setPrevRouteState({ isSearchPage, searchQuery })
     if (isSearchPage) {
       setSearchValue(searchQuery)
-      return
+    } else {
+      setSearchOpen(false)
+      setSearchValue('')
     }
-
-    setSearchOpen(false)
-    setSearchValue('')
-  }, [isSearchPage, location.pathname, searchQuery])
+  }
 
   useEffect(() => {
     if (searchOpen) {
@@ -182,17 +185,19 @@ export const AppHeader = () => {
                 <Separator orientation="vertical" className="mr-4 opacity-50" />
 
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
-                      aria-label="打开用户菜单"
-                    >
-                      <Avatar className="size-9 ring-1 ring-border/70">
-                        <AvatarImage src={session.user.image ?? undefined} alt={session.user.name} />
-                        <AvatarFallback>{session.user.name.slice(0, 1).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                    </button>
-                  </DropdownMenuTrigger>
+                  <DropdownMenuTrigger
+                    render={
+                      <button
+                        className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
+                        aria-label="打开用户菜单"
+                      >
+                        <Avatar className="size-9 ring-1 ring-border/70">
+                          <AvatarImage src={session.user.image ?? undefined} alt={session.user.name} />
+                          <AvatarFallback>{session.user.name.slice(0, 1).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                      </button>
+                    }
+                  />
 
                   <DropdownMenuContent align="end" className="w-40 rounded-2xl p-2">
                     <DropdownMenuLabel className="truncate">{session.user.name}</DropdownMenuLabel>

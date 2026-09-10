@@ -1,3 +1,5 @@
+// 类型管道文件：从 Drizzle 表定义生成 TypeBox 模型，此处 any 为刻意的类型体操手段
+/* oxlint-disable typescript/no-explicit-any */
 import type { TObject, TProperties } from '@sinclair/typebox'
 import type { Table } from 'drizzle-orm'
 import { type BuildSchema, createSchemaFactory } from 'drizzle-orm/typebox-legacy'
@@ -7,58 +9,48 @@ const { createInsertSchema, createSelectSchema } = createSchemaFactory({
   typeboxInstance: t,
 })
 
-type TableProperties<
-  T extends Table,
-  Mode extends 'insert' | 'select'
-> = BuildSchema<Mode, T['_']['columns'], undefined>['properties']
+type TableProperties<T extends Table, Mode extends 'insert' | 'select'> = BuildSchema<
+  Mode,
+  T['_']['columns'],
+  undefined
+>['properties']
 
 type Evaluate<T> = { [K in keyof T]: T[K] } & {}
 
-type MergeProperties<P extends TProperties, R> =
-  Evaluate<Omit<P, keyof R> & R>
+type MergeProperties<P extends TProperties, R> = Evaluate<Omit<P, keyof R> & R>
 
-type RefineOf<R, K extends PropertyKey> =
-  K extends keyof R ? NonNullable<R[K]> : {}
+type RefineOf<R, K extends PropertyKey> = K extends keyof R ? NonNullable<R[K]> : {}
 
-type SchemaProperties<
-  T extends Table,
-  Mode extends 'insert' | 'select',
-  R
-> = MergeProperties<
+type SchemaProperties<T extends Table, Mode extends 'insert' | 'select', R> = MergeProperties<
   TableProperties<T, Mode>,
   Extract<R, Record<string, any>>
 >
 
-type ModelWithSchema<P extends TProperties> = Evaluate<
-  P & { schema: TObject<P> }
->
+type ModelWithSchema<P extends TProperties> = Evaluate<P & { schema: TObject<P> }>
 
-type SingleModelResult<
-  TTable extends Table,
-  TRefine extends Record<string, any>
-> = ReturnType<typeof createSingleModel<TTable, TRefine>>
+type SingleModelResult<TTable extends Table, TRefine extends Record<string, any>> = ReturnType<
+  typeof createSingleModel<TTable, TRefine>
+>
 
 type ModelResult<
   T extends Record<string, Table>,
-  R extends { [K in keyof T]?: Record<string, any> }
+  R extends { [K in keyof T]?: Record<string, any> },
 > = {
-  [K in keyof T & string as `${K}Insert`]:
-  SingleModelResult<
+  [K in keyof T & string as `${K}Insert`]: SingleModelResult<
     T[K],
     Extract<RefineOf<R, K>, Record<string, any>>
   >['insert']
 } & {
-  [K in keyof T & string as `${K}Select`]:
-  SingleModelResult<
+  [K in keyof T & string as `${K}Select`]: SingleModelResult<
     T[K],
     Extract<RefineOf<R, K>, Record<string, any>>
   >['select']
 }
 
-function createSingleModel<
-  TTable extends Table,
-  TRefine extends Record<string, any> = {}
->(table: TTable, refine?: TRefine) {
+function createSingleModel<TTable extends Table, TRefine extends Record<string, any> = {}>(
+  table: TTable,
+  refine?: TRefine,
+) {
   const insertSchema = createInsertSchema(table, refine)
   const selectSchema = createSelectSchema(table, refine)
 
@@ -80,7 +72,7 @@ function createSingleModel<
 
 export const createModel = <
   T extends Record<string, Table>,
-  const R extends { [K in keyof T]?: Record<string, any> }
+  const R extends { [K in keyof T]?: Record<string, any> },
 >(
   tables: T,
   refines: R = {} as R,
@@ -88,11 +80,8 @@ export const createModel = <
   const models = {} as ModelResult<T, R>
 
   const buildOne = <K extends keyof T & string>(key: K) => {
-    const table = tables[key]
-    const refine = (refines[key] ?? {}) as Extract<
-      RefineOf<R, K>,
-      Record<string, any>
-    >
+    const table = tables[key] as Table
+    const refine = (refines[key] ?? {}) as Extract<RefineOf<R, K>, Record<string, any>>
 
     const model = createSingleModel(table, refine)
 
