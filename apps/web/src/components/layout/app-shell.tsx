@@ -1,6 +1,7 @@
+import { type ReactNode } from 'react'
+
 import { AppFooter } from '@/components/layout/app-footer'
 import { AppHeader } from '@/components/layout/app-header'
-import { type ReactNode } from 'react'
 
 type AppShellProps = {
   children: ReactNode

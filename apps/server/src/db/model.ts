@@ -1,4 +1,5 @@
 import { t } from 'elysia'
+
 import { table } from './schema'
 import { createModel } from './utils'
 

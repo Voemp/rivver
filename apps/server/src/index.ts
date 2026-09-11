@@ -4,6 +4,7 @@ import { openapi } from '@elysiajs/openapi'
 import { runEmbeddingGenerate } from '@server/worker/embedding'
 import { runRssFetch } from '@server/worker/rss'
 import { Elysia } from 'elysia'
+
 import { version } from '../package.json'
 import { env } from './config/env'
 import { article } from './modules/article'

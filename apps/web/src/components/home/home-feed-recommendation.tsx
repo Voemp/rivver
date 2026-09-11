@@ -1,3 +1,7 @@
+import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
+import { ArrowUpRight } from 'lucide-react'
+
 import { feedPopularQueryOptions } from '@/api/queries'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
@@ -5,9 +9,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils.ts'
 import { type ContentType, contentTypeLabels } from '@/types/content'
 import { formatRecentTime } from '@/utils/date'
-import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
-import { ArrowUpRight } from 'lucide-react'
 
 type HomeFeedRecommendationProps = {
   contentType?: ContentType
@@ -33,7 +34,7 @@ export const HomeFeedRecommendation = ({ contentType }: HomeFeedRecommendationPr
     <aside className="hidden lg:block lg:w-72 xl:w-76">
       <div className="space-y-4">
         <header className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">popular feeds</p>
+          <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">popular feeds</p>
           <h3 className="text-lg font-semibold tracking-tight text-foreground">热门订阅源</h3>
         </header>
 
@@ -43,7 +44,7 @@ export const HomeFeedRecommendation = ({ contentType }: HomeFeedRecommendationPr
               <Link
                 to="/feed/$id"
                 params={{ id: feed.id }}
-                className="group block rounded-md py-1 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
+                className="group block rounded-md py-1 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
               >
                 <div className="flex items-start gap-3">
                   <Avatar className="mt-0.5 size-10 ring-1 ring-border/60">
@@ -58,7 +59,7 @@ export const HomeFeedRecommendation = ({ contentType }: HomeFeedRecommendationPr
                       <p className="truncate text-sm font-semibold text-foreground group-hover:underline">
                         {feed.title || '未命名订阅源'}
                       </p>
-                      <span className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                      <span className="shrink-0 text-[10px] tracking-[0.16em] text-muted-foreground uppercase">
                         {contentTypeLabels[feed.contentType]}
                       </span>
                     </div>
@@ -74,8 +75,8 @@ export const HomeFeedRecommendation = ({ contentType }: HomeFeedRecommendationPr
                       <div
                         className={cn(
                           'pointer-events-none',
-                          'opacity-0 translate-y-1 transition-all duration-200',
-                          'group-hover:opacity-100 group-hover:translate-y-0',
+                          'translate-y-1 opacity-0 transition-all duration-200',
+                          'group-hover:translate-y-0 group-hover:opacity-100',
                         )}
                       >
                         <ArrowUpRight className="size-4 text-muted-foreground/80" />

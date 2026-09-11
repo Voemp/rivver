@@ -1,3 +1,12 @@
+import { SiSinaweibo, SiTelegram, SiX } from '@icons-pack/react-simple-icons'
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
+import { produce } from 'immer'
+import { Link } from 'lucide-react'
+import { Suspense, useEffect } from 'react'
+import { toast } from 'sonner'
+import { z } from 'zod'
+
 import {
   articleDetailQueryOptions,
   articleFavoriteQueryOptions,
@@ -31,26 +40,23 @@ import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/hooks/use-auth'
 import { useMountEffect } from '@/hooks/use-mount-effect'
 import { useReadingProgress } from '@/hooks/use-reading-progress'
-import { SiSinaweibo, SiTelegram, SiX } from '@icons-pack/react-simple-icons'
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-import { produce } from 'immer'
-import { Link } from 'lucide-react'
-import { Suspense, useEffect } from 'react'
-import { toast } from 'sonner'
-import { z } from 'zod'
 
 export const Route = createFileRoute('/article/$id')({
-  parseParams: (params) => ({
-    id: z.coerce.number().parse(params.id),
-  }),
+  params: {
+    parse: (params) => ({
+      id: z.coerce.number().parse(params.id),
+    }),
+  },
   loader: async ({ context: { queryClient, isAuthed }, params: { id } }) => {
-    const article = await queryClient.ensureQueryData(articleDetailQueryOptions(id))
-    await queryClient.ensureQueryData(feedDetailQueryOptions(article.feedId))
+    const article = await queryClient.query({
+      ...articleDetailQueryOptions(id),
+      staleTime: 'static',
+    })
+    await queryClient.query({ ...feedDetailQueryOptions(article.feedId), staleTime: 'static' })
     if (isAuthed) {
       await Promise.all([
-        queryClient.ensureQueryData(feedSubscriptionQueryOptions(article.feedId)),
-        queryClient.ensureQueryData(articleFavoriteQueryOptions(id)),
+        queryClient.query({ ...feedSubscriptionQueryOptions(article.feedId), staleTime: 'static' }),
+        queryClient.query({ ...articleFavoriteQueryOptions(id), staleTime: 'static' }),
       ])
     }
   },
@@ -352,7 +358,7 @@ function StandardArticleLayout({
   return (
     <section className="relative isolate py-4 pb-16 sm:py-6 lg:py-8">
       <div className="mx-auto grid max-w-368 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,52rem)_18rem] lg:gap-x-8 xl:grid-cols-[20rem_minmax(0,52rem)_18rem] xl:gap-x-10">
-        <aside className="hidden xl:block xl:col-start-1">
+        <aside className="hidden xl:col-start-1 xl:block">
           <div className="sticky top-30 space-y-6 pr-2">
             <ArticleAiSummaryCard
               summary={aiSummary}
@@ -364,7 +370,7 @@ function StandardArticleLayout({
           </div>
         </aside>
 
-        <article className="mx-auto min-w-0 w-full max-w-4xl lg:col-start-2 lg:mx-0">
+        <article className="mx-auto w-full max-w-4xl min-w-0 lg:col-start-2 lg:mx-0">
           <Suspense fallback={<ArticleDetailSkeleton />}>
             <ArticleTitleCard
               title={article.title}
@@ -392,7 +398,7 @@ function StandardArticleLayout({
         </article>
 
         <aside className="hidden sm:block lg:col-start-3">
-          <div className="sticky top-30 max-h-[calc(100dvh-7rem)] space-y-8 overflow-y-auto pl-6 pr-1">
+          <div className="sticky top-30 max-h-[calc(100dvh-7rem)] space-y-8 overflow-y-auto pr-1 pl-6">
             <Suspense fallback={<FeedInfoSkeleton />}>
               <FeedInfoCard
                 feed={feed}
@@ -437,14 +443,14 @@ function MediaArticleLayout({
   return (
     <section className="relative isolate py-4 pb-16 sm:py-6 lg:py-8">
       <div className="mx-auto grid max-w-376 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,64rem)_18rem] lg:gap-x-8 xl:grid-cols-[minmax(0,68rem)_18rem] xl:gap-x-10">
-        <article className="mx-auto min-w-0 w-full max-w-5xl lg:mx-0">
+        <article className="mx-auto w-full max-w-5xl min-w-0 lg:mx-0">
           <Suspense fallback={<ArticleDetailSkeleton />}>
             <ArticleMediaDetail article={article} feed={feed} />
           </Suspense>
         </article>
 
         <aside className="hidden sm:block">
-          <div className="sticky top-30 max-h-[calc(100dvh-7rem)] space-y-8 overflow-y-auto pl-2 pr-1">
+          <div className="sticky top-30 max-h-[calc(100dvh-7rem)] space-y-8 overflow-y-auto pr-1 pl-2">
             <Suspense fallback={<FeedInfoSkeleton />}>
               <FeedInfoCard
                 feed={feed}
@@ -487,18 +493,18 @@ function ArticleSkeleton() {
   return (
     <section className="relative isolate py-4 pb-16 sm:py-6 lg:py-8">
       <div className="mx-auto grid max-w-368 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,52rem)_18rem] lg:gap-x-8 xl:grid-cols-[20rem_minmax(0,52rem)_18rem] xl:gap-x-10">
-        <aside className="hidden xl:block xl:col-start-1">
+        <aside className="hidden xl:col-start-1 xl:block">
           <div className="sticky top-30 pr-2">
             <ArticleAiSummaryCard summary={null} pending errorMessage={undefined} layout="aside" />
           </div>
         </aside>
 
-        <article className="mx-auto min-w-0 w-full max-w-4xl lg:col-start-2 lg:mx-0">
+        <article className="mx-auto w-full max-w-4xl min-w-0 lg:col-start-2 lg:mx-0">
           <ArticleDetailSkeleton />
         </article>
 
         <aside className="hidden sm:block lg:col-start-3">
-          <div className="sticky top-30 max-h-[calc(100dvh-7rem)] space-y-8 overflow-y-auto pl-6 pr-1">
+          <div className="sticky top-30 max-h-[calc(100dvh-7rem)] space-y-8 overflow-y-auto pr-1 pl-6">
             <FeedInfoSkeleton />
             <ArticleTocSkeleton />
             <Separator />

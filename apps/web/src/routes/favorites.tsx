@@ -1,12 +1,14 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute, Link } from '@tanstack/react-router'
+
 import { favoritesQueryOptions } from '@/api/queries'
 import { VerticalCard } from '@/components/common/article-card.tsx'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/favorites')({
-  loader: ({ context }) => context.queryClient.ensureQueryData(favoritesQueryOptions(0, 10)),
+  loader: ({ context }) =>
+    context.queryClient.query({ ...favoritesQueryOptions(0, 10), staleTime: 'static' }),
   pendingComponent: FavoritesSkeleton,
   component: Favorites,
 })
@@ -17,7 +19,7 @@ function Favorites() {
   return (
     <section className="mx-auto w-full max-w-6xl space-y-6">
       <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Favorites</p>
+        <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">Favorites</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">全部收藏</h1>
       </div>
 

@@ -9,6 +9,7 @@ import { profileRepo } from '@server/repos/profileRepo'
 import { ApiResponseModel } from '@server/types/response'
 import { AppError } from '@server/utils/error'
 import { Elysia, status } from 'elysia'
+
 import { betterAuth } from '../auth/service'
 import { ProfileModel } from './model'
 

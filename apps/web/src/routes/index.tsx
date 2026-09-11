@@ -1,3 +1,8 @@
+import { useInfiniteQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
+import { useMemo } from 'react'
+import { z } from 'zod'
+
 import { articlesInfiniteOptions } from '@/api/queries'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { ErrorState } from '@/components/feedback/error-state'
@@ -11,10 +16,6 @@ import { env } from '@/config/env'
 import { useAuth } from '@/hooks/use-auth.tsx'
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll'
 import { contentTypeOptions } from '@/types/content'
-import { useInfiniteQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-import { useMemo } from 'react'
-import { z } from 'zod'
 
 const contentTypeSearchSchema = z.object({
   type: z.enum(contentTypeOptions).optional(),
@@ -24,7 +25,10 @@ export const Route = createFileRoute('/')({
   validateSearch: (search) => contentTypeSearchSchema.parse(search),
   loader: async ({ context: { queryClient, isAuthed } }) => {
     const pageSize = env.articleListPageSize
-    await queryClient.ensureInfiniteQueryData(articlesInfiniteOptions(isAuthed, pageSize))
+    await queryClient.infiniteQuery({
+      ...articlesInfiniteOptions(isAuthed, pageSize),
+      staleTime: 'static',
+    })
   },
   pendingComponent: HomeSkeleton,
   component: Home,

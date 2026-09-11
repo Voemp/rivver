@@ -1,7 +1,9 @@
+import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
+
+import type { ContentType } from '@/types/content'
+
 import { appClient, unwrapResponse } from '@/api/client'
 import { env } from '@/config/env'
-import type { ContentType } from '@/types/content'
-import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
 const DEFAULT_LIMIT = env.articleListPageSize
 

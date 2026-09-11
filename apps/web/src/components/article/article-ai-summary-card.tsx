@@ -1,9 +1,11 @@
+import { RefreshCw, Sparkles } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
-import { RefreshCw, Sparkles } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
+
 import styles from './article-ai-summary-card.module.css'
 
 type ArticleAiSummaryCardProps = {
@@ -50,7 +52,7 @@ export const ArticleAiSummaryCard = ({
               <Sparkles className="size-4" />
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground/85">
+              <p className="text-[11px] font-medium tracking-[0.22em] text-muted-foreground/85 uppercase">
                 AI Summary
               </p>
               <p className="text-sm font-medium text-foreground">Quick scan before you dive in</p>

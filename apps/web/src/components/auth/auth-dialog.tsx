@@ -1,3 +1,11 @@
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
+import { Eye, EyeOff } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
+
 import { authClient } from '@/api/auth-client'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
@@ -19,13 +27,6 @@ import {
 import { Label } from '@/components/ui/label.tsx'
 import { Spinner } from '@/components/ui/spinner.tsx'
 import { useAuth } from '@/hooks/use-auth'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
-import { Eye, EyeOff } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
 
 const authSchema = z.object({
   name: z.string().min(2, '昵称至少 2 位').optional().or(z.literal('')),
@@ -79,7 +80,7 @@ export function AuthDialog() {
 
   return (
     <Dialog open={authDialogOpen} onOpenChange={(open) => !open && closeAuthDialog()}>
-      <DialogContent className="sm:max-w-100 p-0 overflow-hidden">
+      <DialogContent className="overflow-hidden p-0 sm:max-w-100">
         <div className="p-8">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-2xl font-bold tracking-tight">
@@ -167,7 +168,7 @@ export function AuthDialog() {
                       />
                       <Label
                         htmlFor="rememberMe"
-                        className="text-sm font-medium leading-none cursor-pointer select-none"
+                        className="cursor-pointer text-sm leading-none font-medium select-none"
                       >
                         记住我
                       </Label>
@@ -178,7 +179,7 @@ export function AuthDialog() {
 
               <Button
                 type="submit"
-                className="w-full h-11 text-base font-medium"
+                className="h-11 w-full text-base font-medium"
                 disabled={isPending}
               >
                 {isPending && <Spinner data-icon="inline-start" />}
@@ -187,7 +188,7 @@ export function AuthDialog() {
             </FieldGroup>
           </form>
 
-          <div className="mt-8 text-center text-sm text-muted-foreground border-t pt-6">
+          <div className="mt-8 border-t pt-6 text-center text-sm text-muted-foreground">
             {isSignIn ? '还没有账号? ' : '已有账号? '}
             <Button
               variant="link"

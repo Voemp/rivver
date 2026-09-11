@@ -1,6 +1,7 @@
-import { Button } from '@/components/ui/button'
 import { Link } from '@tanstack/react-router'
 import { AlertCircle } from 'lucide-react'
+
+import { Button } from '@/components/ui/button'
 
 type ErrorStateProps = {
   title?: string

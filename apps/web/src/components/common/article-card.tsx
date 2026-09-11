@@ -1,9 +1,12 @@
+import type { Treaty } from '@elysiajs/eden'
+
+import { ArrowUpRight } from 'lucide-react'
+
 import type { appClient } from '@/api/client.ts'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { cn } from '@/lib/utils.ts'
 import { formatRecentTime } from '@/utils/date.ts'
-import type { Treaty } from '@elysiajs/eden'
-import { ArrowUpRight } from 'lucide-react'
 
 export type HomeArticleItem = Treaty.Data<typeof appClient.article.recommendation.get>[number]
 
@@ -49,7 +52,7 @@ export const ArticleMeta = ({ article, compact = false, className }: ArticleMeta
 
   return (
     <div className={cn('flex items-center justify-between gap-2 text-muted-foreground', className)}>
-      <div className="min-w-0 flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         <Avatar className={cn('shrink-0', compact ? 'size-4.5' : 'size-5')}>
           <AvatarImage src={article.feed?.image ?? undefined} alt={feedName} />
           <AvatarFallback className="text-[9px]">{feedInitial}</AvatarFallback>
@@ -60,7 +63,7 @@ export const ArticleMeta = ({ article, compact = false, className }: ArticleMeta
         dateTime={article.pubDate ? new Date(article.pubDate).toISOString() : undefined}
         className={cn(
           'shrink-0 translate-y-1 transition-all duration-200',
-          'group-hover:opacity-0 group-hover:translate-y-0',
+          'group-hover:translate-y-0 group-hover:opacity-0',
           compact ? 'text-[10px]' : 'text-[11px]',
         )}
       >
@@ -116,9 +119,9 @@ export const VerticalCard = ({ article, dense = false, className }: VerticalCard
 
         <div
           className={cn(
-            'pointer-events-none absolute bottom-2 right-2',
-            'opacity-0 translate-y-1 transition-all duration-200',
-            'group-hover:opacity-100 group-hover:translate-y-0',
+            'pointer-events-none absolute right-2 bottom-2',
+            'translate-y-1 opacity-0 transition-all duration-200',
+            'group-hover:translate-y-0 group-hover:opacity-100',
           )}
         >
           <ArrowUpRight className="size-5 text-muted-foreground/80" />
@@ -140,7 +143,7 @@ export const AsideCard = ({ article, className }: AsideCardProps) => {
     >
       <div className="relative flex min-w-0 flex-col justify-between gap-1.5 p-2">
         <div>
-          <h3 className="mb-2 line-clamp-2 text-sm font-semibold leading-5 tracking-tight text-foreground transition-all group-hover:underline">
+          <h3 className="mb-2 line-clamp-2 text-sm leading-5 font-semibold tracking-tight text-foreground transition-all group-hover:underline">
             {article.title ?? '未命名文章'}
           </h3>
           <p className="line-clamp-2 text-xs leading-5 text-muted-foreground">
@@ -151,9 +154,9 @@ export const AsideCard = ({ article, className }: AsideCardProps) => {
 
         <div
           className={cn(
-            'pointer-events-none absolute bottom-2 right-2',
-            'opacity-0 translate-y-1 transition-all duration-200',
-            'group-hover:opacity-100 group-hover:translate-y-0',
+            'pointer-events-none absolute right-2 bottom-2',
+            'translate-y-1 opacity-0 transition-all duration-200',
+            'group-hover:translate-y-0 group-hover:opacity-100',
           )}
         >
           <ArrowUpRight className="size-5 text-muted-foreground/80" />
@@ -186,7 +189,7 @@ export const FlowCard = ({ article, reverse = false, className }: FlowCardProps)
     >
       <div
         className={cn(
-          'h-full min-h-40 max-h-0 overflow-hidden bg-muted/60',
+          'h-full max-h-0 min-h-40 overflow-hidden bg-muted/60',
           reverse ? 'order-2' : 'order-1',
         )}
       >
@@ -206,7 +209,7 @@ export const FlowCard = ({ article, reverse = false, className }: FlowCardProps)
         )}
       >
         <div>
-          <h3 className="mb-2 line-clamp-2 text-base font-semibold leading-6 tracking-tight text-foreground transition-all group-hover:underline">
+          <h3 className="mb-2 line-clamp-2 text-base leading-6 font-semibold tracking-tight text-foreground transition-all group-hover:underline">
             {article.title ?? '未命名文章'}
           </h3>
           <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
@@ -217,9 +220,9 @@ export const FlowCard = ({ article, reverse = false, className }: FlowCardProps)
 
         <div
           className={cn(
-            'pointer-events-none absolute bottom-2 right-2',
-            'opacity-0 translate-y-1 transition-all duration-200',
-            'group-hover:opacity-100 group-hover:translate-y-0',
+            'pointer-events-none absolute right-2 bottom-2',
+            'translate-y-1 opacity-0 transition-all duration-200',
+            'group-hover:translate-y-0 group-hover:opacity-100',
           )}
         >
           <ArrowUpRight className="size-5 text-muted-foreground/80" />

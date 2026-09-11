@@ -1,3 +1,9 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Pencil } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import Cropper from 'react-easy-crop'
+import { toast } from 'sonner'
+
 import { authClient } from '@/api/auth-client.ts'
 import { putAvatar } from '@/api/queries'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -13,11 +19,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { env } from '@/config/env.ts'
 import { AUTH_SESSION_QUERY_KEY, useAuth } from '@/hooks/use-auth.tsx'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Pencil } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
-import Cropper from 'react-easy-crop'
-import { toast } from 'sonner'
 
 type SettingsDialogProps = {
   open: boolean
@@ -100,7 +101,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
           <div className="flex items-center gap-4 rounded-xl border border-border/70 bg-card/70 p-4">
             <button
               type="button"
-              className="group relative rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 cursor-pointer"
+              className="group relative cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
               aria-label="更换头像"
               onClick={() => setAvatarDialogOpen(true)}
             >

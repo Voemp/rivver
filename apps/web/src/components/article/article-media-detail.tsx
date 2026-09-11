@@ -1,3 +1,6 @@
+import { ChevronLeft, ChevronRight, ImageIcon, PlayCircle } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
 import { ArticleContentCard } from '@/components/article/article-content-card'
 import { type FeedInfo } from '@/components/feed/feed-info-card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -6,8 +9,6 @@ import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 import { contentTypeLabels } from '@/types/content'
 import { formatRecentTime } from '@/utils/date'
-import { ChevronLeft, ChevronRight, ImageIcon, PlayCircle } from 'lucide-react'
-import { useMemo, useState } from 'react'
 
 type MediaArticle = {
   id: number
@@ -207,7 +208,7 @@ function MediaMetaBlock({
 }) {
   return (
     <header className="mx-auto max-w-3xl pt-1">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/80">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium tracking-[0.18em] text-muted-foreground/80 uppercase">
         <span className="inline-flex items-center text-foreground/86">
           {contentTypeLabels[article.contentType]}
         </span>
@@ -215,7 +216,7 @@ function MediaMetaBlock({
         <span>{extraLabel}</span>
       </div>
 
-      <h1 className="mt-3 text-xl font-semibold leading-8 tracking-[-0.02em] text-foreground sm:text-2xl sm:leading-9">
+      <h1 className="mt-3 text-xl leading-8 font-semibold tracking-[-0.02em] text-foreground sm:text-2xl sm:leading-9">
         {article.title ?? '未命名内容'}
       </h1>
 
@@ -228,7 +229,7 @@ function MediaMetaBlock({
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">
+            <p className="text-[11px] font-medium tracking-[0.2em] text-muted-foreground/75 uppercase">
               来源
             </p>
             <p className="truncate text-sm font-medium text-foreground">{feed.title}</p>
@@ -236,14 +237,14 @@ function MediaMetaBlock({
         </div>
 
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">
+          <p className="text-[11px] font-medium tracking-[0.2em] text-muted-foreground/75 uppercase">
             Author
           </p>
           <p className="mt-1 text-sm font-medium text-foreground">{article.author ?? 'Unknown'}</p>
         </div>
 
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/75">
+          <p className="text-[11px] font-medium tracking-[0.2em] text-muted-foreground/75 uppercase">
             Published
           </p>
           <p className="mt-1 text-sm font-medium text-foreground">

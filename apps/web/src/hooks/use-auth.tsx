@@ -1,6 +1,7 @@
-import { authClient } from '@/api/auth-client'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createContext, type ReactNode, useContext, useMemo, useState } from 'react'
+
+import { authClient } from '@/api/auth-client'
 
 type AuthDialogMode = 'sign-in' | 'sign-up'
 

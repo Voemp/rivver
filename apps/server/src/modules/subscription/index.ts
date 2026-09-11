@@ -5,6 +5,7 @@ import { AppError } from '@server/utils/error'
 import { fetchSingleFeed } from '@server/worker/rss/fetcher'
 import { Elysia, status } from 'elysia'
 import Parser from 'rss-parser'
+
 import { betterAuth } from '../auth/service'
 import { SubModel } from './model'
 

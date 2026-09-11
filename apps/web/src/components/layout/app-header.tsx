@@ -1,3 +1,7 @@
+import { Link, useLocation, useNavigate } from '@tanstack/react-router'
+import { LogOut, Rss, Search, Star, UserRound } from 'lucide-react'
+import { type SubmitEvent, useEffect, useRef, useState } from 'react'
+
 import rivverLogo from '@/assets/rivver_logo.svg'
 import rivverText from '@/assets/rivver_text.svg'
 import { AuthDialog } from '@/components/auth/auth-dialog'
@@ -17,9 +21,6 @@ import { Separator } from '@/components/ui/separator.tsx'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import { type ContentType, contentTypeLabels, contentTypeOptions } from '@/types/content'
-import { Link, useLocation, useNavigate } from '@tanstack/react-router'
-import { LogOut, Rss, Search, Star, UserRound } from 'lucide-react'
-import { type FormEvent, useEffect, useRef, useState } from 'react'
 
 export const AppHeader = () => {
   const navigate = useNavigate()
@@ -94,7 +95,7 @@ export const AppHeader = () => {
     }
   }, [searchOpen])
 
-  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSearchSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
     const nextQuery = searchValue.trim()
     setSearchOpen(false)
@@ -143,11 +144,11 @@ export const AppHeader = () => {
                   value={searchValue}
                   onChange={(event) => setSearchValue(event.target.value)}
                   placeholder="搜索文章"
-                  className="h-10 rounded-full border-border/70 bg-background/90 pl-4 pr-12 text-sm shadow-none"
+                  className="h-10 rounded-full border-border/70 bg-background/90 pr-12 pl-4 text-sm shadow-none"
                 />
                 <button
                   type="submit"
-                  className="absolute right-1 top-1/2 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="absolute top-1/2 right-1 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   aria-label="提交搜索"
                 >
                   <Search className="size-4" />
@@ -160,7 +161,7 @@ export const AppHeader = () => {
             )}
           </div>
 
-          <div ref={searchAreaRef} className="flex flex-1 h-4 items-center justify-end gap-2">
+          <div ref={searchAreaRef} className="flex h-4 flex-1 items-center justify-end gap-2">
             {!isSearchPage ? (
               <>
                 <Button
@@ -192,7 +193,7 @@ export const AppHeader = () => {
                   <DropdownMenuTrigger
                     render={
                       <button
-                        className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
+                        className="cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         aria-label="打开用户菜单"
                       >
                         <Avatar className="size-9 ring-1 ring-border/70">

@@ -1,3 +1,11 @@
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { produce } from 'immer'
+import { ExternalLink } from 'lucide-react'
+import { startTransition } from 'react'
+import { toast } from 'sonner'
+import { z } from 'zod'
+
 import {
   deleteSubscription,
   feedArticlesQueryOptions,
@@ -14,27 +22,22 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import { type ContentType, contentTypeLabels, contentTypeOptions } from '@/types/content'
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { produce } from 'immer'
-import { ExternalLink } from 'lucide-react'
-import { startTransition } from 'react'
-import { toast } from 'sonner'
-import { z } from 'zod'
 
 const contentTypeSearchSchema = z.object({
   type: z.enum(contentTypeOptions).optional(),
 })
 
 export const Route = createFileRoute('/feed/$id')({
-  parseParams: (params) => ({
-    id: z.coerce.number().parse(params.id),
-  }),
+  params: {
+    parse: (params) => ({
+      id: z.coerce.number().parse(params.id),
+    }),
+  },
   validateSearch: (search) => contentTypeSearchSchema.parse(search),
   loader: ({ context: { queryClient, isAuthed }, params: { id } }) => {
-    void queryClient.ensureQueryData(feedDetailQueryOptions(id))
+    void queryClient.query({ ...feedDetailQueryOptions(id), staleTime: 'static' })
     if (isAuthed) {
-      void queryClient.ensureQueryData(feedSubscriptionQueryOptions(id))
+      void queryClient.query({ ...feedSubscriptionQueryOptions(id), staleTime: 'static' })
     }
   },
   pendingComponent: FeedDetailSkeleton,
@@ -139,7 +142,7 @@ function FeedDetail() {
                 <Button
                   size="icon-sm"
                   variant="link"
-                  className="rounded-full cursor-pointer"
+                  className="cursor-pointer rounded-full"
                   onClick={() => feed.link && window.open(feed.link)}
                   aria-label="打开订阅源链接"
                   title="打开订阅源链接"

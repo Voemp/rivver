@@ -5,8 +5,19 @@ export default defineConfig({
   options: {
     typeAware: true,
     typeCheck: true,
+    reportUnusedDisableDirectives: 'warn',
   },
-  plugins: ['eslint', 'oxc', 'typescript', 'unicorn', 'import', 'react', 'react-perf'],
+  plugins: [
+    'eslint',
+    'oxc',
+    'typescript',
+    'unicorn',
+    'import',
+    'node',
+    'promise',
+    'react',
+    'react-perf',
+  ],
   rules: {
     // ESLint
     'no-debugger': 'error',
@@ -16,33 +27,35 @@ export default defineConfig({
     'no-unreachable-loop': 'error',
 
     // TypeScript
-    '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/no-non-null-assertion': 'warn',
-    '@typescript-eslint/consistent-type-imports': 'error',
-    '@typescript-eslint/no-unnecessary-condition': 'warn',
-    '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
-    '@typescript-eslint/prefer-optional-chain': 'error',
-    '@typescript-eslint/no-floating-promises': 'error',
+    'typescript/consistent-type-imports': 'error',
+    'typescript/no-deprecated': 'warn',
+    'typescript/no-explicit-any': 'warn',
+    'typescript/no-floating-promises': 'error',
+    'typescript/no-non-null-assertion': 'warn',
+    'typescript/no-unsafe-assignment': 'warn',
+    'typescript/no-unnecessary-condition': 'warn',
+    'typescript/no-unnecessary-type-assertion': 'warn',
+    'typescript/prefer-optional-chain': 'error',
 
     // Unicorn
-    'unicorn/no-array-sort': 'error',
     'unicorn/no-array-reverse': 'error',
+    'unicorn/no-array-sort': 'error',
+    'unicorn/no-typeof-undefined': 'error',
+    'unicorn/no-useless-undefined': 'error',
     'unicorn/prefer-array-find': 'error',
     'unicorn/prefer-array-flat-map': 'error',
     'unicorn/prefer-includes': 'error',
     'unicorn/prefer-number-properties': 'error',
     'unicorn/prefer-object-from-entries': 'error',
-    'unicorn/prefer-string-starts-ends-with': 'error',
     'unicorn/prefer-optional-catch-binding': 'error',
     'unicorn/prefer-regexp-test': 'error',
-    'unicorn/no-useless-undefined': 'error',
-    'unicorn/no-typeof-undefined': 'error',
+    'unicorn/prefer-string-starts-ends-with': 'error',
 
     // Import
+    'import/no-cycle': 'warn',
     'import/no-duplicates': 'error',
     'import/no-named-default': 'error',
     'import/no-self-import': 'error',
-    'import/no-cycle': 'warn',
 
     // React
     'react/jsx-no-constructed-context-values': 'error',

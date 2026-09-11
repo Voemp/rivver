@@ -1,5 +1,6 @@
-import { env } from '@/config/env'
 import { SiGithub } from '@icons-pack/react-simple-icons'
+
+import { env } from '@/config/env'
 
 export const AppFooter = () => {
   const currentYear = new Date().getFullYear()
@@ -44,11 +45,11 @@ export const AppFooter = () => {
         </div>
 
         {/* 底部版权栏 */}
-        <div className="mt-10 border-t border-border/40 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border/40 pt-6 md:flex-row">
+          <p className="text-[10px] tracking-wider text-muted-foreground/60 uppercase">
             © {currentYear} {env.appName}. All rights reserved.
           </p>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
+          <p className="text-[10px] tracking-wider text-muted-foreground/60 uppercase">
             Powered By Voemp
           </p>
         </div>

@@ -1,6 +1,7 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+
 import { postReadProgress } from '@/api/queries'
 import { env } from '@/config/env'
-import { useCallback, useEffect, useRef, useState } from 'react'
 
 type UseReadingProgressParams = {
   articleId: number
@@ -155,8 +156,9 @@ export const useReadingProgress = ({ articleId }: UseReadingProgressParams) => {
           }
 
           const currentTop = node.getBoundingClientRect().top + window.scrollY
-          const nextNode =
-            index < base.length - 1 ? document.getElementById(base[index + 1].id) : null
+          // 末项时 base[index + 1] 即 undefined，无需再判 index 越界
+          const nextHeading = base[index + 1]
+          const nextNode = nextHeading ? document.getElementById(nextHeading.id) : null
           const nextTop = nextNode
             ? nextNode.getBoundingClientRect().top + window.scrollY
             : document.documentElement.scrollHeight - window.innerHeight + viewportOffset

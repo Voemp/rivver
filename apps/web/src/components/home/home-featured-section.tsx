@@ -1,8 +1,9 @@
+import { Link } from '@tanstack/react-router'
+import { Fragment } from 'react'
+
 import { HomeArticleCard, type HomeArticleItem } from '@/components/home/home-article-card.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
-import { Link } from '@tanstack/react-router'
-import { Fragment } from 'react'
 
 // --- 1. 定义配置类型 ---
 type FeaturedVariant = 'feature' | 'stack' | 'aside'
@@ -57,7 +58,6 @@ const FeaturedColumn = ({ items, config }: { items: HomeArticleItem[]; config: C
         return (
           <Fragment key={dataIndex}>
             <div className="min-h-0 flex-1">
-              {/* oxlint-disable-next-line typescript/no-unnecessary-condition */}
               {item ? (
                 <FeaturedLink article={item} variant={variant} />
               ) : (
@@ -77,14 +77,14 @@ export const HomeFeaturedSection = ({ items }: { items: HomeArticleItem[] }) => 
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Home Featured</p>
+        <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">Home Featured</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           精选内容
         </h1>
       </header>
 
       {/* LG 布局：按 LAYOUT_CONFIGS 静态配置渲染，index 即其唯一身份 */}
-      <div className="hidden lg:grid lg:h-180 lg:grid-cols-[1fr_1.24fr_1fr] lg:gap-x-16 relative">
+      <div className="relative hidden lg:grid lg:h-180 lg:grid-cols-[1fr_1.24fr_1fr] lg:gap-x-16">
         {LAYOUT_CONFIGS.lg.map((conf, i) => (
           // oxlint-disable-next-line react/no-array-index-key -- 静态布局配置项
           <Fragment key={i}>
@@ -106,7 +106,7 @@ export const HomeFeaturedSection = ({ items }: { items: HomeArticleItem[] }) => 
       </div>
 
       {/* SM 布局：按 LAYOUT_CONFIGS 静态配置渲染，index 即其唯一身份 */}
-      <div className="hidden sm:grid sm:h-168 sm:grid-cols-[1.2fr_1fr] sm:gap-x-8 relative lg:hidden">
+      <div className="relative hidden sm:grid sm:h-168 sm:grid-cols-[1.2fr_1fr] sm:gap-x-8 lg:hidden">
         {LAYOUT_CONFIGS.sm.map((conf, i) => (
           // oxlint-disable-next-line react/no-array-index-key -- 静态布局配置项
           <Fragment key={i}>

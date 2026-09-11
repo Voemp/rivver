@@ -1,4 +1,5 @@
 import type { InvertedStatusMap } from 'elysia/utils'
+
 import { res } from '@server/types/response'
 
 export class AppError extends Error {

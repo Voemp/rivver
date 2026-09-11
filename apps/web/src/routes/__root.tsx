@@ -1,13 +1,15 @@
+import type { QueryClient } from '@tanstack/react-query'
+
+import { TanStackDevtools } from '@tanstack/react-devtools'
+import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+
 import { ErrorState } from '@/components/feedback/error-state.tsx'
 import { NotFoundState } from '@/components/feedback/not-found-state.tsx'
 import { AppShell } from '@/components/layout/app-shell'
 import { Toaster } from '@/components/ui/sonner.tsx'
 import { AuthProvider, sessionQueryOptions } from '@/hooks/use-auth.tsx'
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import type { QueryClient } from '@tanstack/react-query'
-import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
-import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
 type RouterContext = {
   queryClient: QueryClient
@@ -15,7 +17,7 @@ type RouterContext = {
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   beforeLoad: async ({ context: { queryClient } }) => {
-    const session = await queryClient.ensureQueryData(sessionQueryOptions)
+    const session = await queryClient.query({ ...sessionQueryOptions, staleTime: 'static' })
     return {
       isAuthed: !!session?.user,
     }

@@ -1,9 +1,11 @@
-import { Skeleton } from '@/components/ui/skeleton.tsx'
-import { cn } from '@/lib/utils'
 import type { JSX } from 'react'
+
 import ReactMarkdown, { type ExtraProps, type Options } from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
+
+import { Skeleton } from '@/components/ui/skeleton.tsx'
+import { cn } from '@/lib/utils'
 
 type ArticleContentCardProps = {
   content: string

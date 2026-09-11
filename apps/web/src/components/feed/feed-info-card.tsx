@@ -1,11 +1,12 @@
+import { Link } from '@tanstack/react-router'
+import { useState } from 'react'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { cn } from '@/lib/utils'
 import { type ContentType, contentTypeLabels } from '@/types/content'
-import { Link } from '@tanstack/react-router'
-import { useState } from 'react'
 
 export type FeedInfo = {
   id: number
@@ -84,7 +85,7 @@ export const FeedInfoCard = ({
               params={{ id: feed.id }}
               aria-label={linkLabel}
               className={cn(
-                'group block rounded-md outline-none transition-colors',
+                'group block rounded-md transition-colors outline-none',
                 'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2',
               )}
             >

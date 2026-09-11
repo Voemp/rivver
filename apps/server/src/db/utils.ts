@@ -2,6 +2,7 @@
 /* oxlint-disable typescript/no-explicit-any */
 import type { TObject, TProperties } from '@sinclair/typebox'
 import type { Table } from 'drizzle-orm'
+
 import { type BuildSchema, createSchemaFactory } from 'drizzle-orm/typebox-legacy'
 import { t } from 'elysia'
 
@@ -79,18 +80,25 @@ export const createModel = <
 ) => {
   const models = {} as ModelResult<T, R>
 
-  const buildOne = <K extends keyof T & string>(key: K) => {
-    const table = tables[key] as Table
+  type TableEntry = {
+    [K in keyof T & string]: [K, T[K]]
+  }[keyof T & string]
+
+  const buildOne = <K extends keyof T & string>(key: K, table: T[K]) => {
     const refine = (refines[key] ?? {}) as Extract<RefineOf<R, K>, Record<string, any>>
 
     const model = createSingleModel(table, refine)
 
-    models[`${key}Insert` as keyof ModelResult<T, R>] = model.insert as any
-    models[`${key}Select` as keyof ModelResult<T, R>] = model.select as any
+    Object.assign(models, {
+      [`${key}Insert`]: model.insert,
+      [`${key}Select`]: model.select,
+    })
   }
 
-  for (const key of Object.keys(tables) as (keyof T & string)[]) {
-    buildOne(key)
+  const entries = Object.entries(tables) as TableEntry[]
+
+  for (const [key, table] of entries) {
+    buildOne(key, table)
   }
 
   return models

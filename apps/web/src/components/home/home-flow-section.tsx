@@ -1,4 +1,7 @@
+import { Link } from '@tanstack/react-router'
+
 import type { HomeArticleItem } from '@/components/common/article-card.tsx'
+
 import { HomeArticleCard } from '@/components/home/home-article-card.tsx'
 import {
   HomeFeedRecommendation,
@@ -7,7 +10,6 @@ import {
 import { Separator } from '@/components/ui/separator.tsx'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { type ContentType } from '@/types/content'
-import { Link } from '@tanstack/react-router'
 
 export const FlowLink = ({ article, reverse }: { article: HomeArticleItem; reverse: boolean }) => {
   return (
@@ -56,7 +58,7 @@ export const HomeFlowSection = ({
       <div className="hidden lg:grid lg:grid-cols-[minmax(0,40rem)_18rem] lg:justify-center lg:gap-x-12 xl:grid-cols-[minmax(0,42rem)_19rem]">
         <div className="space-y-3">
           <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Flow List</p>
+            <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">Flow List</p>
             <h2 className="text-lg font-semibold tracking-tight text-foreground">流式列表</h2>
           </div>
           <FlowList items={items.slice(8)} />
@@ -64,9 +66,9 @@ export const HomeFlowSection = ({
         <HomeFeedRecommendation contentType={contentType} />
       </div>
 
-      <div className="hidden sm:block lg:hidden sm:mx-auto sm:w-full sm:max-w-xl">
+      <div className="hidden sm:mx-auto sm:block sm:w-full sm:max-w-xl lg:hidden">
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">flow articles</p>
+          <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">flow articles</p>
           <h2 className="text-lg font-semibold tracking-tight text-foreground">流式列表</h2>
         </div>
         <FlowList items={items.slice(3)} className="mt-3" />

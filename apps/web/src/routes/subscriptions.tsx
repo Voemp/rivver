@@ -1,4 +1,17 @@
+import type { Treaty } from '@elysiajs/eden'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
+import { produce } from 'immer'
+import { Plus } from 'lucide-react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
+
 import type { appClient } from '@/api/client.ts'
+
 import { deleteSubscription, postSubscription, subscriptionListQueryOptions } from '@/api/queries'
 import { FeedInfoCard, FeedInfoSkeleton } from '@/components/feed/feed-info-card'
 import { EmptyState } from '@/components/feedback/empty-state'
@@ -15,20 +28,11 @@ import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/fie
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/hooks/use-auth'
-import type { Treaty } from '@elysiajs/eden'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-import { useDebounceFn } from 'ahooks'
-import { produce } from 'immer'
-import { Plus } from 'lucide-react'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
+import { useDebounceFn } from '@/hooks/use-debounce-fn'
 
 export const Route = createFileRoute('/subscriptions')({
-  loader: ({ context }) => context.queryClient.ensureQueryData(subscriptionListQueryOptions()),
+  loader: ({ context }) =>
+    context.queryClient.query({ ...subscriptionListQueryOptions(), staleTime: 'static' }),
   pendingComponent: SubscriptionsSkeleton,
   component: Subscriptions,
 })
@@ -166,7 +170,7 @@ function Subscriptions() {
     <section className="mx-auto w-full max-w-6xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Subscriptions</p>
+          <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">Subscriptions</p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">全部订阅</h1>
         </div>
         <Button onClick={() => setDialogOpen(true)}>

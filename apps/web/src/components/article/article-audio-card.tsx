@@ -1,9 +1,10 @@
+import { Download, Headphones, Pause, Play, Volume2, VolumeX } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { Slider } from '@/components/ui/slider'
-import { Download, Headphones, Pause, Play, Volume2, VolumeX } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
 
 type ArticleAudioCardProps = {
   url: string
@@ -148,7 +149,7 @@ export const ArticleAudioCard = ({ url }: ArticleAudioCardProps) => {
   return (
     <section className="mx-auto mt-10 max-w-3xl py-6">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground/80">
+        <div className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.24em] text-muted-foreground/80 uppercase">
           <Headphones className="size-4" />
           <span>Audio</span>
         </div>
@@ -171,7 +172,7 @@ export const ArticleAudioCard = ({ url }: ArticleAudioCardProps) => {
         Your browser does not support audio playback.
       </audio>
 
-      <div className="border border-border/70 bg-background/70 rounded-xl p-4 sm:p-5">
+      <div className="rounded-xl border border-border/70 bg-background/70 p-4 sm:p-5">
         <div className="flex items-center gap-3">
           <Button
             type="button"

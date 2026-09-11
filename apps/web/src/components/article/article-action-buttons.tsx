@@ -1,3 +1,7 @@
+import { ExternalLink, Heart, Share2 } from 'lucide-react'
+
+import type { IconType } from '@/types/icon.ts'
+
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -10,8 +14,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { cn } from '@/lib/utils'
-import type { IconType } from '@/types/icon.ts'
-import { ExternalLink, Heart, Share2 } from 'lucide-react'
 
 export type SharePlatform = 'copy' | 'x' | 'weibo' | 'telegram'
 

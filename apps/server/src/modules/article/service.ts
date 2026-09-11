@@ -1,4 +1,5 @@
 import type { ContentKind } from '@server/db/schema'
+
 import { articleRepo } from '@server/repos/articleRepo'
 import { behaviorRepo } from '@server/repos/behaviorRepo'
 import { interestRepo } from '@server/repos/interestRepo'

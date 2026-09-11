@@ -1,42 +1,31 @@
 {
   "compilerOptions": {
-    "lib": [
-      "ESNext"
-    ],
     "target": "ESNext",
-    "types": [
-      "bun",
-      "pg"
-    ],
-    "paths": {
-      "@server/*": [
-        "./src/*"
-      ]
-    },
-    // 模块系统
+    "lib": ["ESNext"],
     "module": "Preserve",
-    "moduleDetection": "force",
+    "types": ["bun", "pg"],
+    "paths": {
+      "@server/*": ["./src/*"]
+    },
+    "skipLibCheck": true,
+    /* Bundler mode */
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
-    // Bun 与打包器能力
-    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
     "resolveJsonModule": true,
     "noEmit": true,
-    // 严格类型检查
+    /* Linting */
     "strict": true,
-    "exactOptionalPropertyTypes": true,
-    "noUncheckedIndexedAccess": true,
-    // 控制流检查
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
-    // 代码质量检查
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
     "noUncheckedSideEffectImports": true,
-    // 工程兼容性
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "forceConsistentCasingInFileNames": true
   }
 }

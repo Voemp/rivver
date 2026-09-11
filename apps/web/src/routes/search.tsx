@@ -1,14 +1,15 @@
+import { useQuery } from '@tanstack/react-query'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Search } from 'lucide-react'
+import { type ChangeEvent, useState } from 'react'
+import { z } from 'zod'
+
 import { articleSearchQueryOptions } from '@/api/queries'
 import { VerticalCard } from '@/components/common/article-card'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { ErrorState } from '@/components/feedback/error-state'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useQuery } from '@tanstack/react-query'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { Search } from 'lucide-react'
-import { type ChangeEvent, useState } from 'react'
-import { z } from 'zod'
 
 const searchPageSchema = z.object({
   q: z.string().trim().optional(),
@@ -19,7 +20,7 @@ export const Route = createFileRoute('/search')({
   loaderDeps: ({ search }) => ({ q: search.q?.trim() ?? '' }),
   loader: async ({ context, deps: { q } }) => {
     if (!q) return null
-    await context.queryClient.ensureQueryData(articleSearchQueryOptions(q))
+    await context.queryClient.query({ ...articleSearchQueryOptions(q), staleTime: 'static' })
     return null
   },
   pendingComponent: SearchPageSkeleton,
@@ -54,7 +55,7 @@ function SearchPage({ q }: { q?: string }) {
     <section className="mx-auto w-full max-w-6xl space-y-6">
       <div className="space-y-4">
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+          <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
             Article Search
           </p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">搜索文章</h1>
@@ -66,11 +67,11 @@ function SearchPage({ q }: { q?: string }) {
               value={value}
               onChange={(event) => setValue(event.target.value)}
               placeholder="搜索标题、摘要或正文片段"
-              className="h-11 rounded-full pl-4 pr-14 text-sm"
+              className="h-11 rounded-full pr-14 pl-4 text-sm"
             />
             <button
               type="submit"
-              className="absolute right-1 top-1/2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="absolute top-1/2 right-1 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               aria-label="提交搜索"
             >
               <Search className="size-4.5" />
@@ -101,7 +102,7 @@ function SearchPage({ q }: { q?: string }) {
         <div className="space-y-4">
           <div className="flex items-end justify-between gap-3">
             <div className="space-y-1">
-              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Results</p>
+              <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">Results</p>
               <h2 className="text-lg font-semibold tracking-tight text-foreground">
                 “{q}” 的搜索结果
               </h2>

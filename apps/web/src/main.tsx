@@ -1,8 +1,9 @@
-import { routeTree } from '@/routeTree.gen.ts'
 import { QueryClient } from '@tanstack/react-query'
 import { createRouter, RouterProvider } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { createRoot } from 'react-dom/client'
+
+import { routeTree } from '@/routeTree.gen.ts'
 
 const queryClient = new QueryClient()
 

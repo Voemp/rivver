@@ -1,10 +1,12 @@
 import type { toOpenAPISchema } from '@elysiajs/openapi'
+
 import { db } from '@server/db'
 import { account, session, user, verification } from '@server/db/schema'
 import { trustedOrigins } from '@server/utils/cors'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { betterAuth } from 'better-auth/minimal'
-import { openAPI } from 'better-auth/plugins'
+import { openAPI, type Path } from 'better-auth/plugins'
+
 import { env } from '../../config/env'
 
 export const auth = betterAuth({
@@ -50,19 +52,22 @@ export const auth = betterAuth({
 let _schema: ReturnType<typeof auth.api.generateOpenAPISchema> | undefined
 const getSchema = () => (_schema ??= auth.api.generateOpenAPISchema())
 
+type Paths = ReturnType<typeof toOpenAPISchema>['paths']
+type Components = ReturnType<typeof toOpenAPISchema>['components']
+
 export const OpenAPI = {
-  getPaths: (prefix = '/auth'): Promise<ReturnType<typeof toOpenAPISchema>['paths']> =>
+  getPaths: (prefix = '/auth'): Promise<Paths> =>
     getSchema().then(({ paths }) => {
-      const reference = Object.create(null)
+      const reference = Object.create(null) as Paths
 
       for (const path of Object.keys(paths)) {
         const pathItem = paths[path]
         if (!pathItem) continue
 
         const key = prefix + path
-        reference[key] = pathItem
+        reference[key] = pathItem as ReturnType<typeof toOpenAPISchema>['paths']
 
-        for (const method of Object.keys(pathItem)) {
+        for (const method of Object.keys(pathItem) as (keyof Path)[]) {
           const operation = reference[key][method]
           if (!operation) continue
 
@@ -72,7 +77,5 @@ export const OpenAPI = {
 
       return reference
     }),
-  components: getSchema().then(
-    ({ components }) => components as ReturnType<typeof toOpenAPISchema>['components'],
-  ),
+  components: getSchema().then(({ components }) => components as Components),
 } as const
