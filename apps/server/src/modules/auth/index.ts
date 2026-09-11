@@ -5,6 +5,7 @@ import { trustedOrigins } from '@server/utils/cors'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { betterAuth } from 'better-auth/minimal'
 import { openAPI } from 'better-auth/plugins'
+import { env } from '../../config/env'
 
 export const auth = betterAuth({
   appName: 'Rivver',
@@ -24,8 +25,8 @@ export const auth = betterAuth({
   },
   // socialProviders: {
   //   google: {
-  //     clientId: process.env.GOOGLE_CLIENT_ID!,
-  //     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+  //     clientId: env.GOOGLE_CLIENT_ID,
+  //     clientSecret: env.GOOGLE_CLIENT_SECRET,
   //   },
   // },
   session: {
@@ -37,7 +38,7 @@ export const auth = betterAuth({
     },
   },
   advanced: {
-    useSecureCookies: process.env.NODE_ENV === 'production',
+    useSecureCookies: env.NODE_ENV === 'production',
     trustedProxyHeaders: true,
     database: {
       generateId: 'uuid',

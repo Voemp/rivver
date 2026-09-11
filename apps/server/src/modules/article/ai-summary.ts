@@ -1,5 +1,6 @@
 import { articleRepo } from '@server/repos/articleRepo'
 import { AppError } from '@server/utils/error'
+import { env } from '../../config/env'
 
 const SUMMARY_MAX_SOURCE_CHARS = 12000
 const SUMMARY_REQUEST_TIMEOUT_MS = 30000
@@ -61,9 +62,7 @@ function pickSummarySource(article: Awaited<ReturnType<typeof articleRepo.findSu
 }
 
 async function requestAiSummary(source: string) {
-  const apiKey = process.env.AI_SUMMARY_API_KEY?.trim()
-  const model = process.env.AI_SUMMARY_MODEL?.trim()
-  const baseUrl = process.env.AI_SUMMARY_BASE_URL?.trim() || 'https://api.openai.com/v1'
+  const { AI_SUMMARY_API_KEY: apiKey, AI_SUMMARY_MODEL: model, AI_SUMMARY_BASE_URL: baseUrl } = env
 
   if (!apiKey || !model) {
     throw new AppError(503, 'AI 总结服务未配置', 'AI_SUMMARY_NOT_CONFIGURED')

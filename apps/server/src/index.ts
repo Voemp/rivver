@@ -5,6 +5,7 @@ import { runEmbeddingGenerate } from '@server/worker/embedding'
 import { runRssFetch } from '@server/worker/rss'
 import { Elysia } from 'elysia'
 import { version } from '../package.json'
+import { env } from './config/env'
 import { article } from './modules/article'
 import { auth, OpenAPI } from './modules/auth'
 import { feed } from './modules/feed'
@@ -77,7 +78,7 @@ const app = new Elysia()
   .use(article)
   .use(feed)
 
-app.listen(process.env.PORT ?? 3000, () => {
+app.listen(env.PORT, () => {
   console.log(
     `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}\n` +
       `📖 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,

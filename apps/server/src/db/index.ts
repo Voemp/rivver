@@ -1,11 +1,7 @@
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
+import { env } from '@server/config/env'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { Pool } from 'pg'
 import { relations } from './relations'
 
-const databaseUrl = process.env.DATABASE_URL
-if (!databaseUrl) {
-  throw new Error('缺少 DATABASE_URL 环境变量')
-}
-
-const client = postgres(databaseUrl, { prepare: false })
-export const db = drizzle({ client, relations })
+const client = new Pool({ connectionString: env.DATABASE_URL })
+export const db = drizzle({ client, relations, jit: true })
