@@ -11,14 +11,28 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
-    "fmt:check": "oxfmt --check"
+    "fmt:check": "oxfmt --check",
+    "prepare": "simple-git-hooks"
   },
   "devDependencies": {
+    "lint-staged": "^17.5.1",
     "oxfmt": "^0.67.0",
     "oxlint": "^1.82.0",
     "oxlint-tsgolint": "^7.0.2001",
+    "simple-git-hooks": "^2.14.0",
     "turbo": "^2.10.12",
     "typescript": "^7.0.2"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "bun run lint-staged"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "oxlint --fix"
+    ],
+    "*.{ts,tsx,js,jsx,json,yaml,md}": [
+      "oxfmt"
+    ]
   },
   "packageManager": "bun@1.4.2"
 }

@@ -1,7 +1,7 @@
 import { defineConfig } from 'oxfmt'
 
 export default defineConfig({
-  ignorePatterns: ['apps/web/src/components/ui/**'],
+  ignorePatterns: ['**/*.gen.ts', 'apps/web/src/components/ui/**'],
   sortImports: {
     groups: [
       'type-import',
