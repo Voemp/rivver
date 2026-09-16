@@ -1,9 +1,9 @@
 // 类型管道文件：从 Drizzle 表定义生成 TypeBox 模型，此处 any 为刻意的类型体操手段
 /* oxlint-disable typescript/no-explicit-any */
-import type { TObject, TProperties } from '@sinclair/typebox'
 import type { Table } from 'drizzle-orm'
+import type { TObject, TProperties } from 'typebox'
 
-import { type BuildSchema, createSchemaFactory } from 'drizzle-orm/typebox-legacy'
+import { type BuildSchema, createSchemaFactory } from 'drizzle-orm/typebox'
 import { t } from 'elysia'
 
 const { createInsertSchema, createSelectSchema } = createSchemaFactory({

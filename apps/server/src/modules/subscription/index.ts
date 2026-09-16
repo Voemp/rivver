@@ -19,19 +19,26 @@ export const subscription = new Elysia({
   .use(betterAuth)
   .get(
     '',
-    async ({ user }) => {
-      const subs = await subRepo.listByUser(user.id)
-      return status(200, subs)
-    },
     {
       auth: true,
       response: {
         200: SubModel.listResponse,
       },
     },
+    async ({ user }) => {
+      const subs = await subRepo.listByUser(user.id)
+      return status(200, subs)
+    },
   )
   .post(
     '',
+    {
+      auth: true,
+      body: SubModel.subBody,
+      response: {
+        201: SubModel.subResponse,
+      },
+    },
     async ({ user, body: { url, title } }) => {
       let feed = await feedRepo.findByUrl(url)
       if (!feed) {
@@ -66,28 +73,21 @@ export const subscription = new Elysia({
       const sub = await subRepo.create(_sub)
       return status(201, sub)
     },
-    {
-      auth: true,
-      body: SubModel.subBody,
-      response: {
-        201: SubModel.subResponse,
-      },
-    },
   )
   .delete(
     '',
-    async ({ user, body: { feedId } }) => {
-      const existing = await subRepo.findByUserAndLink(user.id, feedId)
-      if (!existing) throw new AppError(404, '订阅不存在', 'SUBSCRIPTION_NOT_FOUND')
-
-      const sub = await subRepo.remove(user.id, feedId)
-      return status(200, sub)
-    },
     {
       auth: true,
       body: SubModel.unsubBody,
       response: {
         200: SubModel.unsubResponse,
       },
+    },
+    async ({ user, body: { feedId } }) => {
+      const existing = await subRepo.findByUserAndLink(user.id, feedId)
+      if (!existing) throw new AppError(404, '订阅不存在', 'SUBSCRIPTION_NOT_FOUND')
+
+      const sub = await subRepo.remove(user.id, feedId)
+      return status(200, sub)
     },
   )

@@ -1,4 +1,4 @@
-import type { Treaty } from '@elysiajs/eden'
+import type { Treaty } from '@elysia/eden'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'

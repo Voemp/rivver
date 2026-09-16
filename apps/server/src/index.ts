@@ -1,9 +1,9 @@
-import cors from '@elysiajs/cors'
-import cron, { Patterns } from '@elysiajs/cron'
-import { openapi } from '@elysiajs/openapi'
+import cors from '@elysia/cors'
+import cron, { Patterns } from '@elysia/cron'
+import { openapi } from '@elysia/openapi'
 import { runEmbeddingGenerate } from '@server/worker/embedding'
 import { runRssFetch } from '@server/worker/rss'
-import { Elysia } from 'elysia'
+import { Elysia, ValidationError } from 'elysia'
 
 import { version } from '../package.json'
 import { env } from './config/env'
@@ -62,16 +62,8 @@ const app = new Elysia()
       allowedHeaders: ['Content-Type', 'Authorization'],
     }),
   )
-  .error({ AppError })
-  .onError(({ error, code }) => {
-    switch (code) {
-      case 'AppError':
-        return error.toResponse()
-      case 'VALIDATION':
-        return res.error(error.message, error.code)
-    }
-    return null
-  })
+  .error(AppError, ({ error }) => error.toResponse())
+  .error(ValidationError, ({ error }) => res.error(error.message, 'VALIDATION'))
   .guard({ response: { 422: ApiResponseModel.error(undefined, 'VALIDATION') } })
   .mount(auth.handler)
   .use(profile)

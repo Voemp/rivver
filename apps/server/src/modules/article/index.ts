@@ -37,10 +37,6 @@ export const article = new Elysia({
   .use(betterAuth)
   .get(
     '/search',
-    async ({ query: { q, offset = 0, limit = 24, contentType } }) => {
-      const articles = await articleRepo.search(q, offset, Math.min(limit, 50), contentType)
-      return status(200, articles)
-    },
     {
       query: ArticleModel.articleSearchQuery,
       response: {
@@ -50,13 +46,13 @@ export const article = new Elysia({
         security: [],
       },
     },
+    async ({ query: { q, offset = 0, limit = 24, contentType } }) => {
+      const articles = await articleRepo.search(q, offset, Math.min(limit, 50), contentType)
+      return status(200, articles)
+    },
   )
   .get(
     '/:id',
-    async ({ params: { id } }) => {
-      const detail = await articleRepo.findById(id)
-      return status(200, detail)
-    },
     {
       params: ArticleModel.articleParams,
       response: {
@@ -66,13 +62,14 @@ export const article = new Elysia({
         security: [],
       },
     },
+    async ({ params: { id } }) => {
+      const detail = await articleRepo.findById(id)
+      if (!detail) throw new AppError(404, '文章不存在', 'ARTICLE_NOT_FOUND')
+      return status(200, detail)
+    },
   )
   .post(
     '/:id/ai-summary',
-    async ({ params: { id } }) => {
-      const aiSummary = await ensureArticleAiSummary(id)
-      return status(200, { articleId: id, aiSummary })
-    },
     {
       params: ArticleModel.articleParams,
       response: {
@@ -82,22 +79,33 @@ export const article = new Elysia({
         security: [],
       },
     },
+    async ({ params: { id } }) => {
+      const aiSummary = await ensureArticleAiSummary(id)
+      return status(200, { articleId: id, aiSummary })
+    },
   )
   .get(
     '/popular',
-    async ({ query: { offset = 0, limit = 20, contentType } }) => {
-      const articles = await listPopularArticles(offset, Math.min(limit, 50), contentType)
-      return status(200, articles)
-    },
     {
       query: ArticleModel.articleListQuery,
       response: {
         200: ArticleModel.articleListResponse,
       },
     },
+    async ({ query: { offset = 0, limit = 20, contentType } }) => {
+      const articles = await listPopularArticles(offset, Math.min(limit, 50), contentType)
+      return status(200, articles)
+    },
   )
   .get(
     '/recommendation',
+    {
+      auth: true,
+      query: ArticleModel.articleListQuery,
+      response: {
+        200: ArticleModel.articleListResponse,
+      },
+    },
     async ({ user, query: { offset = 0, limit = 20, contentType } }) => {
       limit = Math.min(limit, 50)
 
@@ -141,6 +149,9 @@ export const article = new Elysia({
 
       return status(200, ordered)
     },
+  )
+  .get(
+    '/favorites',
     {
       auth: true,
       query: ArticleModel.articleListQuery,
@@ -148,23 +159,20 @@ export const article = new Elysia({
         200: ArticleModel.articleListResponse,
       },
     },
-  )
-  .get(
-    '/favorites',
     async ({ user, query: { offset = 0, limit = 20 } }) => {
       const articles = await favoriteRepo.listByUser(user.id, offset, Math.min(limit, 50))
       return status(200, articles)
     },
-    {
-      auth: true,
-      query: ArticleModel.articleListQuery,
-      response: {
-        200: ArticleModel.articleListResponse,
-      },
-    },
   )
   .post(
     '/:id/favorite',
+    {
+      auth: true,
+      params: ArticleModel.articleParams,
+      response: {
+        200: ArticleModel.favoriteStatusResponse,
+      },
+    },
     async ({ user, params: { id } }) => {
       const target = await articleRepo.findById(id)
       if (!target) throw new AppError(404, '文章不存在', 'ARTICLE_NOT_FOUND')
@@ -189,6 +197,9 @@ export const article = new Elysia({
 
       return status(200, { favorited: true, articleId: id })
     },
+  )
+  .delete(
+    '/:id/favorite',
     {
       auth: true,
       params: ArticleModel.articleParams,
@@ -196,14 +207,14 @@ export const article = new Elysia({
         200: ArticleModel.favoriteStatusResponse,
       },
     },
-  )
-  .delete(
-    '/:id/favorite',
     async ({ user, params: { id } }) => {
       await favoriteRepo.removeWithBehavior(user.id, id)
       void refreshRecommendations(user.id)
       return status(200, { favorited: false, articleId: id })
     },
+  )
+  .get(
+    '/:id/favorite',
     {
       auth: true,
       params: ArticleModel.articleParams,
@@ -211,23 +222,20 @@ export const article = new Elysia({
         200: ArticleModel.favoriteStatusResponse,
       },
     },
-  )
-  .get(
-    '/:id/favorite',
     async ({ user, params: { id } }) => {
       const favorited = await favoriteRepo.exists(user.id, id)
       return status(200, { favorited, articleId: id })
     },
+  )
+  .post(
+    '/:id/click',
     {
       auth: true,
       params: ArticleModel.articleParams,
       response: {
-        200: ArticleModel.favoriteStatusResponse,
+        200: ArticleModel.behaviorResponse,
       },
     },
-  )
-  .post(
-    '/:id/click',
     async ({ user, params: { id } }) => {
       const target = await articleRepo.findById(id)
       if (!target) throw new AppError(404, '文章不存在', 'ARTICLE_NOT_FOUND')
@@ -246,16 +254,17 @@ export const article = new Elysia({
 
       return status(200, { recorded: true, type: 'click', articleId: id })
     },
-    {
-      auth: true,
-      params: ArticleModel.articleParams,
-      response: {
-        200: ArticleModel.behaviorResponse,
-      },
-    },
   )
   .post(
     '/:id/read-progress',
+    {
+      auth: true,
+      params: ArticleModel.articleParams,
+      body: ArticleModel.readProgressBody,
+      response: {
+        200: ArticleModel.readProgressResponse,
+      },
+    },
     async ({ user, params: { id }, body }) => {
       const target = await articleRepo.findById(id)
       if (!target) throw new AppError(404, '文章不存在', 'ARTICLE_NOT_FOUND')
@@ -287,17 +296,16 @@ export const article = new Elysia({
         return status(200, { recorded: true, articleId: id, progress: body.progress })
       }
     },
-    {
-      auth: true,
-      params: ArticleModel.articleParams,
-      body: ArticleModel.readProgressBody,
-      response: {
-        200: ArticleModel.readProgressResponse,
-      },
-    },
   )
   .post(
     '/:id/share',
+    {
+      auth: true,
+      params: ArticleModel.articleParams,
+      response: {
+        200: ArticleModel.behaviorResponse,
+      },
+    },
     async ({ user, params: { id } }) => {
       const target = await articleRepo.findById(id)
       if (!target) throw new AppError(404, '文章不存在', 'ARTICLE_NOT_FOUND')
@@ -315,12 +323,5 @@ export const article = new Elysia({
       void refreshRecommendations(user.id)
 
       return status(200, { recorded: true, type: 'share', articleId: id })
-    },
-    {
-      auth: true,
-      params: ArticleModel.articleParams,
-      response: {
-        200: ArticleModel.behaviorResponse,
-      },
     },
   )

@@ -113,7 +113,7 @@ OpenAPI/Swagger UI is served at `/openapi` when the server runs.
 - **`no-floating-promises`**: intentionally-unawaited promises need `void` or a `.catch`.
 - **React 19 types**: the global `JSX` namespace is gone — `import type { JSX } from 'react'`. Narrow DOM queries via generics: `querySelectorAll<HTMLHeadingElement>('h1, h2, h3')`.
 - **better-auth client types**: without `$InferServerPlugin`, `authClient.getSession()`'s data is loosely typed; `use-auth.tsx` declares an explicit `AuthUser` and casts once inside `sessionQueryOptions`. Update `AuthUser` when the server `user` table changes.
-- **better-auth OpenAPI**: `auth.api.generateOpenAPISchema()` paths are structurally `OpenAPIV3.PathItemObject` but typed separately — convert once at the boundary (`modules/auth/index.ts`). `openapi-types` currently resolves via hoisting from `@elysiajs/openapi`; add it to `apps/server` dependencies if the import breaks.
+- **better-auth OpenAPI**: `auth.api.generateOpenAPISchema()` paths are structurally `OpenAPIV3.PathItemObject` but typed separately — convert once at the boundary (`modules/auth/index.ts`, re-typed as `OpenAPIV3_1` for `@elysia/openapi` 2.0). `openapi-types` and `@scalar/types` are direct `apps/server` dependencies (peers of `@elysia/openapi`).
 - **drizzle-kit rc.4**: the kit's `Config` type lacks a top-level `casing` field, but the runtime does read it (verified in `cli.js`); `drizzle.config.ts` keeps the option via a type intersection. Don't delete it to satisfy the type checker.
 - **rss-parser custom fields** (`content:encoded`, `content:encodedSnippet`) are declared through the `Parser<T, U>` generics in `worker/rss/fetcher.ts` — don't fall back to index signatures or `any`.
 
@@ -125,16 +125,16 @@ OpenAPI/Swagger UI is served at `/openapi` when the server runs.
 ## Server architecture (`apps/server`)
 
 - **Elysia** app assembled in `src/index.ts`. It `use()`s modules per domain: `profile`, `subscription`, `article`, `feed`, plus `auth` (Better Auth, mounted via `.mount(auth.handler)`).
-- A 24h cron (`@elysiajs/cron`, `Patterns.everyHours(24)`) runs RSS fetch + embedding generation in the background. Standalone worker entrypoints (`worker/rss`, `worker/embedding`) exist for `bun run worker:*`.
+- A 24h cron (`@elysia/cron`, `Patterns.everyHours(24)`) runs RSS fetch + embedding generation in the background. Standalone worker entrypoints (`worker/rss`, `worker/embedding`) exist for `bun run worker:*`. In Elysia 2.0 the plugin scope is `@elysia/*` (not the 1.x `@elysiajs/*`).
 - **Layering pattern:** `modules/*` = routes/controllers that call `repos/*` for data. `repos/*` are the only place that touches `db` directly — keep repo access there.
-- Each module exports an `Elysia` instance; routes use Elysia inline handlers with `query`/`params`/`body`/`response` schema declarations (TypeBox via `@sinclair/typebox` / `elysia`'s `t`), plus `detail` for OpenAPI tags/security.
+- Each module exports an `Elysia` instance; routes use Elysia inline handlers with `query`/`params`/`body`/`response` schema declarations (TypeBox 1.x via the `typebox` package / `elysia`'s `t`), plus `detail` for OpenAPI tags/security. Route options come **before** the handler (`app.get(path, { opts }, handler)`); unlike 1.x (handler first).
 - Some routes also declare `auth: true` in options (see the `macro` in `modules/auth/service.ts`), which injects `user`/`session` and returns 401 for unauthenticated requests. Not every authenticated route relies on it — check the handler signature.
 
 ### Error handling — the `res` / `AppError` pattern
 
 - `AppError(status, message, code)` — `apps/server/src/utils/error.ts`. Throw it in routes for domain errors, e.g. `throw new AppError(404, '文章不存在', 'ARTICLE_NOT_FOUND')`.
 - `res.success(data)` returns `{ success: true, data, error: null }`; `res.error(message, code)` returns `{ code, message }` (`types/response.ts`).
-- Elysia's `.onError` handler in `index.ts` converts `AppError` → its response and `VALIDATION` → 422. Most happy-path handlers return `status(200, payload)` rather than wrapping — match the pattern of the module you're editing.
+- Elysia 2.0's `.error(ErrorClass, handler)` chain in `index.ts` converts `AppError` → its response and `ValidationError` → 422 (`{ code: 'VALIDATION' }`). There is no `onError`/error-code switch anymore. Most happy-path handlers return `status(200, payload)` rather than wrapping — match the pattern of the module you're editing.
 
 ### DB layer (Drizzle) — read this before touching schema
 
@@ -159,7 +159,7 @@ Follows `README.md`; key facts an agent should know:
 - **React 19** + **Vite 8** (Rolldown-powered). TypeScript project refs (`tsconfig.app.json` / `tsconfig.node.json`).
 - **TanStack Router** file-based routing: routes in `src/routes/*.tsx`. `src/routeTree.gen.ts` is **generated** by the router plugin — don't edit it by hand. Run the dev server to regenerate, or `tanstack-router` command.
 - **TanStack Query**: query/infinite-query option factories live in `src/api/queries.ts` (e.g. `articlesInfiniteOptions`, `articleDetailQueryOptions`). The homepage uses infinite queries + `use-infinite-scroll` for recommendation vs popular based on auth state.
-- **API client** is **Eden treaty** (`@elysiajs/eden`), typed end-to-end against the server's `App` type: `appClient = treaty<App>(env.apiBaseUrl, { fetch: { credentials: 'include' } })`. Response unwrapping goes through `unwrapResponse(...)` which throws `ApiError`. Cookies carry the session (`credentials: 'include'`). Auth-specific calls go through `better-auth/react` `authClient`.
+- **API client** is **Eden treaty** (`@elysia/eden`, 2.0 — the 1.x package was `@elysiajs/eden`), typed end-to-end against the server's `App` type: `appClient = treaty<App>(env.apiBaseUrl, { fetch: { credentials: 'include' } })`. Response unwrapping goes through `unwrapResponse(...)` which throws `ApiError`. Cookies carry the session (`credentials: 'include'`). Auth-specific calls go through `better-auth/react` `authClient`.
 - **UI kit:** components under `components/ui/**` are a local Base UI / shadcn-style kit (recently migrated **from Radix UX to Base UI**). Uses `class-variance-authority`, `tailwind-merge`, `cn`, `sonner` for toasts. When adding a UI primitive, extend this kit rather than importing Radix directly. Feature components live under `components/<feature>/`.
 - **Styling:** Tailwind **v4** via `@tailwindcss/vite` (CSS-first config in `src/style.css`); `tw-animate-css`; dark mode via `next-themes`.
 - **Env/config:** all `VITE_*` vars are read once in `src/config/env.ts` (`VITE_API_BASE_URL` default `http://localhost:3000`, `VITE_APP_NAME`, `VITE_RECOMMENDATION_PAGE_SIZE` default `12`), not scattered through the app.

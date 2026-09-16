@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from 'openapi-types'
+import type { ElysiaOpenAPIConfig } from '@elysia/openapi'
 
 import { db } from '@server/db'
 import { account, session, user, verification } from '@server/db/schema'
@@ -49,23 +49,27 @@ export const auth = betterAuth({
   plugins: [openAPI()],
 })
 
+type OpenAPIDocumentation = NonNullable<ElysiaOpenAPIConfig['documentation']>
+type OpenAPIPaths = NonNullable<OpenAPIDocumentation['paths']>
+type OpenAPIComponents = OpenAPIDocumentation['components']
+
 let _schema: ReturnType<typeof auth.api.generateOpenAPISchema> | undefined
 const getSchema = () => (_schema ??= auth.api.generateOpenAPISchema())
 
 export const OpenAPI = {
-  getPaths: (prefix = '/auth'): Promise<OpenAPIV3.PathsObject> =>
+  getPaths: (prefix = '/auth'): Promise<OpenAPIPaths> =>
     getSchema().then(({ paths }) => {
-      const reference = Object.create(null) as OpenAPIV3.PathsObject
+      const reference = Object.create(null) as OpenAPIPaths
 
       for (const path of Object.keys(paths)) {
         const pathItem = paths[path]
         if (!pathItem) continue
 
         const key = prefix + path
-        reference[key] = pathItem as OpenAPIV3.PathItemObject
+        reference[key] = pathItem as OpenAPIPaths[keyof OpenAPIPaths]
 
         for (const method of Object.keys(pathItem) as (keyof Path)[]) {
-          const operation = reference[key][method]
+          const operation = reference[key]?.[method]
           if (!operation) continue
 
           operation.tags = ['Better Auth']
@@ -74,5 +78,5 @@ export const OpenAPI = {
 
       return reference
     }),
-  components: getSchema().then(({ components }) => components as OpenAPIV3.ComponentsObject),
+  components: getSchema().then(({ components }) => components as OpenAPIComponents),
 } as const

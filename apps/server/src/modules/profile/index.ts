@@ -23,19 +23,27 @@ export const profile = new Elysia({
   .use(betterAuth)
   .get(
     '',
-    async ({ user }) => {
-      const profile = await ensureProfile(user.id)
-      return status(200, toProfileResponse(profile))
-    },
     {
       auth: true,
       response: {
         200: ProfileModel.profileResponse,
       },
     },
+    async ({ user }) => {
+      const profile = await ensureProfile(user.id)
+      return status(200, toProfileResponse(profile))
+    },
   )
   .put(
     '/avatar',
+    {
+      auth: true,
+      body: ProfileModel.avatarBody,
+      response: {
+        200: ProfileModel.profileResponse,
+        304: ApiResponseModel.error('更改头像失败', 'CHANGE_AVATAR_FAILED'),
+      },
+    },
     async ({ user, body }) => {
       const inputBuffer = Buffer.from(await body.file.arrayBuffer())
 
@@ -60,17 +68,17 @@ export const profile = new Elysia({
 
       return status(200, toProfileResponse(profile))
     },
-    {
-      auth: true,
-      body: ProfileModel.avatarBody,
-      response: {
-        200: ProfileModel.profileResponse,
-        304: ApiResponseModel.error('更改头像失败', 'CHANGE_AVATAR_FAILED'),
-      },
-    },
   )
   .get(
     '/avatar',
+    {
+      auth: true,
+      query: ProfileModel.avatarQuery,
+      response: {
+        200: ProfileModel.avatarResponse,
+        404: ApiResponseModel.error('头像不存在', 'AVATAR_NOT_FOUND'),
+      },
+    },
     async ({ user, set, request, query }) => {
       const profile = await profileRepo.findByUserId(user.id)
       if (!profile?.avatarBytes) throw new AppError(404, '头像不存在', 'AVATAR_NOT_FOUND')
@@ -92,13 +100,5 @@ export const profile = new Elysia({
       if (etag) set.headers.etag = etag
 
       return profile.avatarBytes
-    },
-    {
-      auth: true,
-      query: ProfileModel.avatarQuery,
-      response: {
-        200: ProfileModel.avatarResponse,
-        404: ApiResponseModel.error('头像不存在', 'AVATAR_NOT_FOUND'),
-      },
     },
   )

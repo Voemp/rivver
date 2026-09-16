@@ -1,4 +1,4 @@
-import type { Treaty } from '@elysiajs/eden'
+import type { Treaty } from '@elysia/eden'
 
 import { ArrowUpRight } from 'lucide-react'
 

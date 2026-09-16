@@ -1,6 +1,6 @@
 import type { App } from '@server/index'
 
-import { treaty } from '@elysiajs/eden'
+import { treaty } from '@elysia/eden'
 
 import { env } from '@/config/env'
 
