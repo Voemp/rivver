@@ -1,4 +1,4 @@
-import type { toOpenAPISchema } from '@elysiajs/openapi'
+import type { OpenAPIV3 } from 'openapi-types'
 
 import { db } from '@server/db'
 import { account, session, user, verification } from '@server/db/schema'
@@ -52,20 +52,17 @@ export const auth = betterAuth({
 let _schema: ReturnType<typeof auth.api.generateOpenAPISchema> | undefined
 const getSchema = () => (_schema ??= auth.api.generateOpenAPISchema())
 
-type Paths = ReturnType<typeof toOpenAPISchema>['paths']
-type Components = ReturnType<typeof toOpenAPISchema>['components']
-
 export const OpenAPI = {
-  getPaths: (prefix = '/auth'): Promise<Paths> =>
+  getPaths: (prefix = '/auth'): Promise<OpenAPIV3.PathsObject> =>
     getSchema().then(({ paths }) => {
-      const reference = Object.create(null) as Paths
+      const reference = Object.create(null) as OpenAPIV3.PathsObject
 
       for (const path of Object.keys(paths)) {
         const pathItem = paths[path]
         if (!pathItem) continue
 
         const key = prefix + path
-        reference[key] = pathItem as ReturnType<typeof toOpenAPISchema>['paths']
+        reference[key] = pathItem as OpenAPIV3.PathItemObject
 
         for (const method of Object.keys(pathItem) as (keyof Path)[]) {
           const operation = reference[key][method]
@@ -77,5 +74,5 @@ export const OpenAPI = {
 
       return reference
     }),
-  components: getSchema().then(({ components }) => components as Components),
+  components: getSchema().then(({ components }) => components as OpenAPIV3.ComponentsObject),
 } as const
