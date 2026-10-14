@@ -2,6 +2,7 @@ import tailwindcss from '@tailwindcss/vite'
 import tanstackRouter from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
+import { visualizer } from 'rollup-plugin-visualizer'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
@@ -10,6 +11,10 @@ export default defineConfig({
     tailwindcss(),
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     react({ compiler: true }),
+    visualizer({
+      filename: './dist/stats.html',
+      gzipSize: true,
+    }),
   ],
   resolve: {
     alias: {
