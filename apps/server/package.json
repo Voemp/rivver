@@ -13,25 +13,25 @@
     "db:pull": "drizzle-kit pull"
   },
   "dependencies": {
-    "@elysia/cors": "next",
-    "@elysia/cron": "next",
-    "@elysia/openapi": "next",
-    "@huggingface/transformers": "^4.2.0",
+    "@elysia/cors": "^2.0.0-beta.2",
+    "@elysia/cron": "^2.0.0-beta.1",
+    "@elysia/openapi": "^2.0.0-beta.4",
+    "@huggingface/transformers": "^4.3.1",
     "@t3-oss/env-core": "^0.13.11",
-    "better-auth": "^1.7.4",
+    "better-auth": "^1.7.7",
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
-    "drizzle-orm": "^1.0.0-rc.5-ab785fc",
-    "elysia": "next",
-    "p-limit": "^7.3.2",
-    "pg": "^8.23.0",
+    "drizzle-orm": "^1.0.0-rc.5-5935859",
+    "elysia": "^2.0.0-beta.30",
+    "p-limit": "^7.3.3",
+    "pg": "^8.23.1",
     "rss-parser": "^3.13.0",
     "typebox": "1.3.31",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.2",
+    "@types/bun": "^1.4.3",
     "@types/pg": "^8.23.1",
-    "drizzle-kit": "^1.0.0-rc.5-ab785fc"
+    "drizzle-kit": "^1.0.0-rc.5-5935859"
   }
 }

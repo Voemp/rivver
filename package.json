@@ -15,12 +15,12 @@
     "prepare": "simple-git-hooks"
   },
   "devDependencies": {
-    "lint-staged": "^17.5.1",
+    "lint-staged": "^17.6.0",
     "oxfmt": "^0.67.0",
-    "oxlint": "^1.82.0",
-    "oxlint-tsgolint": "^7.0.2001",
+    "oxlint": "^1.88.0",
+    "oxlint-tsgolint": "^7.0.2004",
     "simple-git-hooks": "^2.14.0",
-    "turbo": "^2.10.12",
+    "turbo": "^2.11.8",
     "typescript": "^7.0.2"
   },
   "simple-git-hooks": {
@@ -34,5 +34,5 @@
       "oxfmt"
     ]
   },
-  "packageManager": "bun@1.4.2"
+  "packageManager": "bun@1.4.3"
 }

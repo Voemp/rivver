@@ -62,8 +62,8 @@ const app = new Elysia()
       allowedHeaders: ['Content-Type', 'Authorization'],
     }),
   )
-  .error(AppError, ({ error }) => error.toResponse())
-  .error(ValidationError, ({ error }) => res.error(error.message, 'VALIDATION'))
+  .onError(AppError, ({ error }) => error.toResponse())
+  .onError(ValidationError, ({ error }) => res.error(error.message, 'VALIDATION'))
   .guard({ response: { 422: ApiResponseModel.error(undefined, 'VALIDATION') } })
   .mount(auth.handler)
   .use(profile)
