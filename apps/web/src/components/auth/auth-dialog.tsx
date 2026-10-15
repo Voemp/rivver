@@ -37,11 +37,26 @@ const authSchema = z.object({
 
 type AuthFormValues = z.infer<typeof authSchema>
 
-export function AuthDialog() {
+type AuthDialogProps = {
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+export function AuthDialog({ open, onOpenChange }: AuthDialogProps = {}) {
   const { authDialogMode, authDialogOpen, closeAuthDialog, openAuthDialog, refreshSession } =
     useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const isSignIn = authDialogMode === 'sign-in'
+
+  const isControlled = open !== undefined
+  const isOpen = isControlled ? open : authDialogOpen
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(nextOpen)
+    } else if (!nextOpen) {
+      closeAuthDialog()
+    }
+  }
 
   const form = useForm<AuthFormValues>({
     resolver: zodResolver(authSchema),
@@ -49,9 +64,9 @@ export function AuthDialog() {
   })
 
   useEffect(() => {
-    if (!authDialogOpen) form.reset()
+    if (!isOpen) form.reset()
     form.clearErrors()
-  }, [authDialogMode, authDialogOpen, form])
+  }, [authDialogMode, isOpen, form])
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: AuthFormValues) => {
@@ -73,13 +88,16 @@ export function AuthDialog() {
     onSuccess: async () => {
       await refreshSession()
       toast.success(isSignIn ? '欢迎回来' : '账号创建成功')
+      if (onOpenChange) {
+        onOpenChange(false)
+      }
       closeAuthDialog()
     },
     onError: (error: Error) => toast.error(error.message),
   })
 
   return (
-    <Dialog open={authDialogOpen} onOpenChange={(open) => !open && closeAuthDialog()}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="overflow-hidden p-0 sm:max-w-100">
         <div className="p-8">
           <DialogHeader className="mb-6">

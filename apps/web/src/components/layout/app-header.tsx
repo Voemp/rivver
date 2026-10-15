@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -25,7 +26,7 @@ import { type ContentType, contentTypeLabels, contentTypeOptions } from '@/types
 export const AppHeader = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { session, signOut, openAuthDialog } = useAuth()
+  const { session, signOut, openAuthDialog, authDialogOpen, closeAuthDialog } = useAuth()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(location.pathname.startsWith('/search'))
   const [searchValue, setSearchValue] = useState('')
@@ -210,19 +211,26 @@ export const AppHeader = () => {
                   />
 
                   <DropdownMenuContent align="end" className="w-40 rounded-2xl p-2">
-                    <DropdownMenuLabel className="truncate">{session.user.name}</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="rounded-xl py-2.5"
-                      onSelect={() => setSettingsOpen(true)}
-                    >
-                      <UserRound className="size-4" />
-                      用户设置
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="rounded-xl py-2.5" onSelect={() => void signOut()}>
-                      <LogOut className="size-4" />
-                      退出登录
-                    </DropdownMenuItem>
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="truncate">
+                        {session.user.name}
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="cursor-pointer rounded-xl py-2.5"
+                        onClick={() => setSettingsOpen(true)}
+                      >
+                        <UserRound className="size-4" />
+                        用户设置
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer rounded-xl py-2.5"
+                        onClick={() => void signOut()}
+                      >
+                        <LogOut className="size-4" />
+                        退出登录
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
@@ -239,7 +247,7 @@ export const AppHeader = () => {
         </div>
       </header>
 
-      <AuthDialog />
+      <AuthDialog open={authDialogOpen} onOpenChange={(open) => !open && closeAuthDialog()} />
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   )

@@ -27,11 +27,10 @@ import {
   type SharePlatformItem,
 } from '@/components/article/article-action-buttons'
 import { ArticleAiSummaryCard } from '@/components/article/article-ai-summary-card'
+import { ArticleAiSummarySkeletonCard } from '@/components/article/article-ai-summary-skeleton'
 import { ArticleAudioCard, ArticleAudioSkeleton } from '@/components/article/article-audio-card'
-import {
-  ArticleContentCard,
-  ArticleContentSkeleton,
-} from '@/components/article/article-content-card'
+import { ArticleContentCard } from '@/components/article/article-content-card'
+import { ArticleContentSkeleton } from '@/components/article/article-content-skeleton'
 import { ArticleMediaDetail } from '@/components/article/article-media-detail'
 import { ArticleTitleCard, ArticleTitleSkeleton } from '@/components/article/article-title-card.tsx'
 import { ArticleTocCard, ArticleTocSkeleton } from '@/components/article/article-toc-card'
@@ -495,7 +494,7 @@ function ArticleSkeleton() {
       <div className="mx-auto grid max-w-368 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,52rem)_18rem] lg:gap-x-8 xl:grid-cols-[20rem_minmax(0,52rem)_18rem] xl:gap-x-10">
         <aside className="hidden xl:col-start-1 xl:block">
           <div className="sticky top-30 pr-2">
-            <ArticleAiSummaryCard summary={null} pending errorMessage={undefined} layout="aside" />
+            <ArticleAiSummarySkeletonCard layout="aside" />
           </div>
         </aside>
 

@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
-import Cropper from 'react-easy-crop'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { authClient } from '@/api/auth-client.ts'
@@ -17,8 +16,11 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { env } from '@/config/env.ts'
 import { AUTH_SESSION_QUERY_KEY, useAuth } from '@/hooks/use-auth.tsx'
+
+const Cropper = lazy(() => import('react-easy-crop'))
 
 type SettingsDialogProps = {
   open: boolean
@@ -47,7 +49,9 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const avatarMutation = useMutation({
     mutationFn: async (file: File) => {
       const profile = await putAvatar(file)
-      await authClient.updateUser({ image: `${env.apiBaseUrl}${profile.avatarUrl}` })
+      if (profile.avatarUrl) {
+        await authClient.updateUser({ image: `${env.apiBaseUrl}${profile.avatarUrl}` })
+      }
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: AUTH_SESSION_QUERY_KEY })
@@ -90,68 +94,70 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const email = user?.email || '暂无邮箱'
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>设置中心</DialogTitle>
-          <DialogDescription>管理你的个人资料。</DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>设置中心</DialogTitle>
+            <DialogDescription>管理你的个人资料。</DialogDescription>
+          </DialogHeader>
 
-        <div className="mt-4 space-y-6">
-          <div className="flex items-center gap-4 rounded-xl border border-border/70 bg-card/70 p-4">
-            <button
-              type="button"
-              className="group relative cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
-              aria-label="更换头像"
-              onClick={() => setAvatarDialogOpen(true)}
-            >
-              <Avatar className="size-16 ring-1 ring-border/70">
-                <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? 'avatar'} />
-                <AvatarFallback>{displayName.slice(0, 1).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <span className="pointer-events-none absolute inset-0 rounded-full bg-black/35 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-              <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                <Pencil className="size-4" />
-              </span>
-            </button>
-            <div className="min-w-0 space-y-1">
-              <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
-              <p className="truncate text-xs text-muted-foreground">{email}</p>
-            </div>
-          </div>
-
-          <section className="space-y-3 rounded-xl border border-border/70 bg-card/70 p-4">
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold">用户名</h3>
-              <p className="text-xs text-muted-foreground">用于展示在个人资料中。</p>
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <div className="flex-1 space-y-2">
-                <Input
-                  id="username"
-                  placeholder={displayName}
-                  value={usernameInput}
-                  onChange={(event) => setUsernameInput(event.target.value)}
-                />
-              </div>
-              <Button
-                onClick={() => {
-                  const value = usernameInput.trim()
-                  if (!value) {
-                    toast.error('用户名不能为空')
-                    return
-                  }
-                  void usernameMutation.mutateAsync(value)
-                }}
-                disabled={usernameMutation.isPending}
+          <div className="mt-4 space-y-6">
+            <div className="flex items-center gap-4 rounded-xl border border-border/70 bg-card/70 p-4">
+              <button
+                type="button"
+                className="group relative cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
+                aria-label="更换头像"
+                onClick={() => setAvatarDialogOpen(true)}
               >
-                {usernameMutation.isPending ? '保存中...' : '保存用户名'}
-              </Button>
+                <Avatar className="size-16 ring-1 ring-border/70">
+                  <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? 'avatar'} />
+                  <AvatarFallback>{displayName.slice(0, 1).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span className="pointer-events-none absolute inset-0 rounded-full bg-black/35 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <Pencil className="size-4" />
+                </span>
+              </button>
+              <div className="min-w-0 space-y-1">
+                <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
+                <p className="truncate text-xs text-muted-foreground">{email}</p>
+              </div>
             </div>
-          </section>
-        </div>
-      </DialogContent>
+
+            <section className="space-y-3 rounded-xl border border-border/70 bg-card/70 p-4">
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold">用户名</h3>
+                <p className="text-xs text-muted-foreground">用于展示在个人资料中。</p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div className="flex-1 space-y-2">
+                  <Input
+                    id="username"
+                    placeholder={displayName}
+                    value={usernameInput}
+                    onChange={(event) => setUsernameInput(event.target.value)}
+                  />
+                </div>
+                <Button
+                  onClick={() => {
+                    const value = usernameInput.trim()
+                    if (!value) {
+                      toast.error('用户名不能为空')
+                      return
+                    }
+                    void usernameMutation.mutateAsync(value)
+                  }}
+                  disabled={usernameMutation.isPending}
+                >
+                  {usernameMutation.isPending ? '保存中...' : '保存用户名'}
+                </Button>
+              </div>
+            </section>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={avatarDialogOpen} onOpenChange={handleAvatarDialogChange}>
         <DialogContent className="max-w-2xl">
@@ -179,14 +185,16 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
             {avatarPreview ? (
               <div className="grid gap-3 rounded-lg border border-border/60 bg-background p-3">
                 <div className="relative h-60 w-full overflow-hidden rounded-md bg-muted">
-                  <Cropper
-                    image={avatarPreview}
-                    crop={crop}
-                    zoom={zoom}
-                    aspect={1}
-                    onCropChange={setCrop}
-                    onZoomChange={setZoom}
-                  />
+                  <Suspense fallback={<Skeleton className="size-full" />}>
+                    <Cropper
+                      image={avatarPreview}
+                      crop={crop}
+                      zoom={zoom}
+                      aspect={1}
+                      onCropChange={setCrop}
+                      onZoomChange={setZoom}
+                    />
+                  </Suspense>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <Input
@@ -214,6 +222,6 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
           </div>
         </DialogContent>
       </Dialog>
-    </Dialog>
+    </>
   )
 }

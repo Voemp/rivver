@@ -1,8 +1,8 @@
 import { RefreshCw, Sparkles } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
+import { ArticleAiSummarySkeleton } from '@/components/article/article-ai-summary-skeleton'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 
@@ -94,12 +94,3 @@ export const ArticleAiSummaryCard = ({
     </section>
   )
 }
-
-export const ArticleAiSummarySkeleton = () => (
-  <div className="space-y-4">
-    <Skeleton className="h-4 w-11/12 rounded-none" />
-    <Skeleton className="h-4 w-full rounded-none" />
-    <Skeleton className="h-4 w-10/12 rounded-none" />
-    <Skeleton className="h-4 w-9/12 rounded-none" />
-  </div>
-)

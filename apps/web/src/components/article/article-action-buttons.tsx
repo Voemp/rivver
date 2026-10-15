@@ -103,7 +103,7 @@ export const ArticleActionButtons = ({
         <DropdownMenuContent
           side={dropdownSide}
           align={dropdownAlign}
-          className="w-56 rounded-xl border-border/7 p-2 shadow-sm"
+          className="w-56 rounded-xl border-border/70 p-2 shadow-sm"
         >
           <DropdownMenuGroup>
             <DropdownMenuLabel>分享菜单</DropdownMenuLabel>
@@ -112,7 +112,7 @@ export const ArticleActionButtons = ({
               <DropdownMenuItem
                 key={key}
                 onClick={() => onShare(key)}
-                className="rounded-sm py-2.5"
+                className="cursor-pointer rounded-sm py-2.5"
               >
                 <Icon className="size-4" />
                 {label}

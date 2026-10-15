@@ -3,7 +3,8 @@ import cron, { Patterns } from '@elysia/cron'
 import { openapi } from '@elysia/openapi'
 import { runEmbeddingGenerate } from '@server/worker/embedding'
 import { runRssFetch } from '@server/worker/rss'
-import { Elysia, ValidationError } from 'elysia'
+import { Elysia, setFileTypeDetector, ValidationError } from 'elysia'
+import { fileTypeFromBlob } from 'file-type'
 
 import { version } from '../package.json'
 import { env } from './config/env'
@@ -15,6 +16,8 @@ import { subscription } from './modules/subscription'
 import { ApiResponseModel, res } from './types/response'
 import { trustedOrigins } from './utils/cors'
 import { AppError } from './utils/error'
+
+setFileTypeDetector(fileTypeFromBlob)
 
 const app = new Elysia()
   .use(

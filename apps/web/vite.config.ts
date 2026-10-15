@@ -28,11 +28,13 @@ export default defineConfig({
     rolldownOptions: {
       output: {
         manualChunks: (id) => {
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+          const match = id.replace(/\\/g, '/').match(/.*\/node_modules\/(?:@([^/]+)\/)?([^/]+)/)
+          if (!match) return
+
+          const packageName = match[1] ? `@${match[1]}/${match[2]}` : match[2]
+
+          if (packageName === 'react' || packageName === 'react-dom') {
             return 'react-core'
-          }
-          if (id.includes('react-markdown') || id.includes('rehype') || id.includes('remark')) {
-            return 'markdown-bundle'
           }
         },
       },

@@ -177,5 +177,19 @@ export const postSubscription = async (payload: { url: string; title?: string | 
 export const deleteSubscription = async (feedId: number) =>
   unwrapResponse(appClient.subscription.delete({ feedId }), 'Failed to unsubscribe')
 
+export type ProfileData = {
+  userId: string
+  avatarUrl: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
 export const putAvatar = async (file: File) =>
-  unwrapResponse(appClient.profile.avatar.put({ file }), 'Failed to update avatar')
+  unwrapResponse<ProfileData>(
+    appClient.profile.avatar.put({ file }) as Promise<{
+      data: ProfileData | null
+      error: unknown
+      status: number
+    }>,
+    'Failed to update avatar',
+  )
