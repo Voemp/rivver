@@ -1,8 +1,5 @@
 import cors from '@elysia/cors'
-import cron, { Patterns } from '@elysia/cron'
 import { openapi } from '@elysia/openapi'
-import { runEmbeddingGenerate } from '@server/worker/embedding'
-import { runRssFetch } from '@server/worker/rss'
 import { Elysia, setFileTypeDetector, ValidationError } from 'elysia'
 import { fileTypeFromBlob } from 'file-type'
 
@@ -47,16 +44,16 @@ const app = new Elysia()
       },
     }),
   )
-  .use(
-    cron({
-      name: 'article-fetch',
-      pattern: Patterns.everyHours(24),
-      run() {
-        void runRssFetch()
-        void runEmbeddingGenerate()
-      },
-    }),
-  )
+  // .use(
+  //   cron({
+  //     name: 'article-fetch',
+  //     pattern: Patterns.everyHours(24),
+  //     run() {
+  //       void runRssFetch()
+  //       void runEmbeddingGenerate()
+  //     },
+  //   }),
+  // )
   .use(
     cors({
       origin: trustedOrigins.length > 0 ? trustedOrigins : true,

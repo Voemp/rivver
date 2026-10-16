@@ -2,9 +2,9 @@ import { SiGithub } from '@icons-pack/react-simple-icons'
 
 import { env } from '@/config/env'
 
-export const AppFooter = () => {
-  const currentYear = new Date().getFullYear()
+const CURRENT_YEAR = new Date().getFullYear()
 
+export const AppFooter = () => {
   return (
     <footer className="border-t border-border/40 bg-background/95 supports-backdrop-filter:bg-background/60">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -47,7 +47,7 @@ export const AppFooter = () => {
         {/* 底部版权栏 */}
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border/40 pt-6 md:flex-row">
           <p className="text-[10px] tracking-wider text-muted-foreground/60 uppercase">
-            © {currentYear} {env.appName}. All rights reserved.
+            © {CURRENT_YEAR} {env.appName}. All rights reserved.
           </p>
           <p className="text-[10px] tracking-wider text-muted-foreground/60 uppercase">
             Powered By Voemp
